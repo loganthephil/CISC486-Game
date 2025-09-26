@@ -27,3 +27,8 @@ The assets will be quite simple as well. I will search online for models that ma
 Group 26\
 Logan Philip 20294350\
 As I am the only member I will handle everything.
+
+**AI Citations**/
+I used ChatGPT (GPT-5) with the prompt "What is a good approach for adding dynamic stat upgrades where values are enumerated in the following order: 1. Base 2. Add flat increases 3. Multiply by sum of additive multiplication increases. 4. Multiply by remaining multiplicative multiply stat increases." I asked this to get a better feel for the best approach to this feature's implementation.
+
+All final code implementation, logic, and documentation for my project were written entirely by me.
