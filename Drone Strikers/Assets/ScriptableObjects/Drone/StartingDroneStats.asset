@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75342e76716d46959dcc0c59f7b458dd, type: 3}
   m_Name: StartingDroneStats
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.DroneStatsSO
-  MaxHealth: 10
-  MoveSpeed: 10
-  MoveAcceleration: 2
-  MoveDeceleration: 4
+  MaxHealth: 50
+  HealthRegen: 1
+  MoveSpeed: 5
+  MoveAcceleration: 8
+  MoveDeceleration: 10
   FireCooldown: 0.5
   AimSpeed: 5
-  Recoil: 0.5
-  AttackStats:
-    AttackVelocity: 10
-    AttackDamage: 1
-    AttackPierce: 0
+  Recoil: 4
+  AttackVelocity: 10
+  AttackDamage: 5
+  AttackPierce: 0

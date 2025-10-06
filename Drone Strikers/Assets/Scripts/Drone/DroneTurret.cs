@@ -1,21 +1,23 @@
 using DroneStrikers.Combat;
 using DroneStrikers.Core;
-using DroneStrikers.Stats;
 using UnityEngine;
 
 namespace DroneStrikers.Drone
 {
-    [RequireComponent(typeof(DroneStats))] [RequireComponent(typeof(TeamMember))]
+    [RequireComponent(typeof(DroneStats))]
+    [RequireComponent(typeof(TeamMember))]
     public class DroneTurret : MonoBehaviour
     {
         [SerializeField] private Transform _turretTransform;
         [Tooltip("The point from which projectiles are fired. If null, the turret's own transform is used.")]
-        [SerializeField] private Transform _firePoint;
+        [SerializeField]
+        private Transform _firePoint;
         [SerializeField] private GameObject _projectilePrefab;
 
         private DroneStats _ownerStats;
         private TeamMember _teamMember;
         private DroneMovement _droneMovement;
+        private IDestructionContextReceiver _destructionContextReceiver;
 
         private float _cooldownTimer;
         private Vector3 _targetPosition = Vector3.zero; // Current target point
@@ -25,6 +27,7 @@ namespace DroneStrikers.Drone
             _ownerStats = GetComponent<DroneStats>();
             _teamMember = GetComponent<TeamMember>();
             _droneMovement = GetComponent<DroneMovement>();
+            _destructionContextReceiver = GetComponent<IDestructionContextReceiver>();
 
             // Fallback to own transform if no fire point is assigned
             if (_firePoint == null) _firePoint = transform;
@@ -73,10 +76,8 @@ namespace DroneStrikers.Drone
             // Spawn projectile from object pool
             GameObject projectile = ObjectPoolManager.SpawnObject(_projectilePrefab, _firePoint.position, _firePoint.rotation);
 
-            // Apply attack stats to projectile
-            if (projectile.TryGetComponent(out IAttack attack)) attack.ApplyAttackStats(_ownerStats.AttackStats);
-            // Set projectile team to match owner team
-            if (projectile.TryGetComponent(out TeamMember teamMember)) teamMember.Team = _teamMember.Team;
+            // Apply attack stats to projectile, pass destruction context receiver for when projectile destroys something
+            if (projectile.TryGetComponent(out IAttack attack)) attack.InitializeAttack(_ownerStats.AttackStats, _teamMember.Team, _destructionContextReceiver);
 
             // Apply recoil to drone (backwards relative to fire point)
             if (_droneMovement != null) _droneMovement.ApplyForce(-_firePoint.forward * _ownerStats.Recoil);
@@ -87,6 +88,7 @@ namespace DroneStrikers.Drone
 
         /// <summary>
         ///     Requests the turret to fire a projectile.
+        ///     Should be called repeatedly during fixed update while firing is desired.
         /// </summary>
         public void RequestFire()
         {

@@ -5,14 +5,17 @@ using UnityEngine;
 
 namespace DroneStrikers.Projectile
 {
-    [RequireComponent(typeof(TeamMember))] [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(TeamMember))]
+    [RequireComponent(typeof(Rigidbody))]
     public class FiredProjectile : MonoBehaviour, IAttack, IDamageSource, IDamageable
     {
+        private TeamMember _teamMember;
         private Rigidbody _rigidbody;
 
         // -- Drone Specific --
+        public IDestructionContextReceiver InstigatorContextReceiver { get; private set; }
         public int ContactDamage { get; private set; } = 1;
-        private float _speed = 20f; // Speed in units per second
+        private float _speed; // Speed in units per second
         private int _pierce; // Number of enemies the projectile can pierce through
 
         // -- Shared --
@@ -21,6 +24,7 @@ namespace DroneStrikers.Projectile
 
         private void Awake()
         {
+            _teamMember = GetComponent<TeamMember>();
             _rigidbody = GetComponent<Rigidbody>();
         }
 
@@ -44,8 +48,11 @@ namespace DroneStrikers.Projectile
             _age = 0f; // Reset age when enabled
         }
 
-        public void ApplyAttackStats(AttackStats stats)
+        public void InitializeAttack(AttackStats stats, Team team, IDestructionContextReceiver instigatorContextReceiver)
         {
+            _teamMember.Team = team;
+
+            InstigatorContextReceiver = instigatorContextReceiver;
             ContactDamage = stats.AttackDamage;
             _speed = stats.AttackVelocity;
             _pierce = stats.AttackPierce;

@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DroneStrikers.Stats;
+using DroneStrikers.Combat;
+using DroneStrikers.Events;
 using DroneStrikers.Upgrades;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace DroneStrikers.Drone
 {
     [RequireComponent(typeof(DroneStats))]
-    public class DroneUpgrader : MonoBehaviour
+    public class DroneUpgrader : MonoBehaviour, IExperienceProvider, IDestructionContextReceiver
     {
         private DroneStats _droneStats;
+        private LocalEvents _localEvents;
 
-        public int Level { get; private set; }
+        // TODO: Revisit leveling system and experience requirements later. This is just a placeholder.
+        public int Level { get; private set; } = 1;
         public float Experience { get; private set; }
-        public float ExperienceToNextLevel => 100f * (Level + 1);
+        public float ExperienceToNextLevel => 10f * Level; // Temporary formula for required experience
 
         public int AvailableUpgradePoints { get; private set; }
+
+        public float ExperienceOnDestroy => Level * 50f; // Provide experience based on level (temporary formula)
 
         [SerializeField] private UpgradeTreeCollectionSO _upgradeTreeCollectionSO;
 
@@ -26,11 +30,10 @@ namespace DroneStrikers.Drone
 
         private readonly Dictionary<UpgradeTreeSO, UpgradeSO> _lastUpgradeInTrees = new();
 
-        [SerializeField] private UnityEvent _onLevelUp;
-
         private void Awake()
         {
             _droneStats = GetComponent<DroneStats>();
+            _localEvents = GetComponent<LocalEvents>();
         }
 
         private void Start()
@@ -43,7 +46,7 @@ namespace DroneStrikers.Drone
         ///     Adds experience to the drone. Levels up if enough experience is gained.
         /// </summary>
         /// <param name="amount"> The amount of experience to add. </param>
-        public void AddExperience(float amount)
+        private void AddExperience(float amount)
         {
             Experience += amount;
             while (Experience >= ExperienceToNextLevel)
@@ -51,8 +54,14 @@ namespace DroneStrikers.Drone
                 Experience -= ExperienceToNextLevel;
                 Level++;
                 AvailableUpgradePoints++; // Refine later. May want to limit upgrade points at later levels.
+                _localEvents.Invoke(DroneEvents.LevelUp, Level);
                 Debug.Log($"Drone leveled up to {Level}!");
             }
+        }
+
+        public void HandleDestructionContext(in ObjectDestructionContext context)
+        {
+            AddExperience(context.ExperienceToAward);
         }
 
         public bool IsUpgradeAvailable() => AvailableUpgradePoints > 0 && _upgradeTrees.Any(tree => GetAvailableUpgradesInTree(tree).Count > 0);

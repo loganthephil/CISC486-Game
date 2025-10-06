@@ -1,39 +1,30 @@
-﻿using DroneStrikers.Core;
+﻿using DroneStrikers.Events;
 using UnityEngine;
 
 namespace DroneStrikers.Combat
 {
     public class TeamMember : MonoBehaviour
     {
+        private LocalEvents _localEvents;
+
         [SerializeField] private Team _team = Team.Neutral;
         public Team Team
         {
             get => _team;
             set
             {
-                _team = value;
-                UpdateTeamColor();
+                // Only change team and invoke event if the team is actually changing
+                if (_team != value)
+                {
+                    _team = value;
+                    _localEvents?.Invoke(CombatEvents.TeamChanged, _team);
+                }
             }
         }
 
-        private Renderer[] _renderers;
-        private static readonly int TeamColorID = Shader.PropertyToID("_TeamColor");
-
         private void Awake()
         {
-            _renderers = GetComponentsInChildren<Renderer>(true);
-        }
-
-        private void Start()
-        {
-            UpdateTeamColor(); // Ensure color is set at start
-        }
-
-        private void UpdateTeamColor()
-        {
-            foreach (Renderer r in _renderers)
-                if (r.material.HasProperty(TeamColorID))
-                    r.material.SetColor(TeamColorID, TeamColorAssignment.LDRColors[Team]);
+            _localEvents = GetComponent<LocalEvents>();
         }
     }
 }

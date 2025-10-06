@@ -6,7 +6,8 @@ namespace DroneStrikers.Stats
     public class DroneStatsSO : ScriptableObject
     {
         [Header("Drone")]
-        public int MaxHealth = 10; // Maximum health of the drone
+        public float MaxHealth = 10; // Maximum health of the drone
+        public float HealthRegen = 0.5f; // Health regeneration rate per second
 
         [Header("Movement")]
         public float MoveSpeed = 10f; // Movement speed of the drone

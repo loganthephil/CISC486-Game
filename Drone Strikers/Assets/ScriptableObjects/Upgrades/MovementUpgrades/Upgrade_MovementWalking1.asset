@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
   _upgradeName: Quad Legs
   _modifiers:
-  - Stat: 2
+  - Stat: 11
     ModType: 1
     Value: 2
-  - Stat: 3
+  - Stat: 12
     ModType: 1
     Value: 2
-  - Stat: 6
+  - Stat: 22
     ModType: 1
-    Value: 0.75
+    Value: 0.5
   _nextUpgrades: []

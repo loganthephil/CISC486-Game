@@ -106,10 +106,10 @@ namespace DroneStrikers.Stats
                     case StatModType.Flat:
                         flat += mod.Value;
                         break;
-                    case StatModType.Additive:
+                    case StatModType.AdditiveMult:
                         additive += mod.Value;
                         break;
-                    case StatModType.Multiplicative:
+                    case StatModType.MultiplicativeMult:
                         multiplicative *= 1 + mod.Value;
                         break;
                     default:

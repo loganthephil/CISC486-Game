@@ -6,21 +6,22 @@
     public enum StatId
     {
         // -- Drone --
-        MaxHealth,
+        MaxHealth = 0,
+        HealthRegen = 1,
 
         // -- Movement --
-        MoveSpeed,
-        MoveAcceleration,
-        MoveDeceleration,
+        MoveSpeed = 10,
+        MoveAcceleration = 11,
+        MoveDeceleration = 12,
 
         // -- Weapon --
-        FireCooldown,
-        AimSpeed,
-        Recoil,
+        FireCooldown = 20,
+        AimSpeed = 21,
+        Recoil = 22,
 
         // -- Attack --
-        AttackDamage,
-        AttackVelocity,
-        AttackPierce
+        AttackDamage = 30,
+        AttackVelocity = 31,
+        AttackPierce = 32
     }
 }

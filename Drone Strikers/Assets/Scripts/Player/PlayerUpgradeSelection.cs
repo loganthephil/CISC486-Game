@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DroneStrikers.Drone;
+using DroneStrikers.Events;
 using DroneStrikers.Upgrades;
 using UnityEngine;
 
@@ -8,7 +9,12 @@ namespace DroneStrikers.Player
     [RequireComponent(typeof(DroneUpgrader))]
     public class PlayerUpgradeSelection : MonoBehaviour
     {
+        // TODO: Pre instantiate UI elements and pool or disable/enable instead of instantiating/destroying
         private DroneUpgrader _droneUpgrader;
+        private LocalEvents _localEvents;
+
+        private bool _showingTreeSelection;
+        private bool _showingUpgradeSelection;
 
         [SerializeField] private Transform _upgradeSelectionUIParent;
 
@@ -20,12 +26,16 @@ namespace DroneStrikers.Player
         private void Awake()
         {
             _droneUpgrader = GetComponent<DroneUpgrader>();
+            _localEvents = GetComponent<LocalEvents>();
         }
+
+        private void OnEnable() => _localEvents.Subscribe(DroneEvents.LevelUp, OnPlayerLevelUp);
+        private void OnDisable() => _localEvents.Unsubscribe(DroneEvents.LevelUp, OnPlayerLevelUp);
 
         /// <summary>
         ///     Event handler for when the player levels up.
         /// </summary>
-        public void OnPlayerLevelUp()
+        private void OnPlayerLevelUp(int level)
         {
             ShowUpgradeTrees();
         }
@@ -57,6 +67,8 @@ namespace DroneStrikers.Player
 
         private void ShowUpgradeTrees()
         {
+            if (_showingTreeSelection) return; // Already showing trees
+
             ClearUpgradeSelectionUI();
             IReadOnlyList<UpgradeTreeSO> trees = _droneUpgrader.UpgradeTrees;
 
@@ -68,10 +80,14 @@ namespace DroneStrikers.Player
                 treeUI.UpgradeTree = tree;
                 treeUI.PlayerUpgradeSelection = this;
             }
+
+            _showingTreeSelection = true;
         }
 
         private void ShowUpgradeSelectionsInTree(UpgradeTreeSO tree)
         {
+            if (_showingUpgradeSelection) return; // Already showing upgrades
+
             ClearUpgradeSelectionUI();
             IReadOnlyList<UpgradeSO> upgrades = _droneUpgrader.GetAvailableUpgradesInTree(tree);
 
@@ -83,10 +99,14 @@ namespace DroneStrikers.Player
                 upgradeUI.Upgrade = upgrade;
                 upgradeUI.PlayerUpgradeSelection = this;
             }
+
+            _showingUpgradeSelection = true;
         }
 
         private void ClearUpgradeSelectionUI()
         {
+            _showingTreeSelection = false;
+            _showingUpgradeSelection = false;
             foreach (Transform child in _upgradeSelectionUIParent) Destroy(child.gameObject);
         }
     }

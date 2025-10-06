@@ -31,4 +31,6 @@ As I am the only member I will handle everything.
 **AI Citations**/
 I used ChatGPT (GPT-5) with the prompt "What is a good approach for adding dynamic stat upgrades where values are enumerated in the following order: 1. Base 2. Add flat increases 3. Multiply by sum of additive multiplication increases. 4. Multiply by remaining multiplicative multiply stat increases." I asked this to get a better feel for the best approach to this feature's implementation.
 
+I used ChatGPT (GPT-5) with the prompt "Is there a way to create a Unity component that acts as a hub for local events relevant to that game object? For example, within a single game object, other components may want to know when the object is damaged, destroyed, etc.". I asked this because I was curious if there was an in-code way to invoke/subscribe to events around a single game object's components. Doing so led me to writing the LocalEvents component. I may replace with simply using UnityEvents later if I don't get any unique value from this system.
+
 All final code implementation, logic, and documentation for my project were written entirely by me.

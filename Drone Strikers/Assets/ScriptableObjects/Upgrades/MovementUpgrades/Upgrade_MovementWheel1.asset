@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
   _upgradeName: Quad Wheels
   _modifiers:
-  - Stat: 1
+  - Stat: 10
     ModType: 0
-    Value: 10
-  - Stat: 2
+    Value: 2
+  - Stat: 11
     ModType: 1
     Value: 0.75
-  - Stat: 3
+  - Stat: 12
     ModType: 1
     Value: 0.75
   _nextUpgrades: []

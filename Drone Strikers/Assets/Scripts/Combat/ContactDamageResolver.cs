@@ -5,13 +5,14 @@ namespace DroneStrikers.Combat
     /// <summary>
     ///     Required component that resolves contact damage between two colliding objects.
     ///     Must be attached to any GameObject that has an IDamageSource and/or IDamageable component.
+    ///     Requires a TeamMember component to determine team affiliation.
     /// </summary>
     [RequireComponent(typeof(TeamMember))]
     public class ContactDamageResolver : MonoBehaviour, ITeamMember
     {
-        public TeamMember TeamMember { get; private set; }
-        public IDamageSource DamageSource { get; private set; }
-        public IDamageable Damageable { get; private set; }
+        private TeamMember TeamMember { get; set; }
+        private IDamageSource DamageSource { get; set; }
+        private IDamageable Damageable { get; set; }
 
         public Team Team => TeamMember.Team;
 
@@ -38,16 +39,27 @@ namespace DroneStrikers.Combat
             // This object -> Other object
             if (DamageSource != null && otherDamageResolver.Damageable != null)
             {
-                DamageContext damageContext = new(DamageSource.ContactDamage, gameObject, TeamMember.Team);
+                DamageContext damageContext = new(DamageSource.ContactDamage, gameObject, TeamMember.Team, DamageSource.InstigatorContextReceiver);
                 otherDamageResolver.Damageable.TakeDamage(damageContext);
             }
 
             // Other object -> This object
             if (otherDamageResolver.DamageSource != null && Damageable != null)
             {
-                DamageContext damageContext = new(otherDamageResolver.DamageSource.ContactDamage, other, otherDamageResolver.TeamMember.Team);
+                IDamageSource otherDamageSource = otherDamageResolver.DamageSource;
+                DamageContext damageContext = new(otherDamageSource.ContactDamage, other, otherDamageResolver.TeamMember.Team, otherDamageSource.InstigatorContextReceiver);
                 Damageable.TakeDamage(damageContext);
             }
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            HandleCollision(collision.gameObject);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            HandleCollision(other.gameObject);
         }
     }
 }

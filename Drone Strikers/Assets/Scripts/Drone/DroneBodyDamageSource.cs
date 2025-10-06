@@ -1,5 +1,4 @@
 ﻿using DroneStrikers.Combat;
-using DroneStrikers.Stats;
 using UnityEngine;
 
 namespace DroneStrikers.Drone
@@ -8,11 +7,14 @@ namespace DroneStrikers.Drone
     public class DroneBodyDamageSource : MonoBehaviour, IDamageSource
     {
         private DroneStats _droneStats;
+
         public int ContactDamage => _droneStats.AttackStats.AttackDamage;
+        public IDestructionContextReceiver InstigatorContextReceiver { get; private set; }
 
         private void Awake()
         {
             _droneStats = GetComponent<DroneStats>();
+            InstigatorContextReceiver = GetComponent<IDestructionContextReceiver>();
         }
     }
 }

@@ -6,6 +6,11 @@
         ///     The amount of damage this source deals on contact.
         /// </summary>
         int ContactDamage { get; }
+
+        /// <summary>
+        ///     The destruction context receiver of the instigator of this damage source, if any.
+        /// </summary>
+        IDestructionContextReceiver InstigatorContextReceiver { get; }
     }
 
     public interface IDamageable
@@ -22,12 +27,12 @@
         /// <summary>
         ///     The current health of the implementing object.
         /// </summary>
-        int CurrentHealth { get; set; }
+        float CurrentHealth { get; set; }
 
         /// <summary>
         ///     The maximum health of the implementing object.
         /// </summary>
-        int MaxHealth { get; }
+        float MaxHealth { get; }
     }
 
     public interface ITeamMember
@@ -36,5 +41,22 @@
         ///     The team this object belongs to.
         /// </summary>
         Team Team { get; }
+    }
+
+    public interface IExperienceProvider
+    {
+        /// <summary>
+        ///     The amount of experience this object provides when destroyed.
+        /// </summary>
+        float ExperienceOnDestroy { get; }
+    }
+
+    public interface IDestructionContextReceiver
+    {
+        /// <summary>
+        ///     Called when the implementing object is destroyed, providing context about the destruction.
+        /// </summary>
+        /// <param name="context"> The context of the destruction. Readonly. </param>
+        void HandleDestructionContext(in ObjectDestructionContext context);
     }
 }

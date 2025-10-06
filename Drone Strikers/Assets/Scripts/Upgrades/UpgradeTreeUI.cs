@@ -11,11 +11,6 @@ namespace DroneStrikers.Upgrades
         public UpgradeTreeSO UpgradeTree;
         public PlayerUpgradeSelection PlayerUpgradeSelection;
 
-        private void Awake()
-        {
-            _treeNameText = GetComponent<TMP_Text>();
-        }
-
         private void Start()
         {
             if (UpgradeTree == null)

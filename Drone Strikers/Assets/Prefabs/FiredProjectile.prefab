@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4624906851319305589}
   - component: {fileID: 6513283772765869283}
   - component: {fileID: 3052802576682897415}
+  - component: {fileID: -2497008157535056038}
+  - component: {fileID: 1519553987756595981}
   - component: {fileID: 7115116005400131876}
   - component: {fileID: 4079327509245796926}
   - component: {fileID: 4050077322904403337}
@@ -88,6 +90,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23a4c02308b74512876691abf40a59b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.DamageReceiver
+--- !u!114 &-2497008157535056038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712034791458101651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6dab7cde09a45c6a15ee97a1a798484, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.TeamColorizer
+--- !u!114 &1519553987756595981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712034791458101651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9c17df54672477c9c043577fa356e41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Events::DroneStrikers.Events.LocalEvents
 --- !u!135 &7115116005400131876
 SphereCollider:
   m_ObjectHideFlags: 0
