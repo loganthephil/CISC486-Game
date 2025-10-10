@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DroneStrikers.FSM.Interfaces;
-using UnityEngine;
 
 namespace DroneStrikers.FSM
 {
@@ -85,8 +84,6 @@ namespace DroneStrikers.FSM
             previousState.OnExit(); // Exit previous state
             nextState.OnEnter(); // Enter next state
             _currentNode = nextNode; // Update current node
-
-            Debug.Log("Transitioned from " + previousState.GetType().Name + " to " + nextState.GetType().Name);
         }
 
         private ITransition GetTransition()

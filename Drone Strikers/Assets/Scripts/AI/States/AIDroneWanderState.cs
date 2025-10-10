@@ -7,8 +7,8 @@ namespace DroneStrikers.AI.States
     {
         public AIDroneWanderState(DroneMovement droneMovement, ObjectDetector objectDetector) : base(droneMovement, objectDetector) { }
 
-        private static readonly float _minChangeInterval = 2f;
-        private static readonly float _maxChangeInterval = 5f;
+        private const float MinChangeInterval = 2f;
+        private const float MaxChangeInterval = 5f;
 
         private float _nextChangeAt;
 
@@ -36,7 +36,7 @@ namespace DroneStrikers.AI.States
 
         private void ScheduleNextDirectionChange()
         {
-            _nextChangeAt = Time.time + Random.Range(_minChangeInterval, _maxChangeInterval);
+            _nextChangeAt = Time.time + Random.Range(MinChangeInterval, MaxChangeInterval);
         }
     }
 }

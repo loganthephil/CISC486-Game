@@ -11,14 +11,14 @@ namespace DroneStrikers.AI.States
 
         public override void Update()
         {
-            // Pursue the drone with the highest level
-            // This will always be a drone of lower or equal level, as higher level drones trigger fleeing instead
-            DroneInfo targetDrone = _objectDetector.DroneWithHighestLevel;
+            // Pursue the most important detected object
+            // This will be the highest level drone, or if no drones are detected, the closest object
+            GameObject mostImportantObject = _objectDetector.GetMostImportantDetectedObject();
 
-            if (targetDrone is null) return; // No target detected, should not be in this state
+            if (mostImportantObject is null) return; // No target detected, should not be in this state
 
             Vector3 currentPosition = _droneMovement.transform.position;
-            Vector3 targetPosition = targetDrone.transform.position;
+            Vector3 targetPosition = mostImportantObject.transform.position;
 
             // If already very close to the target, do not move
             if (Vector3.Distance(currentPosition, targetPosition) <= MinDistanceToTarget)

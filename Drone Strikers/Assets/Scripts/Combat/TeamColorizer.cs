@@ -10,7 +10,7 @@ namespace DroneStrikers.Combat
         private TeamMember _teamMember;
         private LocalEvents _localEvents;
         private Renderer[] _renderers;
-        private static readonly int TeamColorID = Shader.PropertyToID("_TeamColor");
+        private static readonly int ColorID = Shader.PropertyToID("_Color");
 
         private void Awake()
         {
@@ -27,10 +27,10 @@ namespace DroneStrikers.Combat
 
         private void UpdateTeamColor(Team newTeam)
         {
-            // Set each renderer that has the _TeamColor property to the new team's color
+            // Set each renderer that has the _Color property to the new team's color
             foreach (Renderer r in _renderers)
-                if (r.material.HasProperty(TeamColorID))
-                    r.material.SetColor(TeamColorID, TeamColorAssignment.LDRColors[newTeam]);
+                if (r.material.HasProperty(ColorID))
+                    r.material.SetColor(ColorID, TeamColorAssignment.LDRColors[newTeam]);
         }
     }
 }

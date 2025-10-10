@@ -2,8 +2,8 @@
 {
     public enum StatModType
     {
-        Flat, // Added before any multipliers
-        AdditiveMult, // Summed, then used as (1 + sumAdditive)
-        MultiplicativeMult // Multiplied together as factors
+        Flat, // Flat addition before anything else
+        PercentAdditive, // All percent additive mods are summed before being multiplied
+        PercentMultiplicative // Multiplied on top of everything else
     }
 }

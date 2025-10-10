@@ -5,7 +5,7 @@
         /// <summary>
         ///     The amount of damage this source deals on contact.
         /// </summary>
-        int ContactDamage { get; }
+        float ContactDamage { get; }
 
         /// <summary>
         ///     The destruction context receiver of the instigator of this damage source, if any.

@@ -2,7 +2,7 @@
 
 namespace DroneStrikers.ObjectSpawning
 {
-    [CreateAssetMenu(fileName = "SpawnableSO", menuName = "Scriptable Objects/SpawnableSO")]
+    [CreateAssetMenu(fileName = "Spawnable_", menuName = "Spawning/Spawnable")]
     public class SpawnableSO : ScriptableObject
     {
         [SerializeField] private GameObject _prefab;

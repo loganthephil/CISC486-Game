@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4036664062109057365}
   - component: {fileID: 2205342062070386790}
   - component: {fileID: 6458069834533051395}
+  - component: {fileID: 1475527305272259383}
   - component: {fileID: 2289712633006534652}
   m_Layer: 6
   m_Name: Cube
@@ -195,6 +196,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.SimpleExperienceOnDeath
   _experienceOnDestroy: 10
+--- !u!114 &1475527305272259383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6932437063860109330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 188cdf7b6c724344b50c808266bc42f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Core.Colorizer
+  _color: {r: 0.88235295, g: 0.8901961, b: 0.4, a: 0}
 --- !u!54 &2289712633006534652
 Rigidbody:
   m_ObjectHideFlags: 0

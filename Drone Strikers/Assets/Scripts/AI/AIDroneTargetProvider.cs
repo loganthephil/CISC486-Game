@@ -11,6 +11,7 @@ namespace DroneStrikers.AI
         private ObjectDetector _objectDetector;
         private DroneTurret _turret;
 
+        private GameObject _closestObject;
         private bool _hasTarget;
 
         private void Awake()
@@ -29,22 +30,27 @@ namespace DroneStrikers.AI
             if (_hasTarget) _turret.RequestFire();
         }
 
+        private void Update()
+        {
+            // Only set target if it has been detected and exists
+            if (_closestObject != null)
+            {
+                _hasTarget = true;
+                _turret.SetTarget(_closestObject.transform.position);
+            }
+            else
+            {
+                _hasTarget = false;
+            }
+        }
+
         private IEnumerator UpdateTarget()
         {
+            // Periodically update the closest target
             WaitForSeconds wait = new(0.5f);
             while (true)
             {
-                GameObject closestObject = _objectDetector.GetMostImportantDetectedObject();
-                if (closestObject is null)
-                {
-                    _hasTarget = false;
-                }
-                else
-                {
-                    _hasTarget = true;
-                    _turret.SetTarget(closestObject.transform.position);
-                }
-
+                _closestObject = _objectDetector.GetMostImportantDetectedObject();
                 yield return wait;
             }
         }

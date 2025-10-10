@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9a2e174f7ae43bf842a93fa7548d66a, type: 3}
+  m_Name: SpawnProfile_Rare
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.ChunkSpawnProfileSO
+  _budgetPerCycle: 2
+  _cycleFrequency: 10
+  _frequencyRandomVariance: 0.5
+  _totalMaxPerChunk: 5
+  _spawnableRules:
+  - {fileID: 11400000, guid: 794cf278193a4ea48b469ba19eebae95, type: 2}
+  - {fileID: 11400000, guid: 1da08cd98959dc94eaf4fc8aef78b144, type: 2}

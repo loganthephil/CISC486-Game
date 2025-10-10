@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DroneStrikers.Stats;
+using UnityEngine;
 
 namespace DroneStrikers.Drone
 {
@@ -6,6 +7,10 @@ namespace DroneStrikers.Drone
     [RequireComponent(typeof(Rigidbody))]
     public class DroneMovement : MonoBehaviour
     {
+        [SerializeField] private StatTypeSO _moveSpeedStat;
+        [SerializeField] private StatTypeSO _moveAccelerationStat;
+        [SerializeField] private StatTypeSO _moveDecelerationStat;
+
         private DroneStats _ownerStats;
         private Rigidbody _rigidbody;
 
@@ -13,12 +18,13 @@ namespace DroneStrikers.Drone
         private Vector3 _currentSpeed = Vector3.zero;
         private Vector3 _externalForces = Vector3.zero;
 
-
         private const float MaxExternalForce = 5f;
         private const float DynamicDecelerationModifier = 1.5f;
 
         private void Awake()
         {
+            Debug.Assert(_moveSpeedStat != null && _moveAccelerationStat != null && _moveDecelerationStat != null, "Missing StatType assignment on " + this);
+
             _ownerStats = GetComponent<DroneStats>();
             _rigidbody = GetComponent<Rigidbody>();
         }
@@ -32,11 +38,11 @@ namespace DroneStrikers.Drone
             if (_movementDirection.sqrMagnitude < 0.001f)
                 targetSpeed = Vector3.zero;
             else
-                targetSpeed = _movementDirection * _ownerStats.MoveSpeed;
+                targetSpeed = _movementDirection * GetMoveSpeed();
 
             float actualVelocity = _rigidbody.linearVelocity.magnitude;
             bool isSlowingDown = actualVelocity > targetSpeed.magnitude;
-            maxAcceleration = isSlowingDown ? GetDynamicDeceleration(actualVelocity) : _ownerStats.MoveAcceleration;
+            maxAcceleration = isSlowingDown ? GetDynamicDeceleration(actualVelocity) : GetMoveAcceleration();
 
             // Smoothly interpolate current speed towards target movement direction
             // Using linearVelocity to prevent "sticking" to colliders when there is an abrupt stop due to hitting an obstacle
@@ -74,12 +80,19 @@ namespace DroneStrikers.Drone
 
         private float GetDynamicDeceleration(float currentVelocity)
         {
+            float maxSpeed = GetMoveSpeed();
+            float deceleration = GetMoveDeceleration();
+
             // If current velocity is within max speed, use normal deceleration
-            if (currentVelocity <= _ownerStats.MoveSpeed) return _ownerStats.MoveDeceleration;
+            if (currentVelocity <= maxSpeed) return deceleration;
 
             // If current velocity exceeds max speed, increase deceleration exponentially
-            float excessSpeed = currentVelocity - _ownerStats.MoveSpeed;
-            return _ownerStats.MoveDeceleration + excessSpeed * excessSpeed * DynamicDecelerationModifier;
+            float excessSpeed = currentVelocity - maxSpeed;
+            return deceleration + excessSpeed * excessSpeed * DynamicDecelerationModifier;
         }
+
+        private float GetMoveSpeed() => _ownerStats.GetStatValue(_moveSpeedStat);
+        private float GetMoveAcceleration() => _ownerStats.GetStatValue(_moveAccelerationStat);
+        private float GetMoveDeceleration() => _ownerStats.GetStatValue(_moveDecelerationStat);
     }
 }

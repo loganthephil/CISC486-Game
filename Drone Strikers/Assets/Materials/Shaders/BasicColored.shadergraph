@@ -663,7 +663,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "dcae614382554601834a353b3ef1dabd",
     "m_Id": 0,
-    "m_DisplayName": "TeamColor",
+    "m_DisplayName": "Color",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -720,10 +720,10 @@
     "m_Guid": {
         "m_GuidSerialized": "43b215be-7af4-4c58-a1b1-91ab8fc20735"
     },
-    "m_Name": "TeamColor",
+    "m_Name": "Color",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "TeamColor",
-    "m_DefaultReferenceName": "_TeamColor",
+    "m_RefNameGeneratedByDisplayName": "Color",
+    "m_DefaultReferenceName": "_Color",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,

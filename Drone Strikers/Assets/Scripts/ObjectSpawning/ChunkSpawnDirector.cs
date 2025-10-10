@@ -8,21 +8,19 @@ namespace DroneStrikers.ObjectSpawning
     /// <summary>
     ///     Directs the spawning of objects within a chunk.
     /// </summary>
+    [RequireComponent(typeof(SpawnWithinCollider))]
     public class ChunkSpawnDirector : MonoBehaviour
     {
         [SerializeField] private ChunkSpawnProfileSO _chunkSpawnProfile;
 
         [Header("Spawning")]
         [Tooltip("How many attempts should the spawn director make to place an object before giving up?")]
-        [SerializeField]
-        private int _maxPlacementAttempts = 5;
+        [SerializeField] private int _maxPlacementAttempts = 5;
 
-        [Tooltip("The Y position to spawn objects at within the chunk.")]
-        [SerializeField]
-        private float _yPosition = 0.5f;
+        [Tooltip("The layers to check for collisions against when placing objects.")]
+        [SerializeField] private LayerMask _collisionLayers = -1;
 
-        private MeshCollider _spawnAreaCollider;
-        private Transform _spawnAreaTransform;
+        private SpawnWithinCollider _spawner;
 
         private int _totalBudget;
 
@@ -31,8 +29,7 @@ namespace DroneStrikers.ObjectSpawning
 
         private void Awake()
         {
-            _spawnAreaCollider = GetComponent<MeshCollider>();
-            _spawnAreaTransform = transform;
+            _spawner = GetComponent<SpawnWithinCollider>();
         }
 
         private void OnEnable()
@@ -91,40 +88,11 @@ namespace DroneStrikers.ObjectSpawning
             }
         }
 
-        /// <summary>
-        ///     Attempts to spawn an object based on the provided spawnable rule.
-        /// </summary>
-        /// <param name="rule"> The rule to use for spawning. </param>
-        /// <returns> Whether the spawn was successful. </returns>
+        // Actually attempt to spawn the object
         private bool TrySpawnObject(SpawnableRuleSO rule)
         {
-            if (rule?.Spawnable?.Prefab == null)
-            {
-                Debug.LogError("SpawnableRuleSO or its Prefab is null.");
-                return false;
-            }
-
-            Bounds spawnAreaBounds = _spawnAreaCollider.bounds;
-
-            for (int attempt = 0; attempt < _maxPlacementAttempts; attempt++)
-            {
-                // Generate a random position within the spawn area
-                float x = Random.Range(spawnAreaBounds.min.x, spawnAreaBounds.max.x);
-                float z = Random.Range(spawnAreaBounds.min.z, spawnAreaBounds.max.z);
-                Vector3 spawnPosition = new(x, _yPosition, z);
-
-                // Check if the position would collide with existing objects
-                Collider[] results = { };
-                int size = Physics.OverlapSphereNonAlloc(spawnPosition, rule.Spawnable.MinSeparation, results);
-                if (size > 0) continue; // Collision detected, try again
-
-                // Instantiate the object
-                GameObject spawnedObject = Instantiate(rule.Spawnable.Prefab, spawnPosition, Quaternion.identity, _spawnAreaTransform);
-                return true; // Successfully spawned
-            }
-
-            Debug.Log("Did not find a valid position to spawn after max attempts on Chunk: " + gameObject.name);
-            return false; // Failed to find a valid position after max attempts
+            SpawnableSO spawnable = rule.Spawnable;
+            return _spawner.TrySpawnObject(spawnable.Prefab, spawnable.MinSeparation, _collisionLayers, _maxPlacementAttempts);
         }
 
         private List<SpawnableRuleSO> GetAffordableRules() => _chunkSpawnProfile.SpawnableRules.Where(rule => rule.Cost <= _totalBudget).ToList();

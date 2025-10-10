@@ -11,12 +11,6 @@ namespace DroneStrikers.Stats
         private float _cachedValue;
 
         /// <summary>
-        ///     Creates a new Stat with the specified base value.
-        /// </summary>
-        /// <param name="baseValue"> The base value of the stat.</param>
-        public Stat(float baseValue) => _baseValue = baseValue;
-
-        /// <summary>
         ///     The base value of the stat before any modifiers are applied.
         /// </summary>
         public float BaseValue
@@ -43,6 +37,18 @@ namespace DroneStrikers.Stats
         }
 
         /// <summary>
+        ///     Creates a new Stat with the specified base value.
+        /// </summary>
+        /// <param name="baseValue"> The base value of the stat.</param>
+        public Stat(float baseValue) => _baseValue = baseValue;
+
+        /// <summary>
+        ///     Creates a new Stat using the default value from the provided StatTypeSO.
+        /// </summary>
+        /// <param name="statTypeSO"> The StatTypeSO to use the default value from. </param>
+        public Stat(StatTypeSO statTypeSO) => _baseValue = statTypeSO.DefaultValue;
+
+        /// <summary>
         ///     Add a new modifier to the stat with the specified type, value, and optional source.
         ///     Marks the stat as dirty to recalculate its value.
         /// </summary>
@@ -51,8 +57,8 @@ namespace DroneStrikers.Stats
         /// <param name="source"> The source of the modifier (e.g. an upgrade). Can be null. </param>
         public void AddModifier(StatModType type, float value, object source = null)
         {
-            _modifiers.Add(new StatModifier(type, value, source));
             _isDirty = true;
+            _modifiers.Add(new StatModifier(type, value, source));
         }
 
         /// <summary>
@@ -106,10 +112,10 @@ namespace DroneStrikers.Stats
                     case StatModType.Flat:
                         flat += mod.Value;
                         break;
-                    case StatModType.AdditiveMult:
+                    case StatModType.PercentAdditive:
                         additive += mod.Value;
                         break;
-                    case StatModType.MultiplicativeMult:
+                    case StatModType.PercentMultiplicative:
                         multiplicative *= 1 + mod.Value;
                         break;
                     default:
@@ -117,7 +123,7 @@ namespace DroneStrikers.Stats
                 }
 
             // Calculate final value
-            _cachedValue = (_baseValue + flat) * (1f + additive) * multiplicative;
+            _cachedValue = (_baseValue + flat) * (1 + additive) * multiplicative;
             _isDirty = false; // Value is now up to date
         }
     }

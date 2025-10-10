@@ -1,26 +1,21 @@
 using DroneStrikers.Combat;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DroneStrikers.UI
 {
-    [RequireComponent(typeof(Slider))] [RequireComponent(typeof(Canvas))]
-    public class WorldHealthBar : MonoBehaviour
+    [RequireComponent(typeof(Canvas))]
+    public class WorldHealthBar : ProgressBar
     {
-        private const float MinSliderValue = 0.157f;
         private static readonly Color FullHealthColor = new(0.46f, 0.92f, 0.38f, 1f);
         private static readonly Color MidHealthColor = new(0.92f, 0.58f, 0.38f, 1f);
         private static readonly Color LowHealthColor = new(0.92f, 0.38f, 0.38f, 1f);
 
-        private IHealth _health;
-        private Slider _slider;
         private Canvas _canvas;
-        [SerializeField] private Image _fillImage;
+        private IHealth _health;
 
-        private float _lastCurrentHealth = -1f;
-
-        private void Awake()
+        protected override void Awake()
         {
+            _canvas = GetComponent<Canvas>();
             _health = GetComponentInParent<IHealth>();
             if (_health == null)
             {
@@ -28,23 +23,17 @@ namespace DroneStrikers.UI
                 Destroy(this);
             }
 
-            _slider = GetComponent<Slider>();
-            _canvas = GetComponent<Canvas>();
+            base.Awake();
         }
 
         private void Update()
         {
-            // Only update if health has changed
-            if (Mathf.Approximately(_lastCurrentHealth, _health.CurrentHealth)) return;
-            _lastCurrentHealth = _health.CurrentHealth;
+            float percentage = UpdateValue(_health.CurrentHealth, _health.MaxHealth);
 
-            // Update health bar visibility and value
-            float healthPercent = _health.CurrentHealth / (float)_health.MaxHealth;
-            _canvas.enabled = healthPercent < 1; // Only show if not full health
-            _slider.value = Mathf.Max(healthPercent, MinSliderValue);
+            _canvas.enabled = percentage < 1; // Only show if not full health
 
             // Change color based on health percentage
-            _fillImage.color = healthPercent switch
+            _fillImage.color = percentage switch
             {
                 > 0.75f => FullHealthColor,
                 > 0.35f => MidHealthColor,

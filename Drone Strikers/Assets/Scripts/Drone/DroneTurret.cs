@@ -1,5 +1,6 @@
 using DroneStrikers.Combat;
 using DroneStrikers.Core;
+using DroneStrikers.Stats;
 using UnityEngine;
 
 namespace DroneStrikers.Drone
@@ -10,9 +11,16 @@ namespace DroneStrikers.Drone
     {
         [SerializeField] private Transform _turretTransform;
         [Tooltip("The point from which projectiles are fired. If null, the turret's own transform is used.")]
-        [SerializeField]
-        private Transform _firePoint;
+        [SerializeField] private Transform _firePoint;
         [SerializeField] private GameObject _projectilePrefab;
+
+        [Header("Attack")]
+        [SerializeField] private AttackDefinitionSO _attackDefinition;
+
+        [Header("Stat Types")]
+        [SerializeField] private StatTypeSO _aimSpeedStat;
+        [SerializeField] private StatTypeSO _fireCooldownStat;
+        [SerializeField] private StatTypeSO _recoilStat;
 
         private DroneStats _ownerStats;
         private TeamMember _teamMember;
@@ -49,7 +57,7 @@ namespace DroneStrikers.Drone
             if (targetDirection.sqrMagnitude <= 0.001f) return;
 
             Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
-            _turretTransform.rotation = Quaternion.Slerp(_turretTransform.rotation, targetRotation, _ownerStats.AimSpeed * Time.deltaTime);
+            _turretTransform.rotation = Quaternion.Slerp(_turretTransform.rotation, targetRotation, _ownerStats.GetStatValue(_aimSpeedStat) * Time.deltaTime);
         }
 
         private void UpdateFire()
@@ -77,13 +85,17 @@ namespace DroneStrikers.Drone
             GameObject projectile = ObjectPoolManager.SpawnObject(_projectilePrefab, _firePoint.position, _firePoint.rotation);
 
             // Apply attack stats to projectile, pass destruction context receiver for when projectile destroys something
-            if (projectile.TryGetComponent(out IAttack attack)) attack.InitializeAttack(_ownerStats.AttackStats, _teamMember.Team, _destructionContextReceiver);
+            if (projectile.TryGetComponent(out IAttack attack))
+            {
+                AttackInitData initData = _attackDefinition.CreateInitData(_ownerStats, _teamMember.Team, _destructionContextReceiver);
+                attack.InitializeAttack(initData);
+            }
 
             // Apply recoil to drone (backwards relative to fire point)
-            if (_droneMovement != null) _droneMovement.ApplyForce(-_firePoint.forward * _ownerStats.Recoil);
+            if (_droneMovement != null) _droneMovement.ApplyForce(-_firePoint.forward * _ownerStats.GetStatValue(_recoilStat));
 
             // Set cooldown timer
-            _cooldownTimer = _ownerStats.FireCooldown;
+            _cooldownTimer = _ownerStats.GetStatValue(_fireCooldownStat);
         }
 
         /// <summary>

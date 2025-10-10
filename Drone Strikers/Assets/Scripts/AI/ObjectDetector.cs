@@ -9,12 +9,17 @@ namespace DroneStrikers.AI
     public class ObjectDetector : MonoBehaviour
     {
         /// <summary>
+        ///     Returns true if there is at least one object (drone or otherwise) in range.
+        /// </summary>
+        public bool HasObjectInRange => _detected.Count > 0;
+
+        /// <summary>
         ///     Returns true if there is at least one enemy drone in range.
         /// </summary>
-        public bool IsDroneInRange => _detectedDrones.Count > 0;
-        
+        public bool HasDroneInRange => _detectedDrones.Count > 0;
+
         // TODO: Consider that a drones level may change while being detected
-        
+
         // TODO: Honestly just completely overhaul this entire file. It's so jank.
 
         /// <summary>
@@ -26,7 +31,7 @@ namespace DroneStrikers.AI
             {
                 if (_highestLevelInfo != null) return _highestLevelInfo;
                 RemoveNullDrones();
-                _highestLevelInfo = IsDroneInRange ? _detectedDrones.Values.OrderByDescending(info => info.Level).FirstOrDefault() : null;
+                _highestLevelInfo = HasDroneInRange ? _detectedDrones.Values.OrderByDescending(info => info.Level).FirstOrDefault() : null;
                 return _highestLevelInfo;
             }
         }
@@ -41,10 +46,12 @@ namespace DroneStrikers.AI
             {
                 if (_lowestLevelInfo != null) return _lowestLevelInfo;
                 RemoveNullDrones();
-                _lowestLevelInfo = IsDroneInRange ? _detectedDrones.Values.OrderBy(info => info.Level).FirstOrDefault() : null;
+                _lowestLevelInfo = HasDroneInRange ? _detectedDrones.Values.OrderBy(info => info.Level).FirstOrDefault() : null;
                 return _lowestLevelInfo;
             }
         }
+
+        private int _objectLayer = -1;
 
         private readonly HashSet<GameObject> _detected = new();
         private readonly Dictionary<GameObject, DroneInfo> _detectedDrones = new();
@@ -104,41 +111,48 @@ namespace DroneStrikers.AI
         public GameObject GetMostImportantDetectedObject()
         {
             if (_detected.Count == 0) return null;
-            return IsDroneInRange ? DroneWithHighestLevel?.gameObject : GetClosestDetectedObject();
+            return HasDroneInRange ? DroneWithHighestLevel?.gameObject : GetClosestDetectedObject();
         }
 
         private void Awake()
         {
             _selfInfo = GetComponentInParent<DroneInfo>();
+
+            _objectLayer = LayerMask.NameToLayer("Object");
         }
 
         private void OnTriggerEnter(Collider other)
         {
+            if (other.gameObject.layer != _objectLayer) return; // Only care about "Objects"
+
             TeamMember otherTeamMember = other.GetComponent<TeamMember>();
             if (otherTeamMember != null && otherTeamMember.Team == _selfInfo.Team) return; // Ignore same team members
 
             _detected.Add(other.gameObject);
 
-            if (!other.CompareTag("Drone")) return;
+            if (!other.CompareTag("Drone")) return; // Only care about drones from here on out
 
             DroneInfo info = other.GetComponent<DroneInfo>();
             if (info == null) return;
-            // if (info.Team == _selfInfo.Team) return; // Ignore same team drones
 
-            _detectedDrones[other.gameObject] = info;
+            _detectedDrones[other.gameObject] = info; // Add info to detected drones
 
+            // Update highest and lowest level info if necessary
             if (_highestLevelInfo == null || info.Level > _highestLevelInfo.Level) _highestLevelInfo = info;
             if (_lowestLevelInfo == null || info.Level < _lowestLevelInfo.Level) _lowestLevelInfo = info;
         }
 
         private void OnTriggerExit(Collider other)
         {
-            _detected.Remove(other.gameObject);
+            // Remove from detected set
+            if (!_detected.Remove(other.gameObject)) return; // If it wasn't in the set, do nothing else
 
-            if (!other.CompareTag("Drone")) return;
+            if (!other.CompareTag("Drone")) return; // Only care about drones from here on out
 
+            // Remove from detected drones dictionary
             if (_detectedDrones.Remove(other.gameObject, out DroneInfo info))
             {
+                // If the removed drone was the highest or lowest level, reset them to force recalculation
                 if (info == _highestLevelInfo) _highestLevelInfo = null;
                 if (info == _lowestLevelInfo) _lowestLevelInfo = null;
             }

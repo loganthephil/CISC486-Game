@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DroneStrikers.Upgrades
 {
-    [CreateAssetMenu(fileName = "UpgradeTreeSO", menuName = "Scriptable Objects/UpgradeTreeSO")]
+    [CreateAssetMenu(fileName = "UpgradeTree_", menuName = "Upgrades/Upgrade Tree")]
     public class UpgradeTreeSO : ScriptableObject
     {
         [SerializeField] private string _upgradeTreeName;

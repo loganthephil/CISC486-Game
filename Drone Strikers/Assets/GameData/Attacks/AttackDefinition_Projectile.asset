@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 369c9cb210b247759bade493f6280a6e, type: 3}
+  m_Name: AttackDefinition_Projectile
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.AttackDefinitionSO
+  _prefab: {fileID: 4712034791458101651, guid: dc4a9ada4c0acfc46993a15438178ad9, type: 3}
+  _damageStat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
+  _velocityStat: {fileID: 11400000, guid: 09424619b70a0304c865ab925511bd3c, type: 2}
+  _pierceStat: {fileID: 11400000, guid: dd1e7f7a2ad60284b91a1371002c5c09, type: 2}

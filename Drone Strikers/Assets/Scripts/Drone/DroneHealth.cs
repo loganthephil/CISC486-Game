@@ -1,5 +1,6 @@
 ﻿using DroneStrikers.Combat;
 using DroneStrikers.Events;
+using DroneStrikers.Stats;
 using UnityEngine;
 
 namespace DroneStrikers.Drone
@@ -12,14 +13,19 @@ namespace DroneStrikers.Drone
         private DroneStats _droneStats;
         private LocalEvents _localEvents;
 
+        [SerializeField] private StatTypeSO _maxHealthStat;
+        [SerializeField] private StatTypeSO _healthRegenStat;
+
         public float CurrentHealth { get; set; }
-        public float MaxHealth => _droneStats.MaxHealth;
+        public float MaxHealth => _droneStats.GetStatValue(_maxHealthStat);
 
         private float _timeSinceLastHit;
         private float _lastHealth;
 
         private void Awake()
         {
+            Debug.Assert(_maxHealthStat != null && _healthRegenStat != null, "Missing StatType assignment on " + this);
+
             _droneStats = GetComponent<DroneStats>();
             _localEvents = GetComponent<LocalEvents>();
             if (_localEvents == null) Debug.LogWarning("No local events found. DroneHealth will not be able to respond to damage events.");
@@ -40,7 +46,7 @@ namespace DroneStrikers.Drone
 
             if (CurrentHealth < MaxHealth && _timeSinceLastHit >= HealthRegenDelay)
             {
-                CurrentHealth += _droneStats.HealthRegen * Time.deltaTime; // Regenerate health over time
+                CurrentHealth += _droneStats.GetStatValue(_healthRegenStat) * Time.deltaTime; // Regenerate health over time
                 CurrentHealth = Mathf.Min(CurrentHealth, MaxHealth); // Clamp to max health
             }
         }

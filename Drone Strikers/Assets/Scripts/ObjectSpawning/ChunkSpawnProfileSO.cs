@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DroneStrikers.ObjectSpawning
 {
-    [CreateAssetMenu(fileName = "ChunkSpawnProfileSO", menuName = "Scriptable Objects/ChunkSpawnProfileSO")]
+    [CreateAssetMenu(fileName = "SpawnProfile_", menuName = "Spawning/Chunk Spawn Profile")]
     public class ChunkSpawnProfileSO : ScriptableObject
     {
         [Tooltip("How many credits should the spawn director get per spawn cycle?")]

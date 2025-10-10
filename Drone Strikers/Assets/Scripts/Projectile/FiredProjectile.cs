@@ -14,9 +14,9 @@ namespace DroneStrikers.Projectile
 
         // -- Drone Specific --
         public IDestructionContextReceiver InstigatorContextReceiver { get; private set; }
-        public int ContactDamage { get; private set; } = 1;
+        public float ContactDamage { get; private set; } = 1;
         private float _speed; // Speed in units per second
-        private int _pierce; // Number of enemies the projectile can pierce through
+        private float _pierce; // Number of enemies the projectile can pierce through
 
         // -- Shared --
         private readonly float _lifetime = 2f; // Lifetime in seconds
@@ -48,19 +48,20 @@ namespace DroneStrikers.Projectile
             _age = 0f; // Reset age when enabled
         }
 
-        public void InitializeAttack(AttackStats stats, Team team, IDestructionContextReceiver instigatorContextReceiver)
+        public void InitializeAttack(in AttackInitData initData)
         {
-            _teamMember.Team = team;
+            ContactDamage = initData.Damage;
+            _speed = initData.Velocity;
+            _pierce = initData.Pierce;
 
-            InstigatorContextReceiver = instigatorContextReceiver;
-            ContactDamage = stats.AttackDamage;
-            _speed = stats.AttackVelocity;
-            _pierce = stats.AttackPierce;
+            _teamMember.Team = initData.Team;
+            InstigatorContextReceiver = initData.InstigatorContextReceiver;
         }
 
         public void TakeDamage(in DamageContext context)
         {
-            if (_pierce <= 0) ObjectPoolManager.ReturnObject(gameObject); // Return to pool if no pierce left
+            // Return to pool if no pierce left
+            if (_pierce == 0) ObjectPoolManager.ReturnObject(gameObject);
             _pierce--;
         }
     }

@@ -9,99 +9,52 @@ namespace DroneStrikers.Drone
     ///     Other components can access these stats via public properties.
     ///     Specific functionality for any given stat should be implemented in a separate component.
     /// </summary>
-    public class DroneStats : MonoBehaviour
+    public class DroneStats : MonoBehaviour, IStatsProvider
     {
-        [SerializeField] private DroneStatsSO _statsTemplate;
-
+        [SerializeField] private StatTemplateSO _statsTemplate;
         private StatCollection _stats;
-
-        // -- Drone --
-        public float MaxHealth => Mathf.RoundToInt(_stats[StatId.MaxHealth].Value);
-        public float HealthRegen => _stats[StatId.HealthRegen].Value;
-
-        // -- Movement --
-        public float MoveSpeed => _stats[StatId.MoveSpeed].Value;
-        public float MoveAcceleration => _stats[StatId.MoveAcceleration].Value;
-        public float MoveDeceleration => _stats[StatId.MoveDeceleration].Value;
-
-        // -- Weapon --
-        public float FireCooldown => _stats[StatId.FireCooldown].Value;
-        public float AimSpeed => _stats[StatId.AimSpeed].Value;
-        public float Recoil => _stats[StatId.Recoil].Value;
-
-        // -- Attack --
-        public AttackStats AttackStats => new()
-        {
-            AttackVelocity = _stats[StatId.AttackVelocity].Value,
-            AttackDamage = Mathf.RoundToInt(_stats[StatId.AttackDamage].Value),
-            AttackPierce = Mathf.RoundToInt(_stats[StatId.AttackPierce].Value)
-        };
 
         private void Awake()
         {
             if (_statsTemplate == null) throw new Exception("DroneStats: No stats template assigned.");
-            SetStatsToTemplate();
+            _stats = new StatCollection(_statsTemplate);
         }
 
-        private void SetStatsToTemplate()
-        {
-            if (_statsTemplate == null) throw new Exception("DroneStats: No stats template assigned.");
-
-            _stats = new StatCollection();
-
-            // -- Drone --
-            _stats.Define(StatId.MaxHealth, _statsTemplate.MaxHealth);
-            _stats.Define(StatId.HealthRegen, _statsTemplate.HealthRegen);
-
-            //-- Movement --
-            _stats.Define(StatId.MoveSpeed, _statsTemplate.MoveSpeed);
-            _stats.Define(StatId.MoveAcceleration, _statsTemplate.MoveAcceleration);
-            _stats.Define(StatId.MoveDeceleration, _statsTemplate.MoveDeceleration);
-
-            // -- Weapon --
-            _stats.Define(StatId.FireCooldown, _statsTemplate.FireCooldown);
-            _stats.Define(StatId.AimSpeed, _statsTemplate.AimSpeed);
-            _stats.Define(StatId.Recoil, _statsTemplate.Recoil);
-
-            // -- Attack --
-            _stats.Define(StatId.AttackVelocity, _statsTemplate.AttackVelocity);
-            _stats.Define(StatId.AttackDamage, _statsTemplate.AttackDamage);
-            _stats.Define(StatId.AttackPierce, _statsTemplate.AttackPierce);
-        }
+        public float GetStatValue(StatTypeSO stat) => _stats[stat].Value;
 
         // --- Upgrades ---
         /// <summary>
         ///     Adds a modifier to the specified stat.
         /// </summary>
-        /// <param name="statId"> The StatId of the stat to modify. </param>
+        /// <param name="stat"> The StatTypeSO of the stat to modify. </param>
         /// <param name="type"> The type of modifier to add. </param>
         /// <param name="amount"> The value of the modifier. </param>
         /// <param name="source"> The source of the modifier (e.g. an upgrade). Can be null. </param>
-        public void AddModifier(StatId statId, StatModType type, float amount, object source = null) => _stats.AddModifier(statId, type, amount, source);
+        public void AddModifier(StatTypeSO stat, StatModType type, float amount, object source = null) => _stats.AddModifier(stat, type, amount, source);
 
         /// <summary>
         ///     Adds a flat modifier to the specified stat.
         /// </summary>
-        /// <param name="id"> The StatId of the stat to modify. </param>
+        /// <param name="stat"> The StatTypeSO of the stat to modify. </param>
         /// <param name="amount"> The value of the modifier. </param>
         /// <param name="source"> The source of the modifier (e.g. an upgrade). Can be null. </param>
-        public void AddFlatModifier(StatId id, float amount, object source = null) => _stats.AddModifier(id, StatModType.Flat, amount, source);
+        public void AddFlatModifier(StatTypeSO stat, float amount, object source = null) => _stats.AddModifier(stat, StatModType.Flat, amount, source);
 
         /// <summary>
         ///     Adds an additive multiplier modifier to the specified stat.
         /// </summary>
-        /// <param name="id"> The StatId of the stat to modify. </param>
+        /// <param name="stat"> The StatTypeSO of the stat to modify. </param>
         /// <param name="amount"> The value of the modifier. </param>
         /// <param name="source"> The source of the modifier (e.g. an upgrade). Can be null. </param>
-        public void AddAdditiveModifier(StatId id, float amount, object source = null) => _stats.AddModifier(id, StatModType.AdditiveMult, amount, source);
+        public void AddAdditiveModifier(StatTypeSO stat, float amount, object source = null) => _stats.AddModifier(stat, StatModType.PercentAdditive, amount, source);
 
         /// <summary>
         ///     Adds a multiplicative multiplier modifier to the specified stat.
         /// </summary>
-        /// <param name="id"> The StatId of the stat to modify. </param>
+        /// <param name="stat"> The StatTypeSO of the stat to modify. </param>
         /// <param name="amount"> The value of the modifier. </param>
         /// <param name="source"> The source of the modifier (e.g. an upgrade). Can be null. </param>
-        public void AddMultiplicativeModifier(StatId id, float amount, object source = null) => _stats.AddModifier(id, StatModType.MultiplicativeMult, amount, source);
+        public void AddMultiplicativeModifier(StatTypeSO stat, float amount, object source = null) => _stats.AddModifier(stat, StatModType.PercentMultiplicative, amount, source);
 
         /// <summary>
         ///     Removes all modifiers from all stats that originate from the specified source.

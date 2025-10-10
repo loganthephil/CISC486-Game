@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24d226c0f88d76340ab720ebc7a69269, type: 3}
+  m_Name: Upgrade_Sniper
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
+  _upgradeName: Sniper
+  _modifiers:
+  - Stat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
+    Value: 3
+    ModType: 0
+  - Stat: {fileID: 11400000, guid: 09424619b70a0304c865ab925511bd3c, type: 2}
+    Value: 2
+    ModType: 0
+  - Stat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
+    Value: 0.5
+    ModType: 0
+  - Stat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
+    Value: 2
+    ModType: 0
+  - Stat: {fileID: 11400000, guid: dd1e7f7a2ad60284b91a1371002c5c09, type: 2}
+    Value: 1
+    ModType: 0
+  - Stat: {fileID: 11400000, guid: d11807f650e17ae4cbc9ab8facc28646, type: 2}
+    Value: 0.1
+    ModType: 1
+  _nextUpgrades: []

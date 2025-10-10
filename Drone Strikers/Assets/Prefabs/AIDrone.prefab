@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 4498411802328793018}
   - component: {fileID: 7850206521120833902}
   - component: {fileID: 8574624437403731315}
+  - component: {fileID: 5451170167598884039}
   - component: {fileID: 6560749499503267171}
   - component: {fileID: 37223549559261082}
   - component: {fileID: 9055041432041393804}
@@ -55,8 +56,9 @@ GameObject:
   - component: {fileID: 794553181151540361}
   - component: {fileID: 3463105954110152146}
   - component: {fileID: 8363565953599786548}
-  - component: {fileID: 4098067712986963995}
   - component: {fileID: 7668168320027582377}
+  - component: {fileID: 8887975519440697924}
+  - component: {fileID: 4098067712986963995}
   m_Layer: 6
   m_Name: AIDrone
   m_TagString: Drone
@@ -79,7 +81,6 @@ Transform:
   m_Children:
   - {fileID: 8053588551211952325}
   - {fileID: 2917294513694613669}
-  - {fileID: 2648810206553792665}
   - {fileID: 6981156619975086056}
   - {fileID: 741574566392648353}
   m_Father: {fileID: 0}
@@ -123,7 +124,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0bcc43f87b247efaa16239a2773f267, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.AIDroneMovement
-  _outerObjectDetector: {fileID: 6211365830959151667}
 --- !u!114 &8574624437403731315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,6 +136,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccb7c82a7acb4d67b3ecfa4314fbc966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.AIDroneTargetProvider
+--- !u!114 &5451170167598884039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f094815641046f181836fb03eb8fcd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.AIUpgradeSelection
 --- !u!114 &6560749499503267171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,6 +186,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be8ac5768ca749fdb88e32fe894b3c31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.DroneHealth
+  _maxHealthStat: {fileID: 11400000, guid: 0b05a3c864f5dda4b8aa667a56408363, type: 2}
+  _healthRegenStat: {fileID: 11400000, guid: 16fe2be1acc504f4a8fc4a79893175c3, type: 2}
 --- !u!114 &6440334462628246409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,6 +200,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a569e918ad0343858afb567cf87f7964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.DroneMovement
+  _moveSpeedStat: {fileID: 11400000, guid: 5b291be45f491954791a179df812b76f, type: 2}
+  _moveAccelerationStat: {fileID: 11400000, guid: fd835fb76a39e7a40b6280018a35828f, type: 2}
+  _moveDecelerationStat: {fileID: 11400000, guid: fcc2ed2d2b276df44944b93dac138dd1, type: 2}
 --- !u!114 &8463261026509474524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,6 +240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e71eadce8454a66bea7406553534131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.DroneBodyDamageSource
+  _attackDamageStat: {fileID: 11400000, guid: 1836a566e10ddb5458aa9ff44a700a25, type: 2}
 --- !u!114 &5619913541512797251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -250,6 +268,10 @@ MonoBehaviour:
   _turretTransform: {fileID: 8053588551211952325}
   _firePoint: {fileID: 1545149168181699020}
   _projectilePrefab: {fileID: 4712034791458101651, guid: dc4a9ada4c0acfc46993a15438178ad9, type: 3}
+  _attackDefinition: {fileID: 11400000, guid: d119098f24511444b89a56a019b0c130, type: 2}
+  _aimSpeedStat: {fileID: 11400000, guid: d11807f650e17ae4cbc9ab8facc28646, type: 2}
+  _fireCooldownStat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
+  _recoilStat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
 --- !u!114 &794553181151540361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,6 +308,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 584706125f594417b281d85c4affed52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.DroneInfo
+--- !u!114 &7668168320027582377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fe62fbb635f4bef95e15397e67c8036, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.ObjectDetector
+--- !u!114 &8887975519440697924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 394a6a19e70b469f89e094a58e3e2c97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.TrackedObject
 --- !u!136 &4098067712986963995
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -309,120 +355,6 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7668168320027582377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2074245953654827550}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fe62fbb635f4bef95e15397e67c8036, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.ObjectDetector
---- !u!1 &2673584226619534233
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2648810206553792665}
-  - component: {fileID: 4154672024270658302}
-  - component: {fileID: 2532151114878794576}
-  - component: {fileID: 2073690248136438535}
-  m_Layer: 0
-  m_Name: UI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2648810206553792665
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2673584226619534233}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 6539017670223041718}
-  m_Father: {fileID: 8763781677960678377}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
---- !u!223 &4154672024270658302
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2673584226619534233}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 1
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 4
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!114 &2532151114878794576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2673584226619534233}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
---- !u!114 &2073690248136438535
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2673584226619534233}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &2694126388756049602
 GameObject:
   m_ObjectHideFlags: 0
@@ -602,77 +534,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &3848937087630784805
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6539017670223041718}
-  - component: {fileID: 7058427948368677336}
-  - component: {fileID: 5162494041028161692}
-  m_Layer: 0
-  m_Name: UpgradeSelections
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &6539017670223041718
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3848937087630784805}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2648810206553792665}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: 0}
-  m_SizeDelta: {x: 400, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &7058427948368677336
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3848937087630784805}
-  m_CullTransparentMesh: 1
---- !u!114 &5162494041028161692
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3848937087630784805}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
-  m_Padding:
-    m_Left: 50
-    m_Right: 50
-    m_Top: 50
-    m_Bottom: 50
-  m_ChildAlignment: 0
-  m_Spacing: 50
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1 &6925508632764163133
 GameObject:
   m_ObjectHideFlags: 0
@@ -683,7 +544,6 @@ GameObject:
   m_Component:
   - component: {fileID: 741574566392648353}
   - component: {fileID: 2462993204814797619}
-  - component: {fileID: 6211365830959151667}
   m_Layer: 0
   m_Name: Detector
   m_TagString: Untagged
@@ -727,18 +587,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 20, y: 1, z: 20}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6211365830959151667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6925508632764163133}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fe62fbb635f4bef95e15397e67c8036, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.DroneDetector
 --- !u!1001 &5869294211968778309
 PrefabInstance:
   m_ObjectHideFlags: 0

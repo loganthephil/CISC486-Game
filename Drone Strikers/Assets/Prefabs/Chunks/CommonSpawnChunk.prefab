@@ -9,8 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6983167797959503474}
-  - component: {fileID: 4916693462458765773}
+  - component: {fileID: 5135271004122707637}
   - component: {fileID: 3028567808093431916}
+  - component: {fileID: 7273906060695469257}
   m_Layer: 3
   m_Name: CommonSpawnChunk
   m_TagString: Untagged
@@ -33,8 +34,8 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &4916693462458765773
-MeshCollider:
+--- !u!65 &5135271004122707637
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -51,10 +52,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  serializedVersion: 3
+  m_Size: {x: 10, y: 0, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3028567808093431916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,3 +70,18 @@ MonoBehaviour:
   _chunkSpawnProfile: {fileID: 11400000, guid: c6d48159095151a4c840b293724dad4d, type: 2}
   _maxPlacementAttempts: 5
   _yPosition: 0
+  _collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &7273906060695469257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6108721565772877909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56cc2d8826e04b9ebfda22d36eab13f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.SpawnWithinCollider
