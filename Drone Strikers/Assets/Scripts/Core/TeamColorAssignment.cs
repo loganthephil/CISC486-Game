@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using DroneStrikers.Combat;
+using DroneStrikers.Core.Types;
 using UnityEngine;
 
 namespace DroneStrikers.Core

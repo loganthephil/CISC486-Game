@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using DroneStrikers.Events.Listeners;
+using DroneStrikers.Events.EventSOListeners;
 using UnityEngine;
 
 namespace DroneStrikers.Events.EventSO

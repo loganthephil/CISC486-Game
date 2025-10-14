@@ -4,7 +4,7 @@ using DroneStrikers.Events.EventSO;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace DroneStrikers.Events.Listeners
+namespace DroneStrikers.Events.EventSOListeners
 {
     // Interface for event listeners with a single parameter. Used in both abstract classes for single parameter events.
     public interface IEventListener<in T>

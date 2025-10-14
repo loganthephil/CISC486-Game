@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Spawnable_PentagonalPrism
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.SpawnableSO
   _prefab: {fileID: 6932437063860109330, guid: 9f6b59db1d9489f40af9a8effdb093aa, type: 3}
-  _minSeparation: 2
+  _minSeparation: 0.5

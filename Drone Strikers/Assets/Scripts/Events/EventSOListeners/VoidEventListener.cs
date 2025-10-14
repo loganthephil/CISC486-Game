@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace DroneStrikers.Events.Listeners
+namespace DroneStrikers.Events.EventSOListeners
 {
     public class VoidEventListener : MonoBehaviour
     {

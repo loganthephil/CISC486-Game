@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.AttackDefinitionSO
   _prefab: {fileID: 4712034791458101651, guid: dc4a9ada4c0acfc46993a15438178ad9, type: 3}
   _damageStat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
-  _velocityStat: {fileID: 11400000, guid: 09424619b70a0304c865ab925511bd3c, type: 2}
+  _projectileSpeedStat: {fileID: 11400000, guid: 09424619b70a0304c865ab925511bd3c, type: 2}
   _pierceStat: {fileID: 11400000, guid: dd1e7f7a2ad60284b91a1371002c5c09, type: 2}

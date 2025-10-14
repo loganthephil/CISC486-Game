@@ -18,7 +18,7 @@ Game executable, if needed, is in under `/Drone Strikers/Build`
 
 ### Terms
 **Targetable Object**: Any object that can be destroyed for experience. This includes other drones (AI or Player) and arena objects like Cylinder, Cubes, etc.\
-**Detected Object**: Detected objects are object within a certain range of the AI drone (colling with a special trigger) and are **not** on the same team as the AI drone.
+**Detected Object**: Detected objects are object within a certain range of the AI drone (colliding with a special trigger) and are **not** on the same team as the AI drone.
 
 ## Proposal (Assignment 1)
 ### Title (Working)

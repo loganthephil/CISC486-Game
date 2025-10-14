@@ -42,23 +42,23 @@ GameObject:
   - component: {fileID: 8763781677960678377}
   - component: {fileID: 4498411802328793018}
   - component: {fileID: 7850206521120833902}
+  - component: {fileID: 5260264127513065969}
   - component: {fileID: 8574624437403731315}
   - component: {fileID: 5451170167598884039}
   - component: {fileID: 6560749499503267171}
   - component: {fileID: 37223549559261082}
   - component: {fileID: 9055041432041393804}
   - component: {fileID: 6440334462628246409}
-  - component: {fileID: 8463261026509474524}
   - component: {fileID: 7668862864678098203}
   - component: {fileID: 3830286895492454481}
   - component: {fileID: 5619913541512797251}
+  - component: {fileID: 25917386752036198}
   - component: {fileID: 3181656630450666972}
   - component: {fileID: 794553181151540361}
   - component: {fileID: 3463105954110152146}
   - component: {fileID: 8363565953599786548}
-  - component: {fileID: 7668168320027582377}
   - component: {fileID: 8887975519440697924}
-  - component: {fileID: 4098067712986963995}
+  - component: {fileID: 6890320814131913314}
   m_Layer: 6
   m_Name: AIDrone
   m_TagString: Drone
@@ -83,6 +83,7 @@ Transform:
   - {fileID: 2917294513694613669}
   - {fileID: 6981156619975086056}
   - {fileID: 741574566392648353}
+  - {fileID: 3666640745276707162}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &4498411802328793018
@@ -124,6 +125,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0bcc43f87b247efaa16239a2773f267, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.AIDroneMovement
+--- !u!114 &5260264127513065969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 647e5c4d2f18436eba30eb2ad937d1b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.AI.AINavigation
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 192
+  _attackLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  _perceptionRadius: 10
+  _maxPerceivedObstacles: 20
+  _maxThreats: 3
+  _droneRadius: 1
+  _safetyBuffer: 0.5
+  _maxTimeLookahead: 1.5
+  _wallLookaheadDistance: 5
+  _avoidanceWeight: 1.5
+  _wallAvoidanceWeight: 2
 --- !u!114 &8574624437403731315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,6 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccb7c82a7acb4d67b3ecfa4314fbc966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.AIDroneTargetProvider
+  _engageTargets: 1
 --- !u!114 &5451170167598884039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,18 +235,6 @@ MonoBehaviour:
   _moveSpeedStat: {fileID: 11400000, guid: 5b291be45f491954791a179df812b76f, type: 2}
   _moveAccelerationStat: {fileID: 11400000, guid: fd835fb76a39e7a40b6280018a35828f, type: 2}
   _moveDecelerationStat: {fileID: 11400000, guid: fcc2ed2d2b276df44944b93dac138dd1, type: 2}
---- !u!114 &8463261026509474524
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2074245953654827550}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 718136c4204e464e914c9ffc21636bf2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.ContactDamageResolver
 --- !u!114 &7668862864678098203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,6 +273,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23a4c02308b74512876691abf40a59b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.DamageReceiver
+  _onDestroyedEvent: {fileID: 0}
+--- !u!114 &25917386752036198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718136c4204e464e914c9ffc21636bf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.Combat.ContactDamageResolver
 --- !u!114 &3181656630450666972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,18 +341,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 584706125f594417b281d85c4affed52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Drone.DroneInfo
---- !u!114 &7668168320027582377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2074245953654827550}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fe62fbb635f4bef95e15397e67c8036, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.ObjectDetector
 --- !u!114 &8887975519440697924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,7 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 394a6a19e70b469f89e094a58e3e2c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.TrackedObject
---- !u!136 &4098067712986963995
+--- !u!136 &6890320814131913314
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -456,7 +477,7 @@ GameObject:
   - component: {fileID: 2917294513694613669}
   - component: {fileID: 2342707569089915926}
   - component: {fileID: 9110885407015250658}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -543,7 +564,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 741574566392648353}
+  - component: {fileID: 4165716762946327521}
   - component: {fileID: 2462993204814797619}
+  - component: {fileID: 6714552109762576139}
   m_Layer: 0
   m_Name: Detector
   m_TagString: Untagged
@@ -566,6 +589,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8763781677960678377}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &4165716762946327521
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6925508632764163133}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!65 &2462993204814797619
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -587,6 +637,84 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 20, y: 1, z: 20}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6714552109762576139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6925508632764163133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fe62fbb635f4bef95e15397e67c8036, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.AI.ObjectDetector
+--- !u!1001 &2893369474014176639
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8763781677960678377}
+    m_Modifications:
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3357375911269720411, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_Center.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6189353465899253068, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+      propertyPath: m_Name
+      value: SpawnBounds
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+--- !u!4 &3666640745276707162 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1929183724069712933, guid: 4789260fab486fc4187d9e9df62d3fe2, type: 3}
+  m_PrefabInstance: {fileID: 2893369474014176639}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5869294211968778309
 PrefabInstance:
   m_ObjectHideFlags: 0
