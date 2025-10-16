@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1918143123809467539}
   - component: {fileID: 6925378434224237207}
   - component: {fileID: 940932888321841580}
+  - component: {fileID: 2289712633006534652}
   - component: {fileID: 4203204239146877107}
   - component: {fileID: 1394679768356189346}
   - component: {fileID: 3763950941912785628}
@@ -19,7 +20,7 @@ GameObject:
   - component: {fileID: 2205342062070386790}
   - component: {fileID: 6458069834533051395}
   - component: {fileID: 1475527305272259383}
-  - component: {fileID: 2289712633006534652}
+  - component: {fileID: -7941668561564462382}
   m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
@@ -121,6 +122,33 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!54 &2289712633006534652
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6932437063860109330}
+  serializedVersion: 5
+  m_Mass: 10
+  m_LinearDamping: 10
+  m_AngularDamping: 10
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 116
+  m_CollisionDetection: 0
 --- !u!114 &4203204239146877107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211,33 +239,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Core.Colorizer
   _color: {r: 0.88235295, g: 0.8901961, b: 0.4, a: 0}
---- !u!54 &2289712633006534652
-Rigidbody:
+--- !u!114 &-7941668561564462382
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6932437063860109330}
-  serializedVersion: 5
-  m_Mass: 10
-  m_LinearDamping: 10
-  m_AngularDamping: 10
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 116
-  m_CollisionDetection: 0
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f25ed8806af4a56b15d368caee4eda0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.AI.SimpleValueDangerProvider
 --- !u!1001 &3186105031073264958
 PrefabInstance:
   m_ObjectHideFlags: 0

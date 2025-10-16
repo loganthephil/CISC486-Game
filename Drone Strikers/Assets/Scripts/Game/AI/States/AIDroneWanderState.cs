@@ -2,9 +2,9 @@
 
 namespace DroneStrikers.Game.AI.States
 {
-    public class AIDroneWanderState : AIDroneMovementBaseState
+    public class AIDroneWanderState : AIDroneBaseState
     {
-        public AIDroneWanderState(AINavigation navigation, ObjectDetector objectDetector) : base(navigation, objectDetector) { }
+        public AIDroneWanderState(AINavigation navigation, ObjectDetector objectDetector, AIDroneTargetProvider targetProvider) : base(navigation, objectDetector, targetProvider) { }
 
         private const float MinChangeInterval = 2f;
         private const float MaxChangeInterval = 5f;

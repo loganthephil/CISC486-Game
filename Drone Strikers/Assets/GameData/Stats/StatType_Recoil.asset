@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: StatType_Recoil
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Stats.StatTypeSO
   _name: Recoil
-  _defaultValue: 4
+  _defaultValue: 2

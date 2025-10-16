@@ -137,19 +137,22 @@ namespace DroneStrikers.Game.Drone
         /// <param name="amount"> The amount of experience to add. </param>
         private void AddExperience(float amount)
         {
-            _localEvents.Invoke(DroneEvents.ExperienceGained, amount);
             Experience += amount;
             while (Experience >= RequiredExperienceToNextLevel)
             {
                 Level++;
-                _localEvents.Invoke(DroneEvents.LevelUp, Level);
                 if (UpgradePointLevels.Contains(Level))
                 {
                     // Get an upgrade point if this level grants one
                     AvailableUpgradePoints++;
                     _localEvents.Invoke(DroneEvents.UpgradePointGained, AvailableUpgradePoints);
                 }
+
+                _localEvents.Invoke(DroneEvents.LevelUp, Level);
             }
+
+            // Notify experience after leveling up due to subscribers possibly needing updated level info
+            _localEvents.Invoke(DroneEvents.ExperienceGained, amount);
         }
     }
 }

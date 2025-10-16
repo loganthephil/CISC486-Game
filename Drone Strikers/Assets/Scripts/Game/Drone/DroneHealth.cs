@@ -20,6 +20,7 @@ namespace DroneStrikers.Game.Drone
 
         public float CurrentHealth { get; set; }
         public float MaxHealth => _droneStats.GetStatValue(_maxHealthStat);
+        public float HealthPercent => MaxHealth > 0 ? CurrentHealth / MaxHealth : 0;
 
         private float _timeSinceLastHit;
         private float _lastHealth;

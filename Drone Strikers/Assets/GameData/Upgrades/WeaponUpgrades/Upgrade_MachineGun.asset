@@ -15,14 +15,11 @@ MonoBehaviour:
   _upgradeName: Machine Gun
   _modifiers:
   - Stat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
-    Value: -0.25
+    Value: -0.2
     ModType: 1
   - Stat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
-    Value: -0.5
+    Value: 0.5
     ModType: 1
-  - Stat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
-    Value: 1
-    ModType: 0
   - Stat: {fileID: 11400000, guid: d11807f650e17ae4cbc9ab8facc28646, type: 2}
     Value: -0.1
     ModType: 1

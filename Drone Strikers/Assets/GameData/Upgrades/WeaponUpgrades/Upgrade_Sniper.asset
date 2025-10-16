@@ -15,16 +15,16 @@ MonoBehaviour:
   _upgradeName: Sniper
   _modifiers:
   - Stat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
-    Value: 3
-    ModType: 0
+    Value: 0.6
+    ModType: 1
   - Stat: {fileID: 11400000, guid: 09424619b70a0304c865ab925511bd3c, type: 2}
     Value: 2
     ModType: 0
   - Stat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
-    Value: 0.5
-    ModType: 0
+    Value: -0.25
+    ModType: 1
   - Stat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
-    Value: 2
+    Value: 1
     ModType: 0
   - Stat: {fileID: 11400000, guid: dd1e7f7a2ad60284b91a1371002c5c09, type: 2}
     Value: 1

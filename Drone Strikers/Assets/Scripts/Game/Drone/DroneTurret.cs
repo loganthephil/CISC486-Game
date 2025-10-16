@@ -20,7 +20,7 @@ namespace DroneStrikers.Game.Drone
 
         [Header("Stat Types")]
         [SerializeField] private StatTypeSO _aimSpeedStat;
-        [SerializeField] private StatTypeSO _fireCooldownStat;
+        [SerializeField] private StatTypeSO _attackSpeedStat;
         [SerializeField] private StatTypeSO _recoilStat;
 
         private DroneStats _ownerStats;
@@ -96,7 +96,7 @@ namespace DroneStrikers.Game.Drone
             if (_droneMovement != null) _droneMovement.ApplyForce(-_firePoint.forward * _ownerStats.GetStatValue(_recoilStat));
 
             // Set cooldown timer
-            _cooldownTimer = _ownerStats.GetStatValue(_fireCooldownStat);
+            _cooldownTimer = 1 / _ownerStats.GetStatValue(_attackSpeedStat).EnsureNonZero();
         }
 
         /// <summary>

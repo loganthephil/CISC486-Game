@@ -190,7 +190,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8763781677960678377}
+  - component: {fileID: 2274785078639537476}
   - component: {fileID: 4498411802328793018}
+  - component: {fileID: 7742408368853056376}
   - component: {fileID: 6560749499503267171}
   - component: {fileID: 37223549559261082}
   - component: {fileID: 4053743637647345122}
@@ -207,8 +209,7 @@ GameObject:
   - component: {fileID: 3463105954110152146}
   - component: {fileID: 7502836197512944909}
   - component: {fileID: 2163025859993229753}
-  - component: {fileID: 7742408368853056376}
-  - component: {fileID: 2274785078639537476}
+  - component: {fileID: 362865258141389841}
   m_Layer: 6
   m_Name: Player
   m_TagString: Drone
@@ -236,6 +237,29 @@ Transform:
   - {fileID: 4820383648408296598}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &2274785078639537476
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4498411802328793018
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -263,6 +287,72 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 116
   m_CollisionDetection: 1
+--- !u!114 &7742408368853056376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 3c71e681378778442a4520c57eabe018, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4053743637647345122}
+        m_TargetAssemblyTypeName: DroneStrikers.Player.PlayerController, Assembly-CSharp
+        m_MethodName: OnMovement
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 0eb119ca-f2f1-47c7-a066-d6049adac0c3
+    m_ActionName: 'Player/Movement[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4053743637647345122}
+        m_TargetAssemblyTypeName: DroneStrikers.Player.PlayerController, Assembly-CSharp
+        m_MethodName: OnFire
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 09935542-2ca3-4efd-884f-8fe76852346f
+    m_ActionName: 'Player/Fire[/Keyboard/space,/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a4fde658-2071-4b47-aab0-c93071301973
+    m_ActionName: 'Player/MousePosition[/Mouse/position]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: Keyboard & Mouse
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!114 &6560749499503267171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -413,7 +503,7 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 4712034791458101651, guid: dc4a9ada4c0acfc46993a15438178ad9, type: 3}
   _attackDefinition: {fileID: 11400000, guid: d119098f24511444b89a56a019b0c130, type: 2}
   _aimSpeedStat: {fileID: 11400000, guid: d11807f650e17ae4cbc9ab8facc28646, type: 2}
-  _fireCooldownStat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
+  _attackSpeedStat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
   _recoilStat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
 --- !u!114 &401948373880385567
 MonoBehaviour:
@@ -477,7 +567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 394a6a19e70b469f89e094a58e3e2c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.TrackedObject
---- !u!114 &7742408368853056376
+--- !u!114 &362865258141389841
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -486,86 +576,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2074245953654827550}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Script: {fileID: 11500000, guid: 2bdf4e9f18834d6fa1042bcc4bf74cfd, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: 3c71e681378778442a4520c57eabe018, type: 3}
-  m_NotificationBehavior: 2
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents:
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4053743637647345122}
-        m_TargetAssemblyTypeName: DroneStrikers.Player.PlayerController, Assembly-CSharp
-        m_MethodName: OnMovement
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 0eb119ca-f2f1-47c7-a066-d6049adac0c3
-    m_ActionName: 'Player/Movement[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]'
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4053743637647345122}
-        m_TargetAssemblyTypeName: DroneStrikers.Player.PlayerController, Assembly-CSharp
-        m_MethodName: OnFire
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 09935542-2ca3-4efd-884f-8fe76852346f
-    m_ActionName: 'Player/Fire[/Keyboard/space,/Mouse/leftButton]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: a4fde658-2071-4b47-aab0-c93071301973
-    m_ActionName: 'Player/MousePosition[/Mouse/position]'
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Keyboard & Mouse
-  m_DefaultActionMap: Player
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
---- !u!136 &2274785078639537476
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2074245953654827550}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.Combat.DroneValueDangerProvider
 --- !u!1 &2673584226619534233
 GameObject:
   m_ObjectHideFlags: 0

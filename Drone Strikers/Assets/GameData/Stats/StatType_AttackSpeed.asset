@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7570395dea0740c6bc681cb56c0785f7, type: 3}
-  m_Name: StatType_FireCooldown
+  m_Name: StatType_AttackSpeed
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Stats.StatTypeSO
-  _name: Fire Cooldown
-  _defaultValue: 0.5
+  _name: Attack Speed
+  _defaultValue: 2

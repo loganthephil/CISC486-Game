@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace DroneStrikers.Game.AI
 {
+    [RequireComponent(typeof(DroneMovement))]
+    [RequireComponent(typeof(AIDroneTraits))]
     public class AINavigation : MonoBehaviour
     {
         // TODO: Add "skill" factor to make movement less perfect; set on AI drone spawn
@@ -49,11 +51,11 @@ namespace DroneStrikers.Game.AI
         [SerializeField] private float _wallLookaheadDistance = 5.0f; // Distance to look ahead for walls
 
         [Header("Weights")]
-        [SerializeField] private float _avoidanceWeight = 1.5f; // Strength of avoidance steering
+        // [SerializeField] private float _avoidanceWeight = 1.5f; // Strength of avoidance steering
         [SerializeField] private float _wallAvoidanceWeight = 2.0f; // Strength of wall avoidance steering
 
-
         private DroneMovement _droneMovement;
+        private AIDroneTraits _traits;
         private Rigidbody _rigidbody;
         private DroneInfo _droneInfo;
 
@@ -72,6 +74,8 @@ namespace DroneStrikers.Game.AI
         private Collider[] _hits;
         private readonly List<Threat> _threats = new();
 
+        private Vector3 _lastOutputDirection = Vector3.zero;
+
         // For debugging purposes
         private Vector3 _debugAvoidanceVector;
         private Vector3 _debugSteeringVector;
@@ -80,6 +84,7 @@ namespace DroneStrikers.Game.AI
         private void Awake()
         {
             _droneMovement = GetComponent<DroneMovement>();
+            _traits = GetComponent<AIDroneTraits>();
             _rigidbody = GetComponent<Rigidbody>();
             _droneInfo = GetComponent<DroneInfo>();
         }
@@ -143,7 +148,10 @@ namespace DroneStrikers.Game.AI
         {
             Vector3 movementDirection = GetBaseDesiredDirection();
             movementDirection = SteerMovement(movementDirection);
+            movementDirection = ApplyReactionLag(movementDirection);
+
             _droneMovement.SetMovementDirection(movementDirection);
+            _lastOutputDirection = movementDirection;
         }
 
         // Get the desired movement direction based on the current navigation mode
@@ -239,7 +247,7 @@ namespace DroneStrikers.Game.AI
                 float combinedRadius = _droneRadius + ApproximateRadius(hit) + _safetyBuffer;
                 if (combinedRadius.IsNegligible()) combinedRadius = 0.001f; // Prevent divide by zero
 
-                // If relative speed is negligible (i.e. parallel movement or both stationary), simply push away from the object if currently within the combined radius
+                // If relative speed is negligible (parallel movement or both stationary), simply push away from the object if currently within the combined radius
                 float currentDistance = relativePosition.magnitude;
                 if (relativeSqrSpeed.IsNegligible() && currentDistance < combinedRadius)
                 {
@@ -305,7 +313,7 @@ namespace DroneStrikers.Game.AI
 
             // Combine desired direction with avoidance vector
             Vector3 steeredDirection = desiredDirection;
-            if (!avoidanceVector.sqrMagnitude.IsNegligible()) steeredDirection = (desiredDirection + _avoidanceWeight * avoidanceVector).normalized;
+            if (!avoidanceVector.sqrMagnitude.IsNegligible()) steeredDirection = (desiredDirection + _traits.AvoidanceWeight * avoidanceVector).normalized;
 
             // If not moving, but threatened, move out of the way
             if (steeredDirection.sqrMagnitude.IsNegligible() && !avoidanceVector.sqrMagnitude.IsNegligible()) steeredDirection = avoidanceVector.normalized;
@@ -315,6 +323,13 @@ namespace DroneStrikers.Game.AI
             _debugSteeringVector = 2 * steeredDirection;
 
             return steeredDirection.Flatten();
+        }
+
+        private Vector3 ApplyReactionLag(Vector3 direction)
+        {
+            // Interpolate between the last output direction and the new desired direction based on reaction lag
+            float lagFactor = Mathf.Clamp01(Time.fixedDeltaTime / _traits.ReactionLagSeconds);
+            return Vector3.Slerp(_lastOutputDirection.sqrMagnitude.IsNegligible() ? direction : _lastOutputDirection, direction, lagFactor).normalized;
         }
 
         // Returns the closest point on the collider, or, if the point is inside the collider, the center of the collider's bounds
@@ -335,7 +350,8 @@ namespace DroneStrikers.Game.AI
             return Mathf.Max(extents.x, extents.z);
         }
 
-        private void OnDrawGizmos()
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
         {
             // Draw perception radius
             Gizmos.color = Color.cyan;
@@ -392,5 +408,6 @@ namespace DroneStrikers.Game.AI
                 Gizmos.DrawLine(transform.position, transform.position + _debugSteeringVector);
             }
         }
+#endif
     }
 }

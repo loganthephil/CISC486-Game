@@ -36,6 +36,11 @@ namespace DroneStrikers.Core.Interfaces
         ///     The maximum health of the implementing object.
         /// </summary>
         float MaxHealth { get; }
+
+        /// <summary>
+        ///     The current health of the implementing object as a percentage of its maximum health (0 to 1).
+        /// </summary>
+        float HealthPercent { get; }
     }
 
     public interface ITeamMember
@@ -63,5 +68,20 @@ namespace DroneStrikers.Core.Interfaces
         /// </summary>
         /// <param name="context"> The context of the destruction. Readonly. </param>
         void HandleDestructionContext(in ObjectDestructionContext context);
+    }
+
+    public interface IValueDangerProvider
+    {
+        /// <summary>
+        ///     Arbitrary score that represents how "valuable" destroying this object is (e.g. experience gained on destroy).
+        ///     Values should be normalized across all objects, but for reference, 5 is a little, 50 is medium, 200 is a lot.
+        /// </summary>
+        float BaseValue { get; }
+
+        /// <summary>
+        ///     How dangerous this object is (0+).
+        ///     Values should be normalized across all objects, but for reference, 0 is harmless, 5 is a little, 20 is medium, 100 is very dangerous.
+        /// </summary>
+        float DangerLevel { get; }
     }
 }

@@ -1,65 +1,103 @@
-﻿using System.Collections;
-using DroneStrikers.Game.Drone;
+﻿using DroneStrikers.Game.Drone;
 using UnityEngine;
 
 namespace DroneStrikers.Game.AI
 {
+    [RequireComponent(typeof(AIDroneTraits))]
     [RequireComponent(typeof(DroneTurret))]
     public class AIDroneTargetProvider : MonoBehaviour
     {
         // TODO: Lead shots based on target velocity (base on skill level of AI drone)
-        // TODO: Keep same target in both this component and AIDroneMovement. Instead of prioritizing closest object, prioritize a current target until it's gone.
-        // This will make AI drones seem more intelligent and focused instead of constantly switching targets.
-        // Consider that if they aren't making any meaningful progress towards destroying a target, give up.
+
+        private const float MaxLeadTime = 0.75f; // Max time in the future to lead shots (in seconds)
 
         [SerializeField] private bool _engageTargets = true;
 
-        private ObjectDetector _objectDetector;
+        private AIDroneTraits _traits;
         private DroneTurret _turret;
 
-        private GameObject _closestObject;
-        private bool _hasTarget;
+        private Transform _target;
+        private Vector3 _lastTargetPosition;
+
+        private Vector3 _aimPosition;
 
         private void Awake()
         {
-            _objectDetector = GetComponentInChildren<ObjectDetector>();
+            _traits = GetComponent<AIDroneTraits>();
             _turret = GetComponent<DroneTurret>();
         }
 
-        private void Start()
+        /// <summary>
+        ///     Sets the target that the drone should aim at and engage.
+        /// </summary>
+        /// <param name="target"> The Transform of the target to engage. </param>
+        public void SetTarget(Transform target)
         {
-            StartCoroutine(UpdateTarget());
+            _target = target;
+            _lastTargetPosition = target.position;
+        }
+
+        /// <summary>
+        ///     Clears the current target. The drone will stop engaging any target.
+        /// </summary>
+        public void ClearTarget() => _target = null;
+
+        private void Update()
+        {
+            if (_target == null)
+            {
+                _target = null;
+                return;
+            }
+
+            _aimPosition = CalculateTrackedTargetPosition();
+            _turret.SetTarget(_aimPosition);
+            _lastTargetPosition = _target.position; // Update last known position
         }
 
         private void FixedUpdate()
         {
             if (!_engageTargets) return;
-            if (_hasTarget) _turret.RequestFire();
+            if (_target != null) _turret.RequestFire();
         }
 
-        private void Update()
+        // Track target based on AimTrackingAbility trait
+        // A higher AimTrackingAbility will lead to a more consistent prediction of the target's future position
+        // A lower AimTrackingAbility can still lead the target, but will be less accurate and less consistent between tracking or lagging behind
+        private Vector3 CalculateTrackedTargetPosition()
         {
-            // Only set target if it has been detected and exists
-            if (_closestObject != null)
-            {
-                _hasTarget = true;
-                _turret.SetTarget(_closestObject.transform.position);
-            }
-            else
-            {
-                _hasTarget = false;
-            }
+            if (_target == null) return _aimPosition; // No target, return last aim position
+
+            Vector3 currentTargetPosition = _target.position;
+            Vector3 targetVelocity = (currentTargetPosition - _lastTargetPosition) / Time.fixedDeltaTime;
+            targetVelocity = Vector3.ClampMagnitude(targetVelocity, 100f); // Cap velocity to avoid extreme leads on sudden teleports or very fast targets
+
+            float distanceToTarget = Vector3.Distance(transform.position, currentTargetPosition);
+
+            // Distance-scaled look-ahead time (tuned constants)
+            // Without projectile speed, assume a reasonable cap
+            float lookAhead = Mathf.Clamp(distanceToTarget / 40f, 0f, MaxLeadTime);
+
+            // Aim tracking ability
+            float trackAbility = _traits.AimTrackingAbility;
+
+            // Consistency from tracking ability
+            float randomLeadFactor = Mathf.Lerp(Random.Range(0, 2f), 1f, trackAbility); // More skill = more consistent lead factor
+            lookAhead *= randomLeadFactor; // Apply consistency factor to look-ahead time
+
+            // Predict a position based on target velocity and look-ahead time
+            Vector3 predictedPosition = currentTargetPosition + targetVelocity * lookAhead;
+
+            // Interpolate between current aim position and predicted position based on tracking ability
+            return Vector3.Lerp(_aimPosition, predictedPosition, trackAbility);
         }
 
-        private IEnumerator UpdateTarget()
+        private void OnDrawGizmosSelected()
         {
-            // Periodically update the closest target
-            WaitForSeconds wait = new(0.5f);
-            while (true)
-            {
-                _closestObject = _objectDetector.GetMostImportantDetectedObject();
-                yield return wait;
-            }
+            if (_target == null) return;
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, _aimPosition);
+            Gizmos.DrawSphere(_aimPosition, 0.2f);
         }
     }
 }

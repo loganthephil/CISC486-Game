@@ -1,22 +1,29 @@
-﻿using DroneStrikers.FSM;
+﻿using DroneStrikers.Events;
+using DroneStrikers.FSM;
 using DroneStrikers.Game.AI.States;
 using DroneStrikers.Game.Drone;
 using UnityEngine;
 
 namespace DroneStrikers.Game.AI
 {
-    [RequireComponent(typeof(DroneMovement))]
+    [RequireComponent(typeof(ObjectDetector))]
+    [RequireComponent(typeof(AINavigation))]
+    [RequireComponent(typeof(AIDroneTargetProvider))]
+    [RequireComponent(typeof(AIDroneTraits))]
     [RequireComponent(typeof(DroneInfo))]
-    public class AIDroneMovement : MonoBehaviour
+    [RequireComponent(typeof(LocalEvents))]
+    public class AIDroneBrain : MonoBehaviour
     {
-        private DroneMovement _droneMovement;
-        private ObjectDetector _outerObjectDetector;
+        private ObjectDetector _objectDetector;
         private AINavigation _navigation;
+        private AIDroneTargetProvider _targetProvider;
+        private AIDroneTraits _traits;
+
         private DroneInfo _droneInfo;
+        private LocalEvents _localEvents;
 
         private FiniteStateMachine _stateMachine;
 
-        // TODO: Prefer pursuing drones and higher-level objects over lower-level objects after a certain amount of experience
         // TODO: Add AI personality types (aggressive, passive, balanced, etc.). Choose one at random on spawn.
         // -- Aggressive: More likely to pursue drones earlier on, maybe takes more risks (like pursuing higher level drones)
         // -- Passive: More likely to flee from drones, even if they are around the same level, and just farm objects
@@ -24,10 +31,13 @@ namespace DroneStrikers.Game.AI
 
         private void Awake()
         {
-            _droneMovement = GetComponent<DroneMovement>();
-            _outerObjectDetector = GetComponentInChildren<ObjectDetector>();
+            _objectDetector = GetComponent<ObjectDetector>();
             _navigation = GetComponent<AINavigation>();
+            _targetProvider = GetComponent<AIDroneTargetProvider>();
+            _traits = GetComponent<AIDroneTraits>();
+
             _droneInfo = GetComponent<DroneInfo>();
+            _localEvents = GetComponent<LocalEvents>();
         }
 
         private void Start()
@@ -35,22 +45,19 @@ namespace DroneStrikers.Game.AI
             _stateMachine = new FiniteStateMachine(); // Initialize the state machine
 
             // -- Create States
-            AIDroneWanderState wanderState = new(_navigation, _outerObjectDetector);
-            AIDronePursueState pursueState = new(_navigation, _outerObjectDetector);
-            AIDroneFleeState fleeState = new(_navigation, _outerObjectDetector);
+            AIDroneWanderState wanderState = new(_navigation, _objectDetector, _targetProvider);
+            AIDronePursueState pursueState = new(_navigation, _objectDetector, _targetProvider, _traits, _localEvents);
+            AIDroneFleeState fleeState = new(_navigation, _objectDetector, _targetProvider);
 
             // -- Add Transitions
             // Any -> Flee - If a higher level drone is detected
-            // TODO: Flee if health is too low (<20-25%)?
             _stateMachine.AddAnyTransition(fleeState, new FuncPredicate(ShouldFlee));
-
-            // TODO: Add more nuance to deciding when to flee/pursue based on level/experience difference (maybe a range?), health, etc.
 
             // Wander -> Pursue - If any object is detected and no higher level drones are detected
             _stateMachine.AddTransition(wanderState, pursueState, new FuncPredicate(ShouldPursue));
 
             // Pursue -> Wander - No objects detected
-            _stateMachine.AddTransition(pursueState, wanderState, new FuncPredicate(() => !_outerObjectDetector.HasObjectInRange));
+            _stateMachine.AddTransition(pursueState, wanderState, new FuncPredicate(() => !_objectDetector.HasObjectInRange));
 
             // Flee -> Wander - If no drones of higher level are detected
             _stateMachine.AddTransition(fleeState, wanderState, new FuncPredicate(() => !ShouldFlee()));
@@ -59,9 +66,10 @@ namespace DroneStrikers.Game.AI
             _stateMachine.SetState(wanderState);
         }
 
-        private bool ShouldFlee() => _outerObjectDetector.DroneWithHighestLevel is not null && _outerObjectDetector.DroneWithHighestLevel.Level > _droneInfo.Level;
+        private bool ShouldFlee() => _droneInfo.HealthPercent < _traits.FleeHealthThreshold || ShouldFleeByLevel();
+        private bool ShouldFleeByLevel() => _objectDetector.HighestLevelDrone is not null && _objectDetector.HighestLevelDrone.Level > _droneInfo.Level * (1f + _traits.FleeLevelDifferenceThreshold);
 
-        private bool ShouldPursue() => _outerObjectDetector.HasObjectInRange && !ShouldFlee();
+        private bool ShouldPursue() => _objectDetector.HasObjectInRange && !ShouldFlee();
 
         private void Update()
         {

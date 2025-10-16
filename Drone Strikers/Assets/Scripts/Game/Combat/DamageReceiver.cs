@@ -13,6 +13,7 @@ namespace DroneStrikers.Game.Combat
     [RequireComponent(typeof(IHealth))]
     public class DamageReceiver : MonoBehaviour, IDamageable
     {
+        [Tooltip("Optional global event to raise when this object is destroyed.")]
         [SerializeField] private DamageContextEventSO _onDestroyedEvent;
 
         private IHealth _health;

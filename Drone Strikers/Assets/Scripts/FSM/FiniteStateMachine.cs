@@ -27,6 +27,11 @@ namespace DroneStrikers.FSM
         }
 
         /// <summary>
+        ///     Returns the type of the current state.
+        /// </summary>
+        public Type CurrentState => _currentNode?.State.GetType();
+
+        /// <summary>
         ///     Should be called once per update cycle.
         ///     Checks for valid transitions and runs the current state's update logic.
         /// </summary>

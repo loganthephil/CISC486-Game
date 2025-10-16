@@ -12,6 +12,7 @@ namespace DroneStrikers.Game.ObjectSpawning
         private void Awake()
         {
             _spawnCollider = GetComponentInChildren<Collider>();
+            if (_spawnCollider == null) Debug.LogError("SpawnWithinCollider requires a Collider component in its children to define the spawn area.", this);
         }
 
         /// <summary>
@@ -47,6 +48,13 @@ namespace DroneStrikers.Game.ObjectSpawning
         private static bool GetRandomFreePointInCollider(out Vector3 result, Collider spawnCollider, Bounds spawnObjectBounds, float buffer = 0, int checkedLayers = -1, int maxAttempts = 10)
         {
             Vector3 bufferedExtents = spawnObjectBounds.extents + new Vector3(buffer, buffer, buffer);
+
+            if (spawnCollider == null)
+            {
+                Debug.LogError("Spawn collider is null.");
+                result = Vector3.zero;
+                return false;
+            }
 
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {

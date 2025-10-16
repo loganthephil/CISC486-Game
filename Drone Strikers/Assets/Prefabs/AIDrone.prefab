@@ -40,8 +40,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8763781677960678377}
+  - component: {fileID: 6890320814131913314}
   - component: {fileID: 4498411802328793018}
   - component: {fileID: 7850206521120833902}
+  - component: {fileID: 8906538146749870625}
   - component: {fileID: 5260264127513065969}
   - component: {fileID: 8574624437403731315}
   - component: {fileID: 5451170167598884039}
@@ -58,7 +60,8 @@ GameObject:
   - component: {fileID: 3463105954110152146}
   - component: {fileID: 8363565953599786548}
   - component: {fileID: 8887975519440697924}
-  - component: {fileID: 6890320814131913314}
+  - component: {fileID: -8752237911014593516}
+  - component: {fileID: 5010920308575272897}
   m_Layer: 6
   m_Name: AIDrone
   m_TagString: Drone
@@ -82,10 +85,32 @@ Transform:
   - {fileID: 8053588551211952325}
   - {fileID: 2917294513694613669}
   - {fileID: 6981156619975086056}
-  - {fileID: 741574566392648353}
   - {fileID: 3666640745276707162}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &6890320814131913314
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4498411802328793018
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -125,6 +150,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0bcc43f87b247efaa16239a2773f267, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.AI.AIDroneMovement
+--- !u!114 &8906538146749870625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ed54a54e3045b88cade504b986786b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.AI.ObjectDetector
+  <DetectionRadius>k__BackingField: 15
+  _detectionIntervalFrames: 10
+  _detectionIntervalRandomness: 5
+  _detectionLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _maxDetectionsPerScan: 30
+  _valueWeight: 1
+  _healthWeight: 1.25
+  _distanceWeight: 1
+  _selfDroneInfo: {fileID: 8363565953599786548}
+  _droneValueDangerProvider: {fileID: -8752237911014593516}
+  _traits: {fileID: 5010920308575272897}
 --- !u!114 &5260264127513065969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,7 +203,6 @@ MonoBehaviour:
   _safetyBuffer: 0.5
   _maxTimeLookahead: 1.5
   _wallLookaheadDistance: 5
-  _avoidanceWeight: 1.5
   _wallAvoidanceWeight: 2
 --- !u!114 &8574624437403731315
 MonoBehaviour:
@@ -205,7 +254,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35ffcde720b342c4a945dfc6c6946883, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.TeamMember
-  _team: 2
+  _team: 0
 --- !u!114 &9055041432041393804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -303,7 +352,7 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 4712034791458101651, guid: dc4a9ada4c0acfc46993a15438178ad9, type: 3}
   _attackDefinition: {fileID: 11400000, guid: d119098f24511444b89a56a019b0c130, type: 2}
   _aimSpeedStat: {fileID: 11400000, guid: d11807f650e17ae4cbc9ab8facc28646, type: 2}
-  _fireCooldownStat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
+  _attackSpeedStat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
   _recoilStat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
 --- !u!114 &794553181151540361
 MonoBehaviour:
@@ -353,29 +402,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 394a6a19e70b469f89e094a58e3e2c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.TrackedObject
---- !u!136 &6890320814131913314
-CapsuleCollider:
+--- !u!114 &-8752237911014593516
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2074245953654827550}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bdf4e9f18834d6fa1042bcc4bf74cfd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.Combat.DroneValueDangerProvider
+--- !u!114 &5010920308575272897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2074245953654827550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e218fcac732641a09b2644d0aae2498f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.AI.AIDroneTraits
+  _skill: 0.5
+  _aggression: 0.5
 --- !u!1 &2694126388756049602
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,100 +607,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &6925508632764163133
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 741574566392648353}
-  - component: {fileID: 4165716762946327521}
-  - component: {fileID: 2462993204814797619}
-  - component: {fileID: 6714552109762576139}
-  m_Layer: 0
-  m_Name: Detector
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &741574566392648353
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6925508632764163133}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8763781677960678377}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &4165716762946327521
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6925508632764163133}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!65 &2462993204814797619
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6925508632764163133}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 20, y: 1, z: 20}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6714552109762576139
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6925508632764163133}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fe62fbb635f4bef95e15397e67c8036, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::DroneStrikers.Game.AI.ObjectDetector
 --- !u!1001 &2893369474014176639
 PrefabInstance:
   m_ObjectHideFlags: 0

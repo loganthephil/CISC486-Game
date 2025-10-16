@@ -38,5 +38,17 @@ namespace DroneStrikers.Core
         /// <param name="layer"> The layer to check for. </param>
         /// <returns> True if the LayerMask contains the layer, false otherwise. </returns>
         public static bool Contains(this LayerMask mask, int layer) => (mask & (1 << layer)) != 0;
+
+        /// <summary>
+        ///     If the float is zero, returns a small non-zero value to prevent division by zero errors.
+        ///     Otherwise, returns the float itself.
+        /// </summary>
+        /// <param name="value"> The value to check. </param>
+        /// <returns> The original value if non-zero, otherwise a small non-zero value. </returns>
+        public static float EnsureNonZero(this float value)
+        {
+            if (!value.IsNegligible()) return value;
+            return 0.0001f * Mathf.Sign(value); // Return a small value with the same sign as the original
+        }
     }
 }

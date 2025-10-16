@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events.EventSO;
+using DroneStrikers.Game.AI;
 using DroneStrikers.Game.Combat;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -18,13 +20,13 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
         [SerializeField] private int _maxDronesPerTeam = 5;
 
         [Header("References")]
-        [SerializeField] private SpawnWithinCollider _redTeamSpawner;
-        [SerializeField] private SpawnWithinCollider _blueTeamSpawner;
-        [SerializeField] private GameObject _playerDronePrefab;
-        [SerializeField] private GameObject _aiDronePrefab;
-        [SerializeField] private LayerMask _collisionLayers;
+        [SerializeField] [RequiredField] private SpawnWithinCollider _redTeamSpawner;
+        [SerializeField] [RequiredField] private SpawnWithinCollider _blueTeamSpawner;
+        [SerializeField] [RequiredField] private GameObject _playerDronePrefab;
+        [SerializeField] [RequiredField] private GameObject _aiDronePrefab;
+        [SerializeField] [RequiredField] private LayerMask _collisionLayers;
 
-        [SerializeField] private GameObjectEventSO _onPlayerSpawn;
+        [SerializeField] [RequiredField] private GameObjectEventSO _onPlayerSpawn;
 
         private readonly Dictionary<Team, HashSet<GameObject>> _spawnedDrones = new();
 
@@ -130,6 +132,9 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
             TeamMember teamMember = newDrone.GetComponent<TeamMember>();
             teamMember.Team = teamToSpawn;
 
+            // Set random traits for AI drones
+            if (prefab == _aiDronePrefab && newDrone.TryGetComponent(out AIDroneTraits traits)) traits.SetRandomTraits();
+
             // Track the spawned drone
             TrackedObject trackedObject = newDrone.GetComponent<TrackedObject>();
             if (trackedObject == null) throw new Exception("Spawned drone is missing a TrackedObject component");
@@ -160,5 +165,20 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
         }
 
         private static WaitForSeconds GetRandomWaitTime() => new(Random.Range(5f, 10f));
+
+        private void OnDestroy()
+        {
+            if (_spawnAICoroutine != null) StopCoroutine(_spawnAICoroutine);
+            if (_scanForEmptyTeamsCoroutine != null) StopCoroutine(_scanForEmptyTeamsCoroutine);
+
+            // Unsubscribe from all tracked objects to avoid memory leaks
+            foreach (HashSet<GameObject> teamDrones in _spawnedDrones.Values)
+            foreach (GameObject drone in teamDrones)
+            {
+                if (drone == null) continue;
+                TrackedObject trackedObject = drone.GetComponent<TrackedObject>();
+                if (trackedObject != null) trackedObject.OnDestroyed -= OnDroneDestroyed;
+            }
+        }
     }
 }
