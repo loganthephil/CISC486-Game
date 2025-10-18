@@ -9,8 +9,13 @@ using Random = UnityEngine.Random;
 
 namespace DroneStrikers.Game.AI
 {
+    [RequireComponent(typeof(AIDroneTraits))]
     public class ObjectDetector : MonoBehaviour
     {
+        // TODO: Add some randomness to which objects are prioritized to avoid all drones going for the same target
+
+        // TODO: If more friendly drones are nearby (including self) than enemy drones, be more likely to pursue them
+
         private struct Candidate
         {
             public GameObject GameObject;
@@ -30,7 +35,7 @@ namespace DroneStrikers.Game.AI
         [Tooltip("How much randomness (0-N exclusive, in frames) to potentially add to the detection interval to avoid all drones scanning on the same frame")]
         [SerializeField] private int _detectionIntervalRandomness = 5;
         [SerializeField] [RequiredField] private LayerMask _detectionLayerMask;
-        [SerializeField] private int _maxDetectionsPerScan = 20;
+        [SerializeField] private int _maxDetectionsPerScan = 30;
 
         [Header("Priority Weights")]
         [Tooltip("Contribution from normalized \"value\"")]
@@ -43,9 +48,9 @@ namespace DroneStrikers.Game.AI
         [SerializeField] private float _distanceWeight = 1f;
 
         [Header("References")]
-        [SerializeField] [RequiredField] private DroneInfo _selfDroneInfo;
+        [SerializeField] [RequiredField] private DroneInfoProvider _selfDroneInfoProvider;
         [SerializeField] [RequiredField] private DroneValueDangerProvider _droneValueDangerProvider; // For getting the danger level of this drone
-        [SerializeField] [RequiredField] private AIDroneTraits _traits;
+        private AIDroneTraits _traits;
         private Transform _transform;
 
         private bool _hasObjectInRange;
@@ -89,12 +94,12 @@ namespace DroneStrikers.Game.AI
             if (_mostImportantObjects.Count > 0) _mostImportantObjects.Pop();
         }
 
-        private DroneInfo _highestLevelDrone;
+        private DroneInfoProvider _highestLevelDrone;
         /// <summary>
         ///     The drone info of the highest level detected enemy drone, or null if none in range.
         ///     Can also be null if the object was destroyed this frame.
         /// </summary>
-        public DroneInfo HighestLevelDrone
+        public DroneInfoProvider HighestLevelDrone
         {
             get
             {
@@ -109,7 +114,9 @@ namespace DroneStrikers.Game.AI
 
         private void Awake()
         {
+            _traits = GetComponent<AIDroneTraits>();
             _transform = transform;
+
             _hits = new Collider[_maxDetectionsPerScan];
             _candidates = new List<Candidate>(_maxDetectionsPerScan);
         }
@@ -123,8 +130,6 @@ namespace DroneStrikers.Game.AI
             // Follow through with new scan
             Scan();
         }
-
-        // TODO: If more friendly drones are nearby (including self) than enemy drones, be more likely to pursue them
 
         private void Scan()
         {
@@ -141,7 +146,7 @@ namespace DroneStrikers.Game.AI
             float maxDangerRaw = 0f;
 
             int highestDroneLevel = -1;
-            DroneInfo highestLevelDrone = null;
+            DroneInfoProvider highestLevelDrone = null;
 
             float selfDangerLevel = _droneValueDangerProvider.DangerLevel;
 
@@ -154,7 +159,7 @@ namespace DroneStrikers.Game.AI
 
                 // Ignore same team objects
                 TeamMember otherTeamMember = hitObject.GetComponent<TeamMember>();
-                if (otherTeamMember is not null && otherTeamMember.Team == _selfDroneInfo.Team) continue;
+                if (otherTeamMember is not null && otherTeamMember.Team == _selfDroneInfoProvider.Team) continue;
 
                 // -- Features
                 // Distance (normalized 0-1 from drone to edge of detection radius)
@@ -162,8 +167,8 @@ namespace DroneStrikers.Game.AI
                 float normalizedDistance = Mathf.InverseLerp(0f, DetectionRadius, distance); // 0 = very close, 1 = at edge of detection radius
 
                 // Is a drone
-                DroneInfo droneInfo = hitObject.GetComponent<DroneInfo>();
-                bool isDrone = droneInfo is not null;
+                DroneInfoProvider droneInfoProvider = hitObject.GetComponent<DroneInfoProvider>();
+                bool isDrone = droneInfoProvider is not null;
 
                 // Value & Danger (raw unnormalized)
                 IValueDangerProvider valueDangerProvider = hitObject.GetComponent<IValueDangerProvider>();
@@ -196,10 +201,10 @@ namespace DroneStrikers.Game.AI
                 });
 
                 // Check if this drone is higher level (for fleeing)
-                if (isDrone && droneInfo.Level > highestDroneLevel)
+                if (isDrone && droneInfoProvider.Level > highestDroneLevel)
                 {
-                    highestDroneLevel = droneInfo.Level;
-                    highestLevelDrone = droneInfo;
+                    highestDroneLevel = droneInfoProvider.Level;
+                    highestLevelDrone = droneInfoProvider;
                 }
             }
 

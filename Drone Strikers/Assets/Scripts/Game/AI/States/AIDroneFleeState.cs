@@ -9,9 +9,9 @@ namespace DroneStrikers.Game.AI.States
 
         public override void Update()
         {
-            DroneInfo highestThreat = _objectDetector.HighestLevelDrone;
+            DroneInfoProvider highestThreat = _objectDetector.HighestLevelDrone;
 
-            if (highestThreat is null) return; // No threats detected, should not be in this state
+            if (highestThreat == null) return; // No threats detected, likely that highest threat was destroyed, otherwise shouldn't be in flee state
 
             // TODO: Weight flee direction towards team spawn point if its not too close to the threat
 

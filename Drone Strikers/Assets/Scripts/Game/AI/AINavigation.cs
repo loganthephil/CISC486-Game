@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using DroneStrikers.Core;
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Game.Combat;
 using DroneStrikers.Game.Drone;
 using UnityEngine;
 
 namespace DroneStrikers.Game.AI
 {
-    [RequireComponent(typeof(DroneMovement))]
     [RequireComponent(typeof(AIDroneTraits))]
     public class AINavigation : MonoBehaviour
     {
@@ -40,8 +40,8 @@ namespace DroneStrikers.Game.AI
         [SerializeField] private LayerMask _obstacleMask; // Layers considered as obstacles
         [SerializeField] private LayerMask _attackLayer; // Attack layer
         [SerializeField] private LayerMask _wallLayer; // The layer that walls are on
-        [SerializeField] private float _perceptionRadius = 15f; // How far to look for obstacles
-        [SerializeField] private int _maxPerceivedObstacles = 10; // Maximum potential obstacles to scan per update
+        [SerializeField] private float _perceptionRadius = 10f; // How far to look for obstacles
+        [SerializeField] private int _maxPerceivedObstacles = 20; // Maximum potential obstacles to scan per update
         [SerializeField] private int _maxThreats = 3; // Maximum number of threats to consider for avoidance
 
         [Header("Avoidance")]
@@ -51,13 +51,14 @@ namespace DroneStrikers.Game.AI
         [SerializeField] private float _wallLookaheadDistance = 5.0f; // Distance to look ahead for walls
 
         [Header("Weights")]
-        // [SerializeField] private float _avoidanceWeight = 1.5f; // Strength of avoidance steering
+        [Tooltip("How much should wall avoidance influence steering compared to other avoidance?")]
         [SerializeField] private float _wallAvoidanceWeight = 2.0f; // Strength of wall avoidance steering
 
-        private DroneMovement _droneMovement;
+        [Header("References")]
+        [SerializeField] [RequiredField] private DroneMovement _droneMovement;
+        [SerializeField] [RequiredField] private Rigidbody _rigidbody;
+        [SerializeField] [RequiredField] private DroneInfoProvider _droneInfoProvider;
         private AIDroneTraits _traits;
-        private Rigidbody _rigidbody;
-        private DroneInfo _droneInfo;
 
         // -- Desired Movement --
         private Vector3 _desiredDirection = Vector3.zero;
@@ -83,10 +84,7 @@ namespace DroneStrikers.Game.AI
 
         private void Awake()
         {
-            _droneMovement = GetComponent<DroneMovement>();
             _traits = GetComponent<AIDroneTraits>();
-            _rigidbody = GetComponent<Rigidbody>();
-            _droneInfo = GetComponent<DroneInfo>();
         }
 
         private void Start()
@@ -226,7 +224,7 @@ namespace DroneStrikers.Game.AI
                 if (_attackLayer.Contains(hit.gameObject.layer))
                 {
                     TeamMember teamMemberOfAttack = hit.GetComponent<TeamMember>();
-                    if (teamMemberOfAttack != null && teamMemberOfAttack.Team == _droneInfo.Team) continue; // Ignore attacks from same team
+                    if (teamMemberOfAttack != null && teamMemberOfAttack.Team == _droneInfoProvider.Team) continue; // Ignore attacks from same team
                 }
 
                 Vector3 otherPosition = ClosestPointOrCenter(hit, transform.position);
@@ -318,9 +316,12 @@ namespace DroneStrikers.Game.AI
             // If not moving, but threatened, move out of the way
             if (steeredDirection.sqrMagnitude.IsNegligible() && !avoidanceVector.sqrMagnitude.IsNegligible()) steeredDirection = avoidanceVector.normalized;
 
-            // For debugging purposes. Multiply by 2 to make more visible
+#if UNITY_EDITOR
+            // For debugging purposes, save avoidance and steering vectors
+            // Multiply by 2 to make more visible
             _debugAvoidanceVector = 2 * avoidanceVector;
             _debugSteeringVector = 2 * steeredDirection;
+#endif
 
             return steeredDirection.Flatten();
         }

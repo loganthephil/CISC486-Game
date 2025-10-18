@@ -63,7 +63,7 @@ GameObject:
   - component: {fileID: -8752237911014593516}
   - component: {fileID: 5010920308575272897}
   m_Layer: 6
-  m_Name: AIDrone
+  m_Name: 'AIDrone [Deprecated]'
   m_TagString: Drone
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 2654018971681635095}
   - component: {fileID: 4463306539971226845}
   m_Layer: 0
-  m_Name: PlayerTurret
+  m_Name: DroneTurret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

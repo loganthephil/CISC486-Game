@@ -1,20 +1,19 @@
-﻿using DroneStrikers.Game.Drone;
+﻿using DroneStrikers.Core.Editor;
+using DroneStrikers.Game.Drone;
 using UnityEngine;
 
 namespace DroneStrikers.Game.AI
 {
     [RequireComponent(typeof(AIDroneTraits))]
-    [RequireComponent(typeof(DroneTurret))]
     public class AIDroneTargetProvider : MonoBehaviour
     {
-        // TODO: Lead shots based on target velocity (base on skill level of AI drone)
-
         private const float MaxLeadTime = 0.75f; // Max time in the future to lead shots (in seconds)
 
         [SerializeField] private bool _engageTargets = true;
 
+        [Header("References")]
+        [SerializeField] [RequiredField] private DroneTurret _turret;
         private AIDroneTraits _traits;
-        private DroneTurret _turret;
 
         private Transform _target;
         private Vector3 _lastTargetPosition;
@@ -24,7 +23,6 @@ namespace DroneStrikers.Game.AI
         private void Awake()
         {
             _traits = GetComponent<AIDroneTraits>();
-            _turret = GetComponent<DroneTurret>();
         }
 
         /// <summary>

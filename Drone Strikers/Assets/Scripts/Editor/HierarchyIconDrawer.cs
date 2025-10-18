@@ -6,6 +6,7 @@ using System.Reflection;
 using DroneStrikers.Core.Editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace DroneStrikers.Editor
 {
@@ -74,6 +75,8 @@ namespace DroneStrikers.Editor
                     return true;
                 case IEnumerable enumerable:
                     return enumerable.Cast<object>().Any(item => item == null);
+                case InputActionReference ar when ar.Equals(null):
+                    return true;
                 default:
                     return false;
             }

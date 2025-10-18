@@ -8,6 +8,7 @@ namespace DroneStrikers.Game.Player
     public class KilledByCamera : MonoBehaviour
     {
         private CinemachineCamera _cinemachineCamera;
+        private GameObject _followingPlayerObject;
 
         private void Awake()
         {
@@ -20,6 +21,7 @@ namespace DroneStrikers.Game.Player
         public void OnPlayerSpawned(GameObject player)
         {
             _cinemachineCamera.Target.TrackingTarget = player.transform; // Follow the player
+            _followingPlayerObject = player;
         }
 
         /// <summary>
@@ -27,7 +29,9 @@ namespace DroneStrikers.Game.Player
         /// </summary>
         public void OnPlayerDeath(DamageContext ctx)
         {
+            if (ctx.Receiver != _followingPlayerObject) return; // Only respond if the drone that died is the player drone being followed
             if (ctx.Instigator == null) return; // If no instigator or it doesn't exist, do nothing
+
             Transform instigatorTransform = ctx.Instigator.transform;
             _cinemachineCamera.Target.TrackingTarget = instigatorTransform; // Follow the instigator
         }

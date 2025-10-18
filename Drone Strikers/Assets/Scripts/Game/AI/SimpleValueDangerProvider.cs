@@ -8,7 +8,7 @@ namespace DroneStrikers.Game.AI
         private IExperienceProvider _experienceProvider;
         public float BaseValue => _experienceProvider.ExperienceOnDestroy;
 
-        public float DangerLevel { get; }
+        [field: SerializeField] public float DangerLevel { get; private set; }
 
         private void Awake()
         {

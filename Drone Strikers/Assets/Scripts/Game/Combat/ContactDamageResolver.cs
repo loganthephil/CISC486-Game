@@ -24,34 +24,41 @@ namespace DroneStrikers.Game.Combat
             DamageSource = GetComponent<IDamageSource>();
             Damageable = GetComponent<IDamageable>();
 
-            if (DamageSource == null && Damageable == null) Debug.LogWarning($"ContactDamageResolver on {gameObject.name} has no IDamageSource or IDamageable component.", this);
+            if (DamageSource is null && Damageable is null) Debug.LogWarning($"ContactDamageResolver on {gameObject.name} has no IDamageSource or IDamageable component.", this);
         }
 
-        private void HandleCollision(GameObject other)
+        private void HandleCollision(GameObject otherObject)
         {
-            if (other == null) return; // Safety check
+            if (otherObject == null) return; // Safety check
 
             // To reduce unnecessary GetComponent calls, handle collision for both object in the same place
-            if (gameObject.GetInstanceID() > other.GetInstanceID()) return; // Only run the following code for one of the two colliding objects
+            if (gameObject.GetInstanceID() > otherObject.GetInstanceID()) return; // Only run the following code for one of the two colliding objects
 
-            ContactDamageResolver otherDamageResolver = other.GetComponent<ContactDamageResolver>();
+            ContactDamageResolver otherDamageResolver = otherObject.GetComponent<ContactDamageResolver>();
             if (otherDamageResolver == null) return; // No resolver
             if (TeamMember.Team == otherDamageResolver.TeamMember.Team) return; // Same team
 
+            // Need to cast interfaces to Object since an interface won't perform Unity null checks correctly
+            // Don't need to cast the interfaces on 'this' since they can only be null if they were missing on Awake,
+            // and never if this object was destroyed (this script wouldn't be running then)
+
+            GameObject thisObject = gameObject;
+
             // This object -> Other object
-            if (DamageSource != null && otherDamageResolver.Damageable != null)
+            if (DamageSource is not null && (Object)otherDamageResolver.Damageable != null)
             {
                 GameObject instigator = DamageSource.InstigatorContextReceiver?.gameObject ?? gameObject;
-                DamageContext damageContext = new(DamageSource.ContactDamage, gameObject, TeamMember.Team, instigator, DamageSource.InstigatorContextReceiver);
+                DamageContext damageContext = new(thisObject, instigator, otherObject, DamageSource.ContactDamage, TeamMember.Team, DamageSource.InstigatorContextReceiver);
                 otherDamageResolver.Damageable.TakeDamage(damageContext);
             }
 
             // Other object -> This object
-            if (otherDamageResolver.DamageSource != null && Damageable != null)
+            if ((Object)otherDamageResolver.DamageSource != null && Damageable is not null)
             {
                 IDamageSource otherDamageSource = otherDamageResolver.DamageSource;
-                GameObject instigator = otherDamageSource.InstigatorContextReceiver != null ? otherDamageSource.InstigatorContextReceiver.gameObject : other; // TODO: Scuffed, remove gameObject property from IDestructionContextReceiver and find a better way to get instigator
-                DamageContext damageContext = new(otherDamageSource.ContactDamage, other, otherDamageResolver.TeamMember.Team, instigator, otherDamageSource.InstigatorContextReceiver);
+                GameObject instigator = (Object)otherDamageSource.InstigatorContextReceiver != null ? otherDamageSource.InstigatorContextReceiver.gameObject : otherObject; // TODO: Scuffed, remove gameObject property from IDestructionContextReceiver and find a better way to get instigator
+                Team otherTeam = otherDamageResolver.TeamMember.Team;
+                DamageContext damageContext = new(otherObject, instigator, thisObject, otherDamageSource.ContactDamage, otherTeam, otherDamageSource.InstigatorContextReceiver);
                 Damageable.TakeDamage(damageContext);
             }
         }

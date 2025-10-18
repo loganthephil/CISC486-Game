@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Events;
 using DroneStrikers.Game.Drone;
 using DroneStrikers.Game.Upgrades;
@@ -7,22 +8,15 @@ using UnityEngine;
 
 namespace DroneStrikers.Game.AI
 {
-    [RequireComponent(typeof(DroneUpgrader))]
     public class AIUpgradeSelection : MonoBehaviour
     {
+        [field: SerializeField] [field: RequiredField]
         public DroneUpgrader DroneUpgrader { get; private set; }
-
-        private LocalEvents _localEvents;
+        [SerializeField] [RequiredField] private LocalEvents _localEvents;
 
         private int _remainingUpgrades;
 
         private Coroutine _currentUpgradeSelectionCoroutine;
-
-        private void Awake()
-        {
-            DroneUpgrader = GetComponent<DroneUpgrader>();
-            _localEvents = GetComponent<LocalEvents>();
-        }
 
         private void OnEnable() => _localEvents.Subscribe(DroneEvents.UpgradePointGained, OnDroneUpgradePointGained);
         private void OnDisable() => _localEvents.Unsubscribe(DroneEvents.UpgradePointGained, OnDroneUpgradePointGained);

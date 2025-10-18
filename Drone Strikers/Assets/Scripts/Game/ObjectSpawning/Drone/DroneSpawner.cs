@@ -7,6 +7,7 @@ using DroneStrikers.Core.Types;
 using DroneStrikers.Events.EventSO;
 using DroneStrikers.Game.AI;
 using DroneStrikers.Game.Combat;
+using DroneStrikers.Game.Drone;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -22,8 +23,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
         [Header("References")]
         [SerializeField] [RequiredField] private SpawnWithinCollider _redTeamSpawner;
         [SerializeField] [RequiredField] private SpawnWithinCollider _blueTeamSpawner;
-        [SerializeField] [RequiredField] private GameObject _playerDronePrefab;
-        [SerializeField] [RequiredField] private GameObject _aiDronePrefab;
+        [SerializeField] [RequiredField] private GameObject _dronePrefab;
         [SerializeField] [RequiredField] private LayerMask _collisionLayers;
 
         [SerializeField] [RequiredField] private GameObjectEventSO _onPlayerSpawn;
@@ -35,7 +35,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
 
         public GameObject SpawnPlayerDrone(Team team)
         {
-            GameObject newPlayerDrone = SpawnDroneOnTeam(_playerDronePrefab, team);
+            GameObject newPlayerDrone = SpawnDroneOnTeam(_dronePrefab, team, DroneControllerType.Player);
             if (newPlayerDrone != null) _onPlayerSpawn.Raise(newPlayerDrone);
             return newPlayerDrone;
         }
@@ -70,7 +70,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
                 Team[] teamsNotFull = GetTeamsNotFull();
                 Team teamToSpawn = teamsNotFull[Random.Range(0, teamsNotFull.Length)];
 
-                SpawnDroneOnTeam(_aiDronePrefab, teamToSpawn);
+                SpawnDroneOnTeam(_dronePrefab, teamToSpawn);
 
                 // Wait for a variable amount of time before spawning the next drone
                 yield return GetRandomWaitTime();
@@ -101,7 +101,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
             _scanForEmptyTeamsCoroutine = null; // Clear the reference to the scanning coroutine
         }
 
-        private GameObject SpawnDroneOnTeam(GameObject prefab, Team teamToSpawn)
+        private GameObject SpawnDroneOnTeam(GameObject prefab, Team teamToSpawn, DroneControllerType controllerType = DroneControllerType.AI)
         {
             // Spawn the drone at the appropriate spawner
             GameObject newDrone;
@@ -125,6 +125,11 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
                 return null;
             }
 
+            // Enable the appropriate controller
+            DroneControllerSelector controllerSelector = newDrone.GetComponent<DroneControllerSelector>();
+            if (controllerSelector == null) throw new Exception("Spawned drone is missing a DroneControllerSelector component");
+            controllerSelector.SetControllerType(controllerType);
+
             // Add the drone to the appropriate team set
             _spawnedDrones[teamToSpawn].Add(newDrone);
 
@@ -133,7 +138,9 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
             teamMember.Team = teamToSpawn;
 
             // Set random traits for AI drones
-            if (prefab == _aiDronePrefab && newDrone.TryGetComponent(out AIDroneTraits traits)) traits.SetRandomTraits();
+            // TODO: Come up with a better way to do this. Especially later if I want to make it so AI's remain a consistent "individual" across spawns.
+            AIDroneTraits aiTraits = newDrone.GetComponentInChildren<AIDroneTraits>();
+            if (aiTraits != null) aiTraits.SetRandomTraits();
 
             // Track the spawned drone
             TrackedObject trackedObject = newDrone.GetComponent<TrackedObject>();

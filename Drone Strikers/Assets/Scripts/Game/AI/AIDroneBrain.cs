@@ -1,4 +1,5 @@
-﻿using DroneStrikers.Events;
+﻿using DroneStrikers.Core.Editor;
+using DroneStrikers.Events;
 using DroneStrikers.FSM;
 using DroneStrikers.Game.AI.States;
 using DroneStrikers.Game.Drone;
@@ -10,24 +11,21 @@ namespace DroneStrikers.Game.AI
     [RequireComponent(typeof(AINavigation))]
     [RequireComponent(typeof(AIDroneTargetProvider))]
     [RequireComponent(typeof(AIDroneTraits))]
-    [RequireComponent(typeof(DroneInfo))]
-    [RequireComponent(typeof(LocalEvents))]
     public class AIDroneBrain : MonoBehaviour
     {
+        [SerializeField] [RequiredField] private DroneInfoProvider _droneInfoProvider;
+        [SerializeField] [RequiredField] private LocalEvents _localEvents;
+
         private ObjectDetector _objectDetector;
         private AINavigation _navigation;
         private AIDroneTargetProvider _targetProvider;
         private AIDroneTraits _traits;
 
-        private DroneInfo _droneInfo;
-        private LocalEvents _localEvents;
-
         private FiniteStateMachine _stateMachine;
 
-        // TODO: Add AI personality types (aggressive, passive, balanced, etc.). Choose one at random on spawn.
-        // -- Aggressive: More likely to pursue drones earlier on, maybe takes more risks (like pursuing higher level drones)
-        // -- Passive: More likely to flee from drones, even if they are around the same level, and just farm objects
-        // -- Balanced: Somewhere in between
+        // TODO: Fix AI drones getting stuck on walls due to high recoil.
+        // Idea: Maybe see if shooting negatively impacts drones direction,
+        // and if so, intelligently balance shooting and pausing shooting to move back to target.
 
         private void Awake()
         {
@@ -35,9 +33,6 @@ namespace DroneStrikers.Game.AI
             _navigation = GetComponent<AINavigation>();
             _targetProvider = GetComponent<AIDroneTargetProvider>();
             _traits = GetComponent<AIDroneTraits>();
-
-            _droneInfo = GetComponent<DroneInfo>();
-            _localEvents = GetComponent<LocalEvents>();
         }
 
         private void Start()
@@ -66,8 +61,8 @@ namespace DroneStrikers.Game.AI
             _stateMachine.SetState(wanderState);
         }
 
-        private bool ShouldFlee() => _droneInfo.HealthPercent < _traits.FleeHealthThreshold || ShouldFleeByLevel();
-        private bool ShouldFleeByLevel() => _objectDetector.HighestLevelDrone is not null && _objectDetector.HighestLevelDrone.Level > _droneInfo.Level * (1f + _traits.FleeLevelDifferenceThreshold);
+        private bool ShouldFlee() => _droneInfoProvider.HealthPercent < _traits.FleeHealthThreshold || ShouldFleeByLevel();
+        private bool ShouldFleeByLevel() => _objectDetector.HighestLevelDrone is not null && _objectDetector.HighestLevelDrone.Level > _droneInfoProvider.Level * (1f + _traits.FleeLevelDifferenceThreshold);
 
         private bool ShouldPursue() => _objectDetector.HasObjectInRange && !ShouldFlee();
 

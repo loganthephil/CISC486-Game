@@ -1,4 +1,5 @@
-﻿using DroneStrikers.Events;
+﻿using DroneStrikers.Core.Editor;
+using DroneStrikers.Events;
 using DroneStrikers.FSM;
 using DroneStrikers.Game.Drone;
 using DroneStrikers.Game.Player.UpgradeSelectionStates;
@@ -7,10 +8,11 @@ using UnityEngine;
 
 namespace DroneStrikers.Game.Player
 {
-    [RequireComponent(typeof(DroneUpgrader))]
     public class PlayerUpgradeSelection : MonoBehaviour
     {
+        [field: SerializeField] [field: RequiredField]
         public DroneUpgrader DroneUpgrader { get; private set; }
+        [SerializeField] [RequiredField] private LocalEvents _localEvents;
 
         [SerializeField] private Transform _upgradeSelectionUIParent;
         public Transform UpgradeSelectionUIParent => _upgradeSelectionUIParent;
@@ -19,17 +21,8 @@ namespace DroneStrikers.Game.Player
         public GameObject UpgradeSelectionUIPrefab => _upgradeSelectionUIPrefab;
 
         public UpgradeTreeSO SelectedTree { get; set; }
-
-        private LocalEvents _localEvents;
         private FiniteStateMachine _stateMachine;
-
         private int _remainingUpgrades;
-
-        private void Awake()
-        {
-            DroneUpgrader = GetComponent<DroneUpgrader>();
-            _localEvents = GetComponent<LocalEvents>();
-        }
 
         private void Start()
         {
