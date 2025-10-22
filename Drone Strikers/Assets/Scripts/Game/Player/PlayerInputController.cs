@@ -11,6 +11,8 @@ namespace DroneStrikers.Game.Player
         [SerializeField] [RequiredField] private DroneMovement _droneMovement;
         [SerializeField] [RequiredField] private InputActionReference _mousePositionInputReference;
 
+        [SerializeField] private float _mouseRayYLevel = 1.1f;
+
         [Header("Optional")]
         [Tooltip("Camera used to convert mouse position to world point. If not set, will use Camera.main.")]
         [SerializeField]
@@ -39,7 +41,7 @@ namespace DroneStrikers.Game.Player
         public void OnMovement(InputAction.CallbackContext context)
         {
             Vector3 rawMovement = context.ReadValue<Vector2>();
-            Vector3 direction = rawMovement.x * transform.right + rawMovement.y * transform.forward;
+            Vector3 direction = rawMovement.x * Vector3.right + rawMovement.y * Vector3.forward;
             _droneMovement.SetMovementDirection(direction);
         }
 
@@ -53,14 +55,15 @@ namespace DroneStrikers.Game.Player
         {
             // Cast a ray from the camera through the mouse position that intersects with a horizontal plane at y=0
             Ray ray = _camera.ScreenPointToRay(_mousePositionInputReference.action.ReadValue<Vector2>());
-            Plane plane = new(Vector3.up, Vector3.zero); // Horizontal plane at y=0
 
-            Vector3 point = Vector3.zero;
+            // Horizontal plane at y = _mouseRayYLevel
+            Vector3 targetPoint = new(0f, _mouseRayYLevel, 0f);
+            Plane plane = new(Vector3.up, targetPoint);
 
             // Cast a ray and get the intersection point with the plane
             return plane.Raycast(ray, out float enter)
                 ? ray.GetPoint(enter) // Get the intersection point
-                : point; // If no intersection, return zero vector (this shouldn't happen)
+                : Vector3.zero; // If no intersection, return zero vector (this shouldn't happen)
         }
     }
 }

@@ -1,4 +1,5 @@
 using DroneStrikers.Core;
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Game.Combat;
 using DroneStrikers.Game.Stats;
@@ -10,10 +11,11 @@ namespace DroneStrikers.Game.Drone
     [RequireComponent(typeof(TeamMember))]
     public class DroneTurret : MonoBehaviour
     {
-        [SerializeField] private Transform _turretTransform;
-        [Tooltip("The point from which projectiles are fired. If null, the turret's own transform is used.")]
-        [SerializeField] private Transform _firePoint;
-        [SerializeField] private GameObject _projectilePrefab;
+        [Tooltip("The transform that will be rotated to aim at the target.")]
+        [SerializeField] [RequiredField] private Transform _rotatingTransform;
+        [Tooltip("The point from which projectiles are fired.")]
+        [SerializeField] [RequiredField] private Transform _firePoint;
+        [SerializeField] [RequiredField] private GameObject _projectilePrefab;
 
         [Header("Attack")]
         [SerializeField] private AttackDefinitionSO _attackDefinition;
@@ -51,14 +53,14 @@ namespace DroneStrikers.Game.Drone
         private void UpdateAim()
         {
             // Rotate transform Y towards target point
-            Vector3 targetDirection = _targetPosition - _turretTransform.position;
+            Vector3 targetDirection = _targetPosition - _rotatingTransform.position;
             targetDirection.y = 0; // Keep only horizontal direction
 
             // Only rotate if the difference is significant
             if (targetDirection.sqrMagnitude <= 0.001f) return;
 
             Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
-            _turretTransform.rotation = Quaternion.Slerp(_turretTransform.rotation, targetRotation, _ownerStats.GetStatValue(_aimSpeedStat) * Time.deltaTime);
+            _rotatingTransform.rotation = Quaternion.Slerp(_rotatingTransform.rotation, targetRotation, _ownerStats.GetStatValue(_aimSpeedStat) * Time.deltaTime);
         }
 
         private void UpdateFire()

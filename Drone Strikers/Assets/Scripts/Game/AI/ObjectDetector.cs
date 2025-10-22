@@ -45,7 +45,7 @@ namespace DroneStrikers.Game.AI
         [Tooltip("Favour lower-health objects")]
         [SerializeField] private float _healthWeight = 1.25f;
         [Tooltip("Penalty from normalized distance")]
-        [SerializeField] private float _distanceWeight = 1f;
+        [SerializeField] private float _distanceWeight = 2f;
 
         [Header("References")]
         [SerializeField] [RequiredField] private DroneInfoProvider _selfDroneInfoProvider;

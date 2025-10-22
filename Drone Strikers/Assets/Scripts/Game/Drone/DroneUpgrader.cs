@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
@@ -12,23 +13,13 @@ namespace DroneStrikers.Game.Drone
     [RequireComponent(typeof(DroneStats))]
     public class DroneUpgrader : MonoBehaviour, IExperienceProvider, IDestructionContextReceiver
     {
-        private static readonly Dictionary<int, float> ExperienceToNextLevelMap = new(); // Cache required experience since we call this a lot
-
-        public static float ExperienceToLevel(int level)
-        {
-            if (!ExperienceToNextLevelMap.ContainsKey(level))
-                ExperienceToNextLevelMap[level] = 10f * Mathf.Pow(level - 1, 1.5f); // Tentative formula for required experience
-            return ExperienceToNextLevelMap[level];
-        }
+        private static readonly Dictionary<int, float> ExperienceToNextLevelMap = new(); // Cache required experience since we call it a lot
 
         // Levels at which the player gains an upgrade point
-        public static readonly HashSet<int> UpgradePointLevels = new()
+        private static readonly HashSet<int> UpgradePointLevels = new()
         {
-            5, 10, 15, 20, 25, 30, 40, 50
+            5, 10, 15, 20, 25, 30, 40, 50, 75
         };
-
-        private DroneStats _droneStats;
-        private LocalEvents _localEvents;
 
         public int Level { get; private set; } = 1;
         public float Experience { get; private set; }
@@ -37,10 +28,16 @@ namespace DroneStrikers.Game.Drone
 
         public float ExperienceOnDestroy => Experience * 0.75f; // Provide experience based on level (temporary formula)
 
-        [SerializeField] private UpgradeTreeCollectionSO _upgradeTreeCollectionSO;
-
         private List<UpgradeTreeSO> _upgradeTrees = new();
         public IReadOnlyList<UpgradeTreeSO> UpgradeTrees => _upgradeTrees;
+
+        [SerializeField] [RequiredField] private UpgradeTreeCollectionSO _upgradeTreeCollectionSO;
+        [SerializeField] [RequiredField] private MeshFilter _turretMeshFilter;
+        [SerializeField] [RequiredField] private MeshFilter _bodyMeshFilter;
+        [SerializeField] [RequiredField] private MeshFilter _movementMeshFilter;
+
+        private DroneStats _droneStats;
+        private LocalEvents _localEvents;
 
         private readonly Dictionary<UpgradeTreeSO, UpgradeSO> _lastUpgradeInTrees = new();
 
@@ -95,6 +92,22 @@ namespace DroneStrikers.Game.Drone
             foreach (StatUpgradeModifier modifier in upgrade.Modifiers)
                 _droneStats.AddModifier(modifier.Stat, modifier.ModType, modifier.Value, upgrade);
 
+            // Update visuals of applicable mesh filter
+            switch (upgrade.UpgradeType)
+            {
+                case UpgradeType.Turret:
+                    if (upgrade.Mesh is not null) _turretMeshFilter.mesh = upgrade.Mesh;
+                    break;
+                case UpgradeType.Body:
+                    if (upgrade.Mesh is not null) _bodyMeshFilter.mesh = upgrade.Mesh;
+                    break;
+                case UpgradeType.Movement:
+                    if (upgrade.Mesh is not null) _movementMeshFilter.mesh = upgrade.Mesh;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             // Consume an upgrade point and return true
             AvailableUpgradePoints--;
             return true;
@@ -130,6 +143,13 @@ namespace DroneStrikers.Game.Drone
         /// </summary>
         /// <returns> A list of upgrade trees that have available upgrades. </returns>
         public List<UpgradeTreeSO> GetTreesWithAvailableUpgrades() => _upgradeTrees.Where(HasAvailableUpgradesInTree).ToList();
+
+        private static float ExperienceToLevel(int level)
+        {
+            if (!ExperienceToNextLevelMap.ContainsKey(level))
+                ExperienceToNextLevelMap[level] = 10f * Mathf.Pow(level - 1, 1.5f); // Tentative formula for required experience
+            return ExperienceToNextLevelMap[level];
+        }
 
         /// <summary>
         ///     Adds experience to the drone. Levels up if enough experience is gained.

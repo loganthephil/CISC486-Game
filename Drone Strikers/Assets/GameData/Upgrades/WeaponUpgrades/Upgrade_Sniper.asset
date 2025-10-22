@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Upgrade_Sniper
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
   _upgradeName: Sniper
+  _upgradeType: 0
   _modifiers:
   - Stat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
     Value: 0.6
@@ -33,3 +34,4 @@ MonoBehaviour:
     Value: 0.1
     ModType: 1
   _nextUpgrades: []
+  _mesh: {fileID: 8200138750256642502, guid: 1325e5798fda2434a95ed3171ed3dbb5, type: 3}

@@ -11,7 +11,7 @@ namespace DroneStrikers.Game.AI.States
         private const float MinDistanceToTarget = 3f;
         private const float MaxDistanceToTarget = 10f;
 
-        private const float GiveUpPatienceTime = 10f; // Time in seconds before giving up pursuit of a target if no meaningful progress is made in destroying it.
+        private const float GiveUpPatienceTime = 15f; // Time in seconds before giving up pursuit of a target if no meaningful progress is made in destroying it.
         private const float GiveUpBufferTime = 2f; // Time after dealing *meaningful* damage before ticking up the "give up meter"
         private const float GiveUpRestoreRate = 0.5f; // Rate at which the "give up meter" restores per second when making meaningful progress
         private const float GiveUpProgressThreshold = 0.05f; // Meaningful damage threshold (e.g. 10% of target's max health)
@@ -104,6 +104,8 @@ namespace DroneStrikers.Game.AI.States
             if (_timeSpentMakingNoProgress >= GiveUpPatienceTime)
                 // TODO: Will probably want to flee for a bit, then return to wandering/pursuing
                 GiveUpOnCurrentTarget();
+
+            // Debug.Log("Give Up Meter: " + _timeSpentMakingNoProgress.ToString("F2") + " / " + GiveUpPatienceTime + " | Time since last meaningful progress: " + _timeSinceLastMeaningfulProgress.ToString("F2"));
         }
 
         private void CheckResetGaveUpTarget()

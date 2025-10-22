@@ -9,6 +9,9 @@ namespace DroneStrikers.Game.Upgrades
         [SerializeField] private string _upgradeName;
         public string UpgradeName => _upgradeName;
 
+        [SerializeField] private UpgradeType _upgradeType;
+        public UpgradeType UpgradeType => _upgradeType;
+
         [Header("Stat Modifications")]
         [SerializeField] private List<StatUpgradeModifier> _modifiers = new();
         public IReadOnlyList<StatUpgradeModifier> Modifiers => _modifiers;
@@ -16,5 +19,9 @@ namespace DroneStrikers.Game.Upgrades
         [Header("Next Upgrades")]
         [SerializeField] private List<UpgradeSO> _nextUpgrades = new();
         public IReadOnlyList<UpgradeSO> NextUpgrades => _nextUpgrades;
+
+        [Header("Visuals")]
+        [SerializeField] private Mesh _mesh;
+        public Mesh Mesh => _mesh;
     }
 }

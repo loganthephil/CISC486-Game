@@ -81,6 +81,7 @@ namespace DroneStrikers.Game.AI
         private Vector3 _debugAvoidanceVector;
         private Vector3 _debugSteeringVector;
         private Vector3 _debugWallLookaheadVector;
+        private Vector3 _debugWallAvoidanceVector;
 
         private void Awake()
         {
@@ -293,10 +294,9 @@ namespace DroneStrikers.Game.AI
                 // Fallback to current velocity if not moving in a direction, otherwise fallback to current transform forward
                 Vector3 forward = !desiredDirection.sqrMagnitude.IsNegligible()
                     ? desiredDirection // Use desired direction if requested movement
-                    : !selfVelocity.sqrMagnitude.IsNegligible()
-                        ? selfVelocity.normalized // Use current velocity if moving
-                        : transform.forward; // Use current forward if stationary
+                    : selfVelocity.normalized; // Otherwise use current velocity direction (might be zero)
                 forward = forward.Flatten(); // Constrain to horizontal plane, just to be safe
+                // TODO: Figure out if we need to check when not moving at all. Can't use transform.forward since we do not rotate the drone root.
 
                 _debugWallLookaheadVector = forward * _wallLookaheadDistance; // For debugging purposes
 
@@ -306,6 +306,8 @@ namespace DroneStrikers.Game.AI
                     Vector3 awayFromWall = wallHit.normal.Flatten();
                     // Add avoidance away from wall, weighted by proximity to wall
                     avoidanceVector += awayFromWall * (_wallAvoidanceWeight * Mathf.Clamp01(1f - wallHit.distance / _wallLookaheadDistance));
+
+                    _debugWallAvoidanceVector = awayFromWall;
                 }
             }
 
@@ -393,6 +395,12 @@ namespace DroneStrikers.Game.AI
                 Gizmos.color = Color.magenta;
                 Vector3 startPos = transform.position + Vector3.up;
                 Gizmos.DrawLine(startPos, startPos + _debugWallLookaheadVector);
+            }
+
+            if (!Vector3.zero.Approximately(_debugWallAvoidanceVector))
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawLine(transform.position, transform.position + _debugWallAvoidanceVector);
             }
 
             // Draw debug avoidance vector

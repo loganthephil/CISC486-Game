@@ -38,14 +38,12 @@ namespace DroneStrikers.Game.Combat
             if (otherDamageResolver == null) return; // No resolver
             if (TeamMember.Team == otherDamageResolver.TeamMember.Team) return; // Same team
 
-            // Need to cast interfaces to Object since an interface won't perform Unity null checks correctly
-            // Don't need to cast the interfaces on 'this' since they can only be null if they were missing on Awake,
-            // and never if this object was destroyed (this script wouldn't be running then)
-
             GameObject thisObject = gameObject;
 
+            // TODO: Only check each object for null once
+
             // This object -> Other object
-            if (DamageSource is not null && (Object)otherDamageResolver.Damageable != null)
+            if ((Object)DamageSource != null && (Object)otherDamageResolver.Damageable != null)
             {
                 GameObject instigator = DamageSource.InstigatorContextReceiver?.gameObject ?? gameObject;
                 DamageContext damageContext = new(thisObject, instigator, otherObject, DamageSource.ContactDamage, TeamMember.Team, DamageSource.InstigatorContextReceiver);
@@ -53,7 +51,7 @@ namespace DroneStrikers.Game.Combat
             }
 
             // Other object -> This object
-            if ((Object)otherDamageResolver.DamageSource != null && Damageable is not null)
+            if ((Object)otherDamageResolver.DamageSource != null && (Object)Damageable != null)
             {
                 IDamageSource otherDamageSource = otherDamageResolver.DamageSource;
                 GameObject instigator = (Object)otherDamageSource.InstigatorContextReceiver != null ? otherDamageSource.InstigatorContextReceiver.gameObject : otherObject; // TODO: Scuffed, remove gameObject property from IDestructionContextReceiver and find a better way to get instigator
