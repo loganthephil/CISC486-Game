@@ -41,11 +41,15 @@ namespace DroneStrikers.Game.Combat
             GameObject thisObject = gameObject;
 
             // TODO: Only check each object for null once
+            
+            // TODO: Somehow track instigator context receivers such that the last one that caused damage is rewarded with kill credit
+            // This would be to avoid situations where a drone is attacking another drone,
+            // but the drone being attacked dies from environmental damage, not rewarding the attacker who deserved the kill.
 
             // This object -> Other object
             if ((Object)DamageSource != null && (Object)otherDamageResolver.Damageable != null)
             {
-                GameObject instigator = DamageSource.InstigatorContextReceiver?.gameObject ?? gameObject;
+                GameObject instigator = (Object)DamageSource.InstigatorContextReceiver != null ? DamageSource.InstigatorContextReceiver.gameObject : thisObject; // TODO: Also scuffed
                 DamageContext damageContext = new(thisObject, instigator, otherObject, DamageSource.ContactDamage, TeamMember.Team, DamageSource.InstigatorContextReceiver);
                 otherDamageResolver.Damageable.TakeDamage(damageContext);
             }

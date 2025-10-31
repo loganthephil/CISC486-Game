@@ -1,32 +1,31 @@
-﻿using UnityEngine;
+﻿using DroneStrikers.BehaviourTrees;
+using UnityEngine;
 
-namespace DroneStrikers.Game.AI.States
+namespace DroneStrikers.Game.AI.Strategies
 {
-    public class AIDroneWanderState : AIDroneBaseState
+    public class AIDroneWanderStrategy : IStrategy
     {
-        public AIDroneWanderState(AINavigation navigation, ObjectDetector objectDetector, AIDroneTargetProvider targetProvider) : base(navigation, objectDetector, targetProvider) { }
-
         private const float MinChangeInterval = 2f;
         private const float MaxChangeInterval = 5f;
 
         private const float WanderBoundaryRadius = 50f;
         private const float CenterRadius = 10f;
 
+        private readonly AINavigation _navigation;
+
         private float _nextChangeAt;
 
-        public override void OnEnter()
-        {
-            SetNewDirection();
-            ScheduleNextDirectionChange();
-        }
+        public AIDroneWanderStrategy(AINavigation navigation) => _navigation = navigation;
 
-        public override void Update()
+        public Node.Status Process()
         {
             if (Time.time >= _nextChangeAt)
             {
                 SetNewDirection();
                 ScheduleNextDirectionChange();
             }
+
+            return Node.Status.Running;
         }
 
         private void SetNewDirection()

@@ -1,4 +1,9 @@
 # Drone Strikers
+## Assignment 3
+**Note on Pathfinding**
+"Traditional" pathfinding like A* or NavMesh did not make sense for my game, so instead I elected to create a steering algorithm that "path finds" throughout the area dynamically. There are no static objects in my game except for the walls that surround the entire map. The positions of objects, enemy Drones and projectiles are always changing. Due to this, I made a steering algorithm where the AI Drone will scan for nearby objects and predict if it will collide with said object if the AI continues moving in the same direction (which includes not moving at all if the AI is stationary). This creates a system where the AI will attempt to dodge objects and projectiles in its path. This can be seen most evidently when the AI is pursuing another Drone, where, depending on the simulated "skill-level" of the AI Drone (set on spawn), it will stay away from any dangerous objects in the path towards its target. The AI always uses the same steering algorithm since there is never a point where the AI would want to stop dodging objects that would damage it, however, depending on factors like the AI Drone's current level (not to be confused with skill-level), some threats may become less important to dodge than others, having less of an effect on the steering avoidance vector.
+
+
 ## Assignment 2
 Gameplay Video: https://youtu.be/5UUWPTiwFzw?si=hHfU_ZJizZt1yoef \
 Game executable, if needed, is in under `/Drone Strikers/Build`

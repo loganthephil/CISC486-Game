@@ -503,7 +503,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.Drone.DroneSpawner
   _spawnAIDrones: 1
-  _maxDronesPerTeam: 1
+  _maxDronesPerTeam: 5
   _redTeamSpawner: {fileID: 1564825366}
   _blueTeamSpawner: {fileID: 1707002074}
   _dronePrefab: {fileID: 2074245953654827550, guid: 0406c04c347339a4cbd0ca3ecc99beca, type: 3}
@@ -520,7 +520,7 @@ Transform:
   m_GameObject: {fileID: 235833076}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.58165, y: 0.01, z: -5.97947}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

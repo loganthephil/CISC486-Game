@@ -40,8 +40,6 @@ namespace DroneStrikers.Game.AI
         [Header("Priority Weights")]
         [Tooltip("Contribution from normalized \"value\"")]
         [SerializeField] private float _valueWeight = 1f;
-        // [Tooltip("Contribution from normalized \"danger\"")]
-        // [SerializeField] private float _dangerWeight = 1f;
         [Tooltip("Favour lower-health objects")]
         [SerializeField] private float _healthWeight = 1.25f;
         [Tooltip("Penalty from normalized distance")]
@@ -53,9 +51,22 @@ namespace DroneStrikers.Game.AI
         private AIDroneTraits _traits;
         private Transform _transform;
 
+        private bool _hasDroneInRange;
+        /// <summary>
+        ///     True if there is at least one enemy drone in range.
+        /// </summary>
+        public bool HasDroneInRange
+        {
+            get
+            {
+                EnsureScanUpToDate();
+                return _hasDroneInRange;
+            }
+        }
+
         private bool _hasObjectInRange;
         /// <summary>
-        ///     True if there is at least one object (drone or otherwise) in range.
+        ///     True if there is at least one object (non-Drone) in range.
         /// </summary>
         public bool HasObjectInRange
         {
@@ -66,13 +77,35 @@ namespace DroneStrikers.Game.AI
             }
         }
 
-        // TODO: Perhaps split up the initial detection and the prioritization into two separate methods and only prioritize when needed actually?
-        private readonly DropOutStack<GameObject> _mostImportantObjects = new(MaxImportantObjectsTracked);
         /// <summary>
-        ///     The most important detected object based on the following priority:
-        ///     If there's an enemy drone in range, weigh that very highly. Prioritize lower health % drones over higher health drones.
-        ///     Otherwise, pick the object with the highest value while also considering distance and health percentage.
-        ///     If an object has a lower health percentage, weigh that decently highly since it'll be easier to destroy.
+        ///     Returns true if there is at least one drone or object in range.
+        /// </summary>
+        public bool HasAnyInRange => HasDroneInRange || HasObjectInRange;
+
+        // TODO: Perhaps split up the initial detection and the prioritization into two separate methods and only prioritize when needed actually?
+        private readonly DropOutStack<GameObject> _mostImportantDrones = new(MaxImportantObjectsTracked);
+        private readonly DropOutStack<GameObject> _mostImportantObjects = new(MaxImportantObjectsTracked);
+
+        /// <summary>
+        ///     The most important detected drone based on the following priority:
+        ///     Pick the drone with the highest value while also considering distance and health percentage.
+        ///     If a drone has a lower health percentage, weigh that higher since it'll be easier to destroy.
+        ///     Also consider the danger level of the drone, weighing high danger drones lower.
+        /// </summary>
+        /// <returns> The most important detected drone GameObject, or null if none are detected. </returns>
+        public GameObject MostImportantDrone
+        {
+            get
+            {
+                EnsureScanUpToDate();
+                return _mostImportantDrones.Count > 0 ? _mostImportantDrones.Peek() : null;
+            }
+        }
+
+        /// <summary>
+        ///     The most important detected object (non-drone) based on the following priority:
+        ///     Pick the object with the highest value while also considering distance and health percentage.
+        ///     If an object has a lower health percentage, weigh that higher since it'll be easier to destroy.
         ///     Also consider the danger level of the object, weighing high danger objects lower.
         /// </summary>
         /// <returns> The most important detected GameObject, or null if none are detected. </returns>
@@ -83,15 +116,6 @@ namespace DroneStrikers.Game.AI
                 EnsureScanUpToDate();
                 return _mostImportantObjects.Count > 0 ? _mostImportantObjects.Peek() : null;
             }
-        }
-
-        /// <summary>
-        ///     Removes the most important object from consideration, allowing the next most important object to be considered.
-        /// </summary>
-        public void DiscardMostImportantObject()
-        {
-            EnsureScanUpToDate();
-            if (_mostImportantObjects.Count > 0) _mostImportantObjects.Pop();
         }
 
         private DroneInfoProvider _highestLevelDrone;
@@ -135,15 +159,20 @@ namespace DroneStrikers.Game.AI
         {
             // Clear previous state
             _candidates.Clear();
-            _hasObjectInRange = false;
+            _mostImportantDrones.Clear();
             _mostImportantObjects.Clear();
-            _highestLevelDrone = null;
+            // Other state set after scan
 
             // Scan for objects within detection radius
             int hitCount = Physics.OverlapSphereNonAlloc(_transform.position, DetectionRadius, _hits, _detectionLayerMask, QueryTriggerInteraction.Ignore);
 
-            float maxValueRaw = 0f;
-            float maxDangerRaw = 0f;
+            float maxDroneValueRaw = 0f;
+            float maxDroneDangerRaw = 0f;
+            float maxObjectValueRaw = 0f;
+            float maxObjectDangerRaw = 0f;
+
+            bool hasDroneInRange = false;
+            bool hasObjectInRange = false;
 
             int highestDroneLevel = -1;
             DroneInfoProvider highestLevelDrone = null;
@@ -186,8 +215,18 @@ namespace DroneStrikers.Game.AI
                 if (health is not null) healthPercent = health.HealthPercent;
 
                 // Track max values for normalization later
-                if (valueRaw > maxValueRaw) maxValueRaw = valueRaw;
-                if (dangerRaw > maxDangerRaw) maxDangerRaw = dangerRaw;
+                if (isDrone)
+                {
+                    // Drone object
+                    if (valueRaw > maxDroneValueRaw) maxDroneValueRaw = valueRaw;
+                    if (dangerRaw > maxDroneDangerRaw) maxDroneDangerRaw = dangerRaw;
+                }
+                else
+                {
+                    // Non-drone object
+                    if (valueRaw > maxObjectValueRaw) maxObjectValueRaw = valueRaw;
+                    if (dangerRaw > maxObjectDangerRaw) maxObjectDangerRaw = dangerRaw;
+                }
 
                 // Add to candidates
                 _candidates.Add(new Candidate
@@ -208,13 +247,25 @@ namespace DroneStrikers.Game.AI
                 }
             }
 
-            // Pass over candidates to find the most important one
-            float highestScore = float.NegativeInfinity;
+            // Pass over candidates to find the most important ones
+            float highestDroneScore = float.NegativeInfinity;
+            float highestObjectScore = float.NegativeInfinity;
 
             foreach (Candidate candidate in _candidates)
             {
-                float normalizedValue = maxValueRaw > 0f ? candidate.ValueRaw / maxValueRaw : 0f; // 0-1
-                float normalizedDanger = maxDangerRaw > 0f ? candidate.DangerRaw / maxDangerRaw : 0f; // 0-1
+                float normalizedValue;
+                float normalizedDanger;
+                // Normalize features
+                if (candidate.IsDrone)
+                {
+                    normalizedValue = maxDroneValueRaw > 0f ? candidate.ValueRaw / maxDroneValueRaw : 0f; // 0-1
+                    normalizedDanger = maxDroneDangerRaw > 0f ? candidate.DangerRaw / maxDroneDangerRaw : 0f; // 0-1
+                }
+                else
+                {
+                    normalizedValue = maxObjectValueRaw > 0f ? candidate.ValueRaw / maxObjectValueRaw : 0f; // 0-1
+                    normalizedDanger = maxObjectDangerRaw > 0f ? candidate.DangerRaw / maxObjectDangerRaw : 0f; // 0-1
+                }
 
                 // Shift such that closer = add for danger, further = lower for danger
                 normalizedDanger = (1f - Mathf.Clamp01(normalizedDanger + (candidate.DistanceNorm - 0.5f))) * 2f;
@@ -227,18 +278,33 @@ namespace DroneStrikers.Game.AI
                 score += normalizedDanger * _traits.DangerWeight; // Higher danger is dependent on distance
                 score -= candidate.DistanceNorm * _distanceWeight; // Closer is better
 
-                // Favour enemy drones very highly (multiply score)
-                if (candidate.IsDrone) score *= _traits.DroneBiasWeight; // Get the bias from traits
-
-                if (score > highestScore)
+                // Update most important based on type
+                if (candidate.IsDrone)
                 {
-                    highestScore = score;
-                    _mostImportantObjects.Push(candidate.GameObject); // Push onto drop out stack
+                    // score *= _traits.DroneBiasWeight; // Get the bias from traits
+                    hasDroneInRange = true; // Mark that we have at least one drone in range
+
+                    if (score > highestDroneScore)
+                    {
+                        highestDroneScore = score;
+                        _mostImportantDrones.Push(candidate.GameObject); // Push onto drop out stack
+                    }
+                }
+                else
+                {
+                    hasObjectInRange = true; // If not a drone, must be an object
+
+                    if (score > highestObjectScore)
+                    {
+                        highestObjectScore = score;
+                        _mostImportantObjects.Push(candidate.GameObject); // Push onto drop out stack
+                    }
                 }
             }
 
             // Update rest of state based on findings
-            _hasObjectInRange = _candidates.Count > 0;
+            _hasDroneInRange = hasDroneInRange;
+            _hasObjectInRange = hasObjectInRange;
             _highestLevelDrone = highestLevelDrone;
         }
 

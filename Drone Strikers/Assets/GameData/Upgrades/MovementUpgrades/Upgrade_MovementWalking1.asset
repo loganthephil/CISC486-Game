@@ -25,4 +25,4 @@ MonoBehaviour:
     Value: -0.25
     ModType: 1
   _nextUpgrades: []
-  _mesh: {fileID: 0}
+  _mesh: {fileID: 1499382305277628684, guid: b701e11b2f679de4ba86705728aa214f, type: 3}

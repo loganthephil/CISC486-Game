@@ -17,6 +17,9 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
     {
         // TODO: If adding more teams, maybe make a list for team spawners and then create a HashSet for each team in that list.
 
+        // TODO: Pre-spawn and pool drones instead of instantiating on the fly.
+        // Drones are fairly complex objects so instantiating them might cause hitches (unconfirmed but plausible).
+
         [SerializeField] private bool _spawnAIDrones = true;
         [SerializeField] private int _maxDronesPerTeam = 5;
 

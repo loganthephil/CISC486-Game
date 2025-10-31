@@ -36,6 +36,9 @@ namespace DroneStrikers.Game.AI
             }
         }
 
+        private const float Radians45 = Mathf.PI / 4f;
+        private static readonly Vector3 WallLookaheadOffset = new(0f, 1f, 0f);
+
         [Header("Perception")]
         [SerializeField] private LayerMask _obstacleMask; // Layers considered as obstacles
         [SerializeField] private LayerMask _attackLayer; // Attack layer
@@ -75,13 +78,14 @@ namespace DroneStrikers.Game.AI
         private Collider[] _hits;
         private readonly List<Threat> _threats = new();
 
-        private Vector3 _lastOutputDirection = Vector3.zero;
+        private Vector3 _lastLagVector = Vector3.zero;
 
         // For debugging purposes
         private Vector3 _debugAvoidanceVector;
         private Vector3 _debugSteeringVector;
         private Vector3 _debugWallLookaheadVector;
         private Vector3 _debugWallAvoidanceVector;
+        private Vector3 _debugFinalMovementDirection;
 
         private void Awake()
         {
@@ -148,9 +152,13 @@ namespace DroneStrikers.Game.AI
             Vector3 movementDirection = GetBaseDesiredDirection();
             movementDirection = SteerMovement(movementDirection);
             movementDirection = ApplyReactionLag(movementDirection);
+            _lastLagVector = movementDirection;
 
+            // Lock movement to 8 directions to simulate keyboard input
+            movementDirection = LockToEightDirections(movementDirection);
+
+            _debugFinalMovementDirection = movementDirection; // For debugging purposes
             _droneMovement.SetMovementDirection(movementDirection);
-            _lastOutputDirection = movementDirection;
         }
 
         // Get the desired movement direction based on the current navigation mode
@@ -301,7 +309,7 @@ namespace DroneStrikers.Game.AI
                 _debugWallLookaheadVector = forward * _wallLookaheadDistance; // For debugging purposes
 
                 // Raycast forward (from slightly above to avoid ground) to see if a wall is in the way
-                if (Physics.Raycast(new Ray(transform.position + Vector3.up, forward), out RaycastHit wallHit, _wallLookaheadDistance, _wallLayer, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(new Ray(transform.position + WallLookaheadOffset, forward), out RaycastHit wallHit, _wallLookaheadDistance, _wallLayer, QueryTriggerInteraction.Ignore))
                 {
                     Vector3 awayFromWall = wallHit.normal.Flatten();
                     // Add avoidance away from wall, weighted by proximity to wall
@@ -332,8 +340,20 @@ namespace DroneStrikers.Game.AI
         {
             // Interpolate between the last output direction and the new desired direction based on reaction lag
             float lagFactor = Mathf.Clamp01(Time.fixedDeltaTime / _traits.ReactionLagSeconds);
-            return Vector3.Slerp(_lastOutputDirection.sqrMagnitude.IsNegligible() ? direction : _lastOutputDirection, direction, lagFactor).normalized;
+            Vector3 fromDirection = _lastLagVector.IsNegligible() ? direction : _lastLagVector;
+            return Vector3.Slerp(fromDirection, direction, lagFactor).normalized;
         }
+
+        private Vector3 LockToEightDirections(Vector3 direction)
+        {
+            if (direction.IsNegligible()) return direction; // Don't bother if not moving
+
+            float angle = Mathf.Atan2(direction.z, direction.x); // Get angle in radians
+            float eightDirectionAngle = Mathf.Round(angle / Radians45) * Radians45; // Round to nearest 45 degrees
+            return new Vector3(Mathf.Cos(eightDirectionAngle), 0f, Mathf.Sin(eightDirectionAngle)).normalized;
+        }
+
+        // -- Static Helpers --
 
         // Returns the closest point on the collider, or, if the point is inside the collider, the center of the collider's bounds
         private static Vector3 ClosestPointOrCenter(Collider collider, Vector3 fromPosition)
@@ -377,6 +397,8 @@ namespace DroneStrikers.Game.AI
                         Gizmos.DrawWireSphere(ClosestPointOrCenter(hit, transform.position), ApproximateRadius(hit));
             }
 
+            Vector3 startPos;
+
             // Draw threats
             if (_threats != null)
             {
@@ -393,7 +415,7 @@ namespace DroneStrikers.Game.AI
             if (_wallLookaheadDistance > 0f)
             {
                 Gizmos.color = Color.magenta;
-                Vector3 startPos = transform.position + Vector3.up;
+                startPos = transform.position + WallLookaheadOffset;
                 Gizmos.DrawLine(startPos, startPos + _debugWallLookaheadVector);
             }
 
@@ -406,7 +428,7 @@ namespace DroneStrikers.Game.AI
             // Draw debug avoidance vector
             if (!Vector3.zero.Approximately(_debugAvoidanceVector))
             {
-                Gizmos.color = Color.cyan;
+                Gizmos.color = Color.orange;
                 Gizmos.DrawLine(transform.position, transform.position + _debugAvoidanceVector);
             }
 
@@ -416,6 +438,19 @@ namespace DroneStrikers.Game.AI
                 Gizmos.color = Color.blue;
                 Gizmos.DrawLine(transform.position, transform.position + _debugSteeringVector);
             }
+
+            // Draw after lag vector
+            if (!Vector3.zero.Approximately(_lastLagVector))
+            {
+                Gizmos.color = Color.purple;
+                startPos = transform.position + Vector3.up * 0.25f;
+                Gizmos.DrawLine(startPos, startPos + _lastLagVector * 2);
+            }
+
+            // Draw final desired direction
+            Gizmos.color = Color.green;
+            startPos = transform.position + Vector3.up * 0.5f;
+            Gizmos.DrawLine(startPos, startPos + _debugFinalMovementDirection * 2);
         }
 #endif
     }
