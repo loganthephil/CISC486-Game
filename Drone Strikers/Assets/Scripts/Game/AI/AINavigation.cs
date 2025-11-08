@@ -10,8 +10,6 @@ namespace DroneStrikers.Game.AI
     [RequireComponent(typeof(AIDroneTraits))]
     public class AINavigation : MonoBehaviour
     {
-        // TODO: Add "skill" factor to make movement less perfect; set on AI drone spawn
-
         private enum NavigationMode
         {
             None,
@@ -46,6 +44,7 @@ namespace DroneStrikers.Game.AI
         [SerializeField] private float _perceptionRadius = 10f; // How far to look for obstacles
         [SerializeField] private int _maxPerceivedObstacles = 20; // Maximum potential obstacles to scan per update
         [SerializeField] private int _maxThreats = 3; // Maximum number of threats to consider for avoidance
+        [SerializeField] [Min(0f)] private float _perceptionPollInterval = 0.333f; // How often to poll for obstacles (in seconds)
 
         [Header("Avoidance")]
         [SerializeField] private float _droneRadius = 1.0f; // Radius of the drone
@@ -53,9 +52,14 @@ namespace DroneStrikers.Game.AI
         [SerializeField] private float _maxTimeLookahead = 1.5f; // How far ahead to predict collisions
         [SerializeField] private float _wallLookaheadDistance = 5.0f; // Distance to look ahead for walls
 
+        [Header("Smoothing")]
+        [SerializeField] [Range(0f, 1f)] private float _avoidanceEmaAlpha = 0.25f; // Higher = more responsive, lower = smoother
+        [SerializeField] private float _largeAngleThreshold = 45f; // Angle in degrees for the avoidance vector change to be considered large
+        [SerializeField] [Range(0f, 1f)] private float _avoidanceLargeAngleEmaAlpha = 1f; // How much to favor new direction on large angle changes
+
         [Header("Weights")]
         [Tooltip("How much should wall avoidance influence steering compared to other avoidance?")]
-        [SerializeField] private float _wallAvoidanceWeight = 2.0f; // Strength of wall avoidance steering
+        [SerializeField] private float _wallAvoidanceWeight = 3f; // Strength of wall avoidance steering
 
         [Header("References")]
         [SerializeField] [RequiredField] private DroneMovement _droneMovement;
@@ -78,10 +82,17 @@ namespace DroneStrikers.Game.AI
         private Collider[] _hits;
         private readonly List<Threat> _threats = new();
 
+        private Vector3 _lastSteeredDirection = Vector3.zero;
+        private float _timeSinceLastPerceptionPoll;
+
         private Vector3 _lastLagVector = Vector3.zero;
 
-        // For debugging purposes
-        private Vector3 _debugAvoidanceVector;
+        // -- Smoothing --
+        private Vector3 _smoothedAvoidanceVector = Vector3.zero;
+        private Vector3 _avoidanceSum = Vector3.zero;
+
+        // -- Debugging --
+        private Vector3 _debugRawAvoidanceVector;
         private Vector3 _debugSteeringVector;
         private Vector3 _debugWallLookaheadVector;
         private Vector3 _debugWallAvoidanceVector;
@@ -150,12 +161,14 @@ namespace DroneStrikers.Game.AI
         private void FixedUpdate()
         {
             Vector3 movementDirection = GetBaseDesiredDirection();
+            _desiredDirection = movementDirection;
+
             movementDirection = SteerMovement(movementDirection);
             movementDirection = ApplyReactionLag(movementDirection);
             _lastLagVector = movementDirection;
 
             // Lock movement to 8 directions to simulate keyboard input
-            movementDirection = LockToEightDirections(movementDirection);
+            movementDirection = LockToEightDirections(movementDirection); // Disabled to test jitter caused by SteerMovement
 
             _debugFinalMovementDirection = movementDirection; // For debugging purposes
             _droneMovement.SetMovementDirection(movementDirection);
@@ -216,6 +229,13 @@ namespace DroneStrikers.Game.AI
         // Expects a normalized desired direction vector
         private Vector3 SteerMovement(Vector3 desiredDirection)
         {
+            // Check if it's time to poll for obstacles
+            _timeSinceLastPerceptionPoll += Time.fixedDeltaTime;
+            if (_timeSinceLastPerceptionPoll < _perceptionPollInterval)
+                // Not time yet, return last steered direction
+                return _lastSteeredDirection;
+            _timeSinceLastPerceptionPoll = 0f; // Reset timer
+
             // Get current velocity
             Vector3 selfVelocity = _rigidbody.linearVelocity.Flatten();
 
@@ -259,7 +279,8 @@ namespace DroneStrikers.Game.AI
                 if (relativeSqrSpeed.IsNegligible() && currentDistance < combinedRadius)
                 {
                     Vector3 awayFromThreat = (-relativePosition).normalized; // Push directly away from the object
-                    _threats.Add(new Threat(0f, currentDistance, awayFromThreat, 1f));
+                    float urgency = Mathf.Clamp01((combinedRadius - currentDistance) / combinedRadius); // 0 = at or beyond safe distance, 1 = collision
+                    _threats.Add(new Threat(0f, currentDistance, awayFromThreat, urgency));
                     continue;
                 }
 
@@ -286,13 +307,13 @@ namespace DroneStrikers.Game.AI
                     : a.TimeToCollision.CompareTo(b.TimeToCollision); // If equal urgency, prioritize earlier collision
             });
 
-            Vector3 avoidanceVector = Vector3.zero;
+            Vector3 rawAvoidanceVector = Vector3.zero;
             int maxThreatsToConsider = Mathf.Min(_maxThreats, _threats.Count);
             for (int i = 0; i < maxThreatsToConsider; i++)
             {
                 Threat threat = _threats[i];
                 float weight = Mathf.Lerp(0.25f, 1.0f, threat.Urgency); // Weight based on urgency (0.25 to 1.0)
-                avoidanceVector += threat.AwayFromThreat * weight;
+                rawAvoidanceVector += threat.AwayFromThreat * weight;
             }
 
             // Avoid walls by ray-casting forward
@@ -313,36 +334,58 @@ namespace DroneStrikers.Game.AI
                 {
                     Vector3 awayFromWall = wallHit.normal.Flatten();
                     // Add avoidance away from wall, weighted by proximity to wall
-                    avoidanceVector += awayFromWall * (_wallAvoidanceWeight * Mathf.Clamp01(1f - wallHit.distance / _wallLookaheadDistance));
+                    rawAvoidanceVector += awayFromWall * (_wallAvoidanceWeight * Mathf.Clamp01(1f - wallHit.distance / _wallLookaheadDistance));
 
                     _debugWallAvoidanceVector = awayFromWall;
                 }
             }
 
-            // Combine desired direction with avoidance vector
-            Vector3 steeredDirection = desiredDirection;
-            if (!avoidanceVector.sqrMagnitude.IsNegligible()) steeredDirection = (desiredDirection + _traits.AvoidanceWeight * avoidanceVector).normalized;
+            rawAvoidanceVector.Normalize();
 
-            // If not moving, but threatened, move out of the way
-            if (steeredDirection.sqrMagnitude.IsNegligible() && !avoidanceVector.sqrMagnitude.IsNegligible()) steeredDirection = avoidanceVector.normalized;
+            // Smooth the avoidance vector
+            Vector3 smoothedAvoidance = SmoothAvoidance(rawAvoidanceVector);
+
+            // Combine desired direction with avoidance vector
+            // Also works fine if desiredDirection is zero (the avoidance vector will dominate)
+            Vector3 steeredDirection = desiredDirection;
+            if (!smoothedAvoidance.sqrMagnitude.IsNegligible()) steeredDirection = (desiredDirection + _traits.AvoidanceWeight * smoothedAvoidance).normalized;
 
 #if UNITY_EDITOR
-            // For debugging purposes, save avoidance and steering vectors
+            // For debugging purposes, save vectors for visualization
             // Multiply by 2 to make more visible
-            _debugAvoidanceVector = 2 * avoidanceVector;
+            _debugRawAvoidanceVector = 2 * rawAvoidanceVector;
             _debugSteeringVector = 2 * steeredDirection;
 #endif
 
-            return steeredDirection.Flatten();
+            _lastSteeredDirection = steeredDirection.Flatten();
+            return _lastSteeredDirection;
         }
 
-        private Vector3 ApplyReactionLag(Vector3 direction)
+        private Vector3 SmoothAvoidance(Vector3 raw)
         {
-            // Interpolate between the last output direction and the new desired direction based on reaction lag
-            float lagFactor = Mathf.Clamp01(Time.fixedDeltaTime / _traits.ReactionLagSeconds);
-            Vector3 fromDirection = _lastLagVector.IsNegligible() ? direction : _lastLagVector;
-            return Vector3.Slerp(fromDirection, direction, lagFactor).normalized;
+            // Alpha to use for EMA
+            float alpha = _avoidanceEmaAlpha;
+
+            // Large angle change between current smoothed and raw
+            float angle = _smoothedAvoidanceVector.sqrMagnitude.IsNegligible() || raw.sqrMagnitude.IsNegligible()
+                ? 0f
+                : Vector3.Angle(_smoothedAvoidanceVector, raw);
+            bool largeAngleChange = angle > _largeAngleThreshold;
+
+            // Large magnitude change (i.e. from still to moving)
+            bool magnitudeSpike = raw.sqrMagnitude > _smoothedAvoidanceVector.sqrMagnitude * 1.5f;
+
+            // Boost alpha if large change detected
+            if (largeAngleChange || magnitudeSpike) alpha = Mathf.Max(alpha, _avoidanceLargeAngleEmaAlpha);
+
+            _smoothedAvoidanceVector = Vector3.Lerp(_smoothedAvoidanceVector, raw, alpha);
+            return _smoothedAvoidanceVector;
         }
+
+        private Vector3 ApplyReactionLag(Vector3 direction) =>
+            // Want reaction lag to simulate human reaction time, i.e. a delay
+            // Not implemented yet
+            direction;
 
         private Vector3 LockToEightDirections(Vector3 direction)
         {
@@ -419,17 +462,26 @@ namespace DroneStrikers.Game.AI
                 Gizmos.DrawLine(startPos, startPos + _debugWallLookaheadVector);
             }
 
+            // Draw debug wall avoidance vector
             if (!Vector3.zero.Approximately(_debugWallAvoidanceVector))
             {
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawLine(transform.position, transform.position + _debugWallAvoidanceVector);
             }
 
+            // Draw desired direction
+            Gizmos.color = Color.black;
+            startPos = transform.position + Vector3.up * 0.75f;
+            if (!_desiredDirection.IsNegligible())
+                Gizmos.DrawLine(startPos, startPos + _desiredDirection * 2); // Indicate desired movement direction
+            else
+                Gizmos.DrawLine(startPos, startPos + Vector3.up * 3); // Indicate no desired movement with an upward line
+
             // Draw debug avoidance vector
-            if (!Vector3.zero.Approximately(_debugAvoidanceVector))
+            if (!Vector3.zero.Approximately(_debugRawAvoidanceVector))
             {
                 Gizmos.color = Color.orange;
-                Gizmos.DrawLine(transform.position, transform.position + _debugAvoidanceVector);
+                Gizmos.DrawLine(transform.position, transform.position + _debugRawAvoidanceVector);
             }
 
             // Draw debug steering vector

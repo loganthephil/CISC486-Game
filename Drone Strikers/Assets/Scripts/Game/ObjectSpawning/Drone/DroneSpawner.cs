@@ -15,6 +15,14 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
 {
     public class DroneSpawner : MonoBehaviour
     {
+        [Serializable] [Flags]
+        private enum TeamFlag
+        {
+            None = 0,
+            Red = 1 << 0,
+            Blue = 1 << 1
+        }
+
         // TODO: If adding more teams, maybe make a list for team spawners and then create a HashSet for each team in that list.
 
         // TODO: Pre-spawn and pool drones instead of instantiating on the fly.
@@ -22,6 +30,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
 
         [SerializeField] private bool _spawnAIDrones = true;
         [SerializeField] private int _maxDronesPerTeam = 5;
+        [SerializeField] private TeamFlag _teamsToSpawnFor = TeamFlag.Red | TeamFlag.Blue;
 
         [Header("References")]
         [SerializeField] [RequiredField] private SpawnWithinCollider _redTeamSpawner;
@@ -61,7 +70,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
             yield return new WaitForSeconds(0.5f); // Initial delay before starting
 
             // Keep trying to spawn drones until both teams are at max capacity
-            while (!AllTeamsFull())
+            while (!AllEnabledTeamsAreFull())
             {
                 if (!_spawnAIDrones)
                 {
@@ -70,7 +79,9 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
                 }
 
                 // Choose a random team that is not full
-                Team[] teamsNotFull = GetTeamsNotFull();
+                Team[] teamsNotFull = GetEnabledTeamsNotFull();
+                if (teamsNotFull.Length == 0) break; // All teams full, exit
+
                 Team teamToSpawn = teamsNotFull[Random.Range(0, teamsNotFull.Length)];
 
                 SpawnDroneOnTeam(_dronePrefab, teamToSpawn);
@@ -91,7 +102,7 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
             {
                 WaitForSeconds wait = new(5f);
                 if (_spawnAICoroutine != null) break; // Already spawning, exit
-                if (!AllTeamsFull())
+                if (!AllEnabledTeamsAreFull())
                 {
                     // A team has space, restart spawning (won't be null since we checked above)
                     _spawnAICoroutine = StartCoroutine(SpawnAIDrones());
@@ -161,17 +172,18 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
             _spawnAICoroutine ??= StartCoroutine(SpawnAIDrones());
         }
 
-        private bool AllTeamsFull()
+        private bool AllEnabledTeamsAreFull()
         {
-            return _spawnedDrones.Values.All(teamDrones => teamDrones.Count >= _maxDronesPerTeam);
+            Team[] enabledTeams = GetEnabledTeams();
+            if (enabledTeams.Length == 0) return true; // nothing to spawn
+
+            return enabledTeams.All(team => _spawnedDrones[team].Count >= _maxDronesPerTeam);
         }
 
-        private Team[] GetTeamsNotFull()
+        private Team[] GetEnabledTeamsNotFull()
         {
-            return _spawnedDrones
-                .Where(kvp => kvp.Value.Count < _maxDronesPerTeam)
-                .Select(kvp => kvp.Key)
-                .ToArray();
+            Team[] enabledTeams = GetEnabledTeams();
+            return enabledTeams.Where(t => _spawnedDrones[t].Count < _maxDronesPerTeam).ToArray();
         }
 
         private static WaitForSeconds GetRandomWaitTime() => new(Random.Range(5f, 10f));
@@ -188,6 +200,30 @@ namespace DroneStrikers.Game.ObjectSpawning.Drone
                 if (drone == null) continue;
                 TrackedObject trackedObject = drone.GetComponent<TrackedObject>();
                 if (trackedObject != null) trackedObject.OnDestroyed -= OnDroneDestroyed;
+            }
+        }
+
+        private static bool HasFlag(TeamFlag value, TeamFlag flag) => (value & flag) == flag;
+
+        private Team[] GetEnabledTeams()
+        {
+            List<Team> result = new();
+            if (HasFlag(_teamsToSpawnFor, TeamFlag.Red)) result.Add(Team.Red);
+            if (HasFlag(_teamsToSpawnFor, TeamFlag.Blue)) result.Add(Team.Blue);
+            return result.ToArray();
+        }
+
+        private static Team FlagToTeam(TeamFlag flag)
+        {
+            switch (flag)
+            {
+                case TeamFlag.Red:
+                    return Team.Red;
+                case TeamFlag.Blue:
+                    return Team.Blue;
+                case TeamFlag.None:
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flag), $"Not expected team flag value: {flag}");
             }
         }
     }

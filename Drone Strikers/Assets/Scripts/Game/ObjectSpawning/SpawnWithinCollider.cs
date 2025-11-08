@@ -37,6 +37,7 @@ namespace DroneStrikers.Game.ObjectSpawning
                 spawnBounds = new Bounds(Vector3.zero, new Vector3(1f, 1f, 1f)); // Fallback bounds
             }
 
+            // TODO: Pool these objects instead of instantiating new ones every time
             bool gotFreePoint = GetRandomFreePointInCollider(out Vector3 spawnPosition, _spawnCollider, spawnBounds, buffer, collisionLayers, maxAttempts);
             return gotFreePoint
                 ? Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity, _spawnUnderParent ? transform : null)

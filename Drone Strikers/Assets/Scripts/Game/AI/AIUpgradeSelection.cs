@@ -34,24 +34,41 @@ namespace DroneStrikers.Game.AI
 
         private IEnumerator SelectUpgrades()
         {
+            float maxDelay = 15f; // Max delay for first upgrade to simulate noticing there are available upgrades
+
+            // For each remaining upgrade point, wait a bit and then select an upgrade
             while (_remainingUpgrades > 0)
             {
-                // Wait for variable frame time to simulate thinking time
-                yield return new WaitForSeconds(Random.Range(1f, 5f));
+                // Wait for variable time depending on whether it's the first upgrade since calling the coroutine or a subsequent one
+                yield return new WaitForSeconds(Random.Range(2f, maxDelay));
 
-                // Select a random upgrade tree
-                List<UpgradeTreeSO> availableTrees = DroneUpgrader.GetTreesWithAvailableUpgrades();
-                if (availableTrees.Count == 0) yield break; // No available upgrades left
-                UpgradeTreeSO selectedTree = availableTrees[Random.Range(0, availableTrees.Count)];
+                // Apply a random upgrade from the available trees
+                if (!SelectAndApplyUpgrade()) break; // If no upgrade was applied, exit loop
 
-                // Select a random available upgrade from the selected tree
-                List<UpgradeSO> availableUpgrades = DroneUpgrader.GetAvailableUpgradesInTree(selectedTree);
-                UpgradeSO selectedUpgrade = availableUpgrades[Random.Range(0, availableUpgrades.Count)];
-
-                // Apply the selected upgrade
-                DroneUpgrader.ApplyUpgrade(selectedUpgrade, selectedTree);
-                _remainingUpgrades--;
+                // Decrease max delay to simulate decision-making instead of noticing that there are upgrades
+                maxDelay = 8f;
             }
+
+            _currentUpgradeSelectionCoroutine = null; // Reset coroutine reference when done
+        }
+
+        private bool SelectAndApplyUpgrade()
+        {
+            List<UpgradeTreeSO> availableTrees = DroneUpgrader.GetTreesWithAvailableUpgrades();
+            if (availableTrees.Count == 0) return false; // No available upgrade trees
+
+            // Select a random upgrade tree
+            UpgradeTreeSO selectedTree = availableTrees[Random.Range(0, availableTrees.Count)];
+
+            // Select a random available upgrade from the selected tree
+            List<UpgradeSO> availableUpgrades = DroneUpgrader.GetAvailableUpgradesInTree(selectedTree);
+            UpgradeSO selectedUpgrade = availableUpgrades[Random.Range(0, availableUpgrades.Count)];
+
+            // Apply the selected upgrade
+            if (!DroneUpgrader.ApplyUpgrade(selectedUpgrade, selectedTree)) return false; // If for some reason it fails, return false
+            _remainingUpgrades--;
+
+            return true;
         }
     }
 }

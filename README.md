@@ -1,59 +1,34 @@
 # Drone Strikers
 ## Assignment 3
-**Note on Pathfinding**
-"Traditional" pathfinding like A* or NavMesh did not make sense for my game, so instead I elected to create a steering algorithm that "path finds" throughout the area dynamically. There are no static objects in my game except for the walls that surround the entire map. The positions of objects, enemy Drones and projectiles are always changing. Due to this, I made a steering algorithm where the AI Drone will scan for nearby objects and predict if it will collide with said object if the AI continues moving in the same direction (which includes not moving at all if the AI is stationary). This creates a system where the AI will attempt to dodge objects and projectiles in its path. This can be seen most evidently when the AI is pursuing another Drone, where, depending on the simulated "skill-level" of the AI Drone (set on spawn), it will stay away from any dangerous objects in the path towards its target. The AI always uses the same steering algorithm since there is never a point where the AI would want to stop dodging objects that would damage it, however, depending on factors like the AI Drone's current level (not to be confused with skill-level), some threats may become less important to dodge than others, having less of an effect on the steering avoidance vector.
+### Note on Pathfinding Implementation
+"Traditional" pathfinding like A* or NavMesh did not make sense for my game, so instead I elected to create a steering algorithm that "path finds" throughout the arena dynamically. 
+There are no static objects in my game except for the walls that surround the entire map. The positions of objects, enemy Drones, and projectiles are always changing. 
+Due to this, I made a steering algorithm where the AI Drone will scan for nearby objects and predict if it will collide with said object if the AI continues moving in the same direction (including when stationary). 
+This creates a system where the AI will attempt to dodge objects and projectiles in its path. 
+This can be seen most evidently (but not exclusively) when the AI is pursuing another Drone, where, depending on the simulated "skill-level" of the AI Drone (set on spawn), 
+it will stay away from any dangerous objects in the path towards its target. 
+The AI always uses the same steering algorithm since there is never a point where the AI would want to stop dodging objects that would damage it, 
+however, depending on factors like the AI Drone's current level (not to be confused with skill-level), some threats may become less important to dodge than others, 
+having less of an effect on the steering avoidance vector.
 
+### Descision-Making and Steering Demonstration
+Gameplay Video: https://www.youtube.com/watch?v=66NdgFn9gKA
 
-## Assignment 2
-Gameplay Video: https://youtu.be/5UUWPTiwFzw?si=hHfU_ZJizZt1yoef \
-Game executable, if needed, is in under `/Drone Strikers/Build`
+Not shown in video (due to video length constraints):
+- AI Drones will wander when no targetable objects are detected. Due to the high density of objects in the arena, this wandering behaviour is not visible very often.
+- If an AI Drone does not make significant progress in destroying its target within a certain time limit, it will "give up", flee for a short period of time, then return to normal behaviour.
 
-![State Diagram for AI Drones](https://github.com/user-attachments/assets/fe13f113-b042-439d-9f80-c1bcf7536565)
+### Decision Tree Diagram for Reference
+![Decision Tree for AI Drones](https://github.com/user-attachments/assets/c34527fb-6003-4495-8598-387857a0998e)
 
-### States
-**Wander**: The drone will move in a random direction for a short period of time, before choosing a new direction.\
-**Pursue**: The drone will move towards the highest priority targetable object (1. Highest level Drone in range; 2. Closest other targetable object).\
-**Flee**: The drone will move away from the highest priority threat (the highest level Drone in detection range).
+### Instructions to Run (if needed)
+1. Download the repository as a ZIP and extract it
+2. Navigate to the extracted directory: `/Drone Strikers/Builds/Dev`
+3. Run `Drone Strikers.exe`
 
-### Transitions
-**Wander -> Pursue**: If any targetable object is detected within detection range and no higher level Drones are detected.\
-**Pursue -> Wander**: If no targetable objects are detected within detection range.\
-**Wander/Pursue -> Flee**: If a higher level Drone is detected within detection range.\
-**Flee -> Wander**: If no higher level Drones are detected within detection range.
-
-### Terms
-**Targetable Object**: Any object that can be destroyed for experience. This includes other drones (AI or Player) and arena objects like Cylinder, Cubes, etc.\
-**Detected Object**: Detected objects are object within a certain range of the AI drone (colliding with a special trigger) and are **not** on the same team as the AI drone.
-
-## Proposal (Assignment 1)
-### Title (Working)
-Drone Strikers
-
-### Core Gameplay
-Players are in control of a “drone” and will be placed in one of two teams. Players must gather “experience” by destroying objects, AI entities, or other players (not on their team). Upon leveling up players will be presented with the ability to enhance their drone in various ways to prolong their survival. The goal is to be the strongest drone in the lobby and achieve “victory” for their team.
-
-### Game Type
-Arena Battle - Third-person, top down
-
-### Player Setup
-I will be aiming to support at least 10 players, and depending on how it goes, even more. It will be online multiplayer.
-
-### AI Enemies
-The most prevalent AI enemies will be AI-controlled drones that fill the role of additional players. These AI-controlled “player” drones (or AI players) will follow the same tasks as normal players would. There may also be some simpler AI-controlled drones that take the role of fodder for players or AI players to gain experience. Both AI types will use a finite state machine for their behaviour. AI players will need to make decisions that emulate how a player might play the game. The other basic AI drones will just attempt to damage the closest player or AI player. When no players are nearby, these basic AI drones will stay still.
-
-### Scripted Events
-At the very least, arena objects that are destroyed by players will need to respawn. This will likely happen after a certain amount of time and based on object saturation in a given area. Perhaps this will be implemented by running an automatic periodic check on a given location of the arena and if the object saturation is not too high, spawn another object. 
-
-### Environment
-The environment will be a very simple arena that is mostly devoid of colour (white, maybe with a grid). There may be changes in elevation if it proves to be a good addition. The drones and other objects will contrast with the sterile environment for ease of viewing. The environment simply facilitates the gameplay.
-
-### Assets
-The assets will be quite simple as well. I will search online for models that may work but I mostly anticipate that I will need to create them from scratch in Blender (or similar). Audio (if necessary) will likely come from Freesound.org.
-
-### Team
+# Team
 Group 26\
-Logan Philip 20294350\
-As I am the only member I will handle everything.
+Logan Philip - 20294350
 
 # AI Citations
 I used ChatGPT (GPT-5) with the prompt "What is a good approach for adding dynamic stat upgrades where values are enumerated in the following order: 1. Base 2. Add flat increases 3. Multiply by sum of additive multiplication increases. 4. Multiply by remaining multiplicative multiply stat increases." I asked this to get a better feel for the best approach to this feature's implementation.

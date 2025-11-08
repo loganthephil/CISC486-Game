@@ -1,4 +1,5 @@
-﻿using DroneStrikers.Core.Interfaces;
+﻿using DroneStrikers.Core.Editor;
+using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Game.Combat;
 using UnityEngine;
@@ -23,6 +24,7 @@ namespace DroneStrikers.Game.Drone
         public DroneControllerType ControllerType => _controllerSelector.CurrentControllerType;
         public Vector3 Position => _transform.position;
         public int Level => _droneUpgrader.Level;
+        public float Experience => _droneUpgrader.Experience;
         public Team Team => _teamMember.Team;
 
         public float MaxHealth => _health.MaxHealth;
@@ -31,17 +33,14 @@ namespace DroneStrikers.Game.Drone
 
         private Transform _transform;
 
-        private DroneControllerSelector _controllerSelector;
-        private DroneUpgrader _droneUpgrader;
-        private TeamMember _teamMember;
+        [SerializeField] [RequiredField] private DroneControllerSelector _controllerSelector;
+        [SerializeField] [RequiredField] private DroneUpgrader _droneUpgrader;
+        [SerializeField] [RequiredField] private TeamMember _teamMember;
         private IHealth _health;
 
         private void Awake()
         {
             _transform = transform;
-            _controllerSelector = GetComponent<DroneControllerSelector>();
-            _droneUpgrader = GetComponent<DroneUpgrader>();
-            _teamMember = GetComponent<TeamMember>();
             _health = GetComponent<IHealth>();
         }
     }

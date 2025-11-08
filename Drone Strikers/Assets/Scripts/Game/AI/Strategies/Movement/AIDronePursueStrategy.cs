@@ -5,7 +5,7 @@ namespace DroneStrikers.Game.AI.Strategies
 {
     public class AIDronePursueStrategy : IStrategy
     {
-        private const float MinDistanceToTarget = 3f;
+        private const float MinDistanceToTarget = 5f;
         private const float MaxDistanceToTarget = 10f;
 
         private readonly float _giveUpDistanceSqr;

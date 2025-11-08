@@ -23,7 +23,7 @@ namespace DroneStrikers.Game.Drone
         [Header("Stat Types")]
         [SerializeField] private StatTypeSO _aimSpeedStat;
         [SerializeField] private StatTypeSO _attackSpeedStat;
-        [SerializeField] private StatTypeSO _recoilStat;
+        [SerializeField] private StatTypeSO _recoilStat; // TODO: Replace recoil stat with a new "stability" stat or knockback resistance stat? Perhaps have two separate stats: one for recoil force when firing, one for receiving knockback force from recoil and other sources.
 
         private DroneStats _ownerStats;
         private TeamMember _teamMember;

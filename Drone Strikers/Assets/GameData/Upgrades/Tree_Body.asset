@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1820845a2dc43fbafe80e2c32cc9a53, type: 3}
+  m_Name: Tree_Body
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeTreeSO
+  _upgradeTreeName: Body
+  _startingUpgrades:
+  - {fileID: 11400000, guid: f5f1651b6d9ceb2498bcb5081c6bcd10, type: 2}
+  - {fileID: 11400000, guid: 94eb150707910d84d8f55fbfc28c8865, type: 2}

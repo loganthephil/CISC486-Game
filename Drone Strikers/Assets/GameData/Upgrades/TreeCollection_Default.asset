@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: TreeCollection_Default
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeTreeCollectionSO
   _upgradeTrees:
-  - {fileID: 11400000, guid: bcdab06e522e1e64f8e18f61e473f4ac, type: 2}
   - {fileID: 11400000, guid: 1064343fd9c885d4da3779c3b52fccc8, type: 2}
+  - {fileID: 11400000, guid: 84e4a993ca118d64ea5bac90f8bf22d2, type: 2}
+  - {fileID: 11400000, guid: bcdab06e522e1e64f8e18f61e473f4ac, type: 2}

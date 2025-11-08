@@ -9,52 +9,85 @@ namespace DroneStrikers.Game.Player
     {
         [SerializeField] [RequiredField] private DroneTurret _turret;
         [SerializeField] [RequiredField] private DroneMovement _droneMovement;
-        [SerializeField] [RequiredField] private InputActionReference _mousePositionInputReference;
 
-        [SerializeField] private float _mouseRayYLevel = 1.1f;
+        [Tooltip("The transform to use for the Y level targeted by mouse raycasts.")]
+        [SerializeField] [RequiredField] private Transform _mouseRayYLevelTransform;
 
-        [Header("Optional")]
-        [Tooltip("Camera used to convert mouse position to world point. If not set, will use Camera.main.")]
-        [SerializeField]
-        private Camera _camera;
+        private Camera _raycastCamera;
+        private InputAction _movementAction;
+        private InputAction _mousePositionAction;
+
+        private float _mouseRayYLevel;
 
         private bool _fireHeld;
+        private bool _autoFireEnabled;
 
-        private void Awake()
+        // Cache the main camera on awake as the camera used for ray casting
+        private void Awake() => _raycastCamera = Camera.main;
+
+        // Cache the Y level for mouse ray casting since it doesn't change
+        private void Start() => _mouseRayYLevel = _mouseRayYLevelTransform.position.y;
+
+        private void OnEnable()
         {
-            if (_camera == null) _camera = Camera.main;
+            // Get input actions from the input handler singleton
+            GameInputActions inputActions = GameInputHandler.InputActions;
+
+            inputActions.Drone.Enable(); // Enable the Drone action map
+
+            // Cache needed input action references
+            _movementAction = inputActions.Drone.Movement;
+            _mousePositionAction = inputActions.Drone.MousePosition;
+
+            // Subscribe to input events
+            inputActions.Drone.Fire.started += OnFire;
+            inputActions.Drone.Fire.canceled += OnFire;
+
+            inputActions.Drone.AutoFire.started += OnAutoFirePressed;
+        }
+
+        private void OnDisable()
+        {
+            // Get input actions from the input handler singleton
+            GameInputActions inputActions = GameInputHandler.InputActions;
+
+            inputActions.Drone.Disable(); // Disable the Drone action map
+
+            // Unsubscribe from input events
+            inputActions.Drone.Fire.started -= OnFire;
+            inputActions.Drone.Fire.canceled -= OnFire;
+
+            inputActions.Drone.AutoFire.started -= OnAutoFirePressed;
         }
 
         private void Update()
         {
             _turret.SetTarget(TryGetTargetPoint());
+            UpdateMovement(); // Update movement based on input
         }
 
         private void FixedUpdate()
         {
-            if (_fireHeld) _turret.RequestFire();
+            if (_autoFireEnabled || _fireHeld) _turret.RequestFire();
         }
 
-        /// <summary>
-        ///     EVENT HANDLER. DO NOT CALL DIRECTLY.
-        /// </summary>
-        public void OnMovement(InputAction.CallbackContext context)
+        private void UpdateMovement()
         {
-            Vector3 rawMovement = context.ReadValue<Vector2>();
+            Vector3 rawMovement = _movementAction.ReadValue<Vector2>();
             Vector3 direction = rawMovement.x * Vector3.right + rawMovement.y * Vector3.forward;
             _droneMovement.SetMovementDirection(direction);
         }
 
-        public void OnFire(InputAction.CallbackContext context)
-        {
-            if (context.started) _fireHeld = true;
-            else if (context.canceled) _fireHeld = false;
-        }
+        // Triggered on fire input action started/canceled
+        private void OnFire(InputAction.CallbackContext context) => _fireHeld = context.started; // true if started, false if canceled
+
+        // Triggered on auto-fire input action started
+        private void OnAutoFirePressed(InputAction.CallbackContext context) => _autoFireEnabled = !_autoFireEnabled; // Toggle auto-fire state
 
         private Vector3 TryGetTargetPoint()
         {
             // Cast a ray from the camera through the mouse position that intersects with a horizontal plane at y=0
-            Ray ray = _camera.ScreenPointToRay(_mousePositionInputReference.action.ReadValue<Vector2>());
+            Ray ray = _raycastCamera.ScreenPointToRay(_mousePositionAction.ReadValue<Vector2>());
 
             // Horizontal plane at y = _mouseRayYLevel
             Vector3 targetPoint = new(0f, _mouseRayYLevel, 0f);

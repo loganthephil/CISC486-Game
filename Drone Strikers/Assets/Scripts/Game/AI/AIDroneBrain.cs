@@ -165,6 +165,7 @@ namespace DroneStrikers.Game.AI
             void ClearTarget()
             {
                 _blackboard.SetValue<Transform>(_targetTransformKey, null);
+                _targetProvider.ClearTarget(); // Also clear the target from the target provider
             }
         }
 
