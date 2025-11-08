@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Spawnable_Cube
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.SpawnableSO
   _prefab: {fileID: 6932437063860109330, guid: a1a5d17c4dfee0946831a8b50f173e09, type: 3}
-  _minSeparation: 1.5
+  _minSeparation: 0.5

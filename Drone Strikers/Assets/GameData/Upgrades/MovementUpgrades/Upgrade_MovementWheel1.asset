@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Upgrade_MovementWheel1
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
   _upgradeName: Quad Wheels
+  _upgradeType: 2
   _modifiers:
   - Stat: {fileID: 11400000, guid: 5b291be45f491954791a179df812b76f, type: 2}
     Value: 2
@@ -24,3 +25,4 @@ MonoBehaviour:
     Value: 0.75
     ModType: 1
   _nextUpgrades: []
+  _mesh: {fileID: 7917866149768046988, guid: 13ae92adbcb281b4b9db6b7e2f25b836, type: 3}

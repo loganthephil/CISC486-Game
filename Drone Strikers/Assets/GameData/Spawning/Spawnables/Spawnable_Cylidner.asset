@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Spawnable_Cylidner
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.SpawnableSO
   _prefab: {fileID: 6932437063860109330, guid: 81eb6cd3d970329468825c79823b2f70, type: 3}
-  _minSeparation: 1
+  _minSeparation: 0.5

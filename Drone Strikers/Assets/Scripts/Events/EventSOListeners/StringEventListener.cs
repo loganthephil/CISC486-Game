@@ -1,6 +1,4 @@
-﻿namespace DroneStrikers.Events.Listeners
+﻿namespace DroneStrikers.Events.EventSOListeners
 {
-    public class StringEventListener : SingleParameterEventListener<string>
-    {
-    }
+    public class StringEventListener : SingleParameterEventListener<string> { }
 }

@@ -69,10 +69,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.ChunkSpawnDirector
   _chunkSpawnProfile: {fileID: 11400000, guid: c6d48159095151a4c840b293724dad4d, type: 2}
   _maxPlacementAttempts: 5
-  _yPosition: 0
   _collisionLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 320
 --- !u!114 &7273906060695469257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,3 +84,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56cc2d8826e04b9ebfda22d36eab13f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.ObjectSpawning.SpawnWithinCollider
+  _spawnUnderParent: 1

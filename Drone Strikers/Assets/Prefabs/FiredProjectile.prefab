@@ -90,6 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23a4c02308b74512876691abf40a59b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Combat.DamageReceiver
+  _onDestroyedEvent: {fileID: 0}
 --- !u!114 &-2497008157535056038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,7 +196,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: 28a18f163c4190b419c052bbc8ea8117, type: 3}
+  - {fileID: 2100000, guid: c46b90f6121480b458526185d766bfda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

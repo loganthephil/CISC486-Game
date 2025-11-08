@@ -7,7 +7,7 @@ namespace DroneStrikers.FSM
     /// </summary>
     public abstract class BaseState : IState
     {
-        protected StateMachine _machine;
+        protected FiniteStateMachine _machine;
 
         public virtual void OnEnter() { }
         public virtual void OnExit() { }

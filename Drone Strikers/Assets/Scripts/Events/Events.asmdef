@@ -1,7 +1,9 @@
 {
     "name": "Events",
     "rootNamespace": "DroneStrikers",
-    "references": [],
+    "references": [
+        "GUID:c14a7f404e9c767418078647bcc52c76"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
