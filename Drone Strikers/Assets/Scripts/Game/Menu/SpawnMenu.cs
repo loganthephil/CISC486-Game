@@ -1,15 +1,17 @@
 ﻿using DroneStrikers.Core.Types;
-using DroneStrikers.Game.ObjectSpawning.Drone;
+using DroneStrikers.Networking;
 using UnityEngine;
 
 namespace DroneStrikers.Game.Menu
 {
     public class SpawnMenu : MonoBehaviour
     {
-        // TODO: Decouple from DroneSpawner. Perhaps signal an event that the spawner listens to instead.
-        [SerializeField] private DroneSpawner _droneSpawner;
+        public void OnRedTeamButtonPressed() => RequestSpawnPlayerDrone((int)Team.Red);
+        public void OnBlueTeamButtonPressed() => RequestSpawnPlayerDrone((int)Team.Blue);
 
-        public void OnRedTeamButtonPressed() => _droneSpawner.SpawnPlayerDrone(Team.Red);
-        public void OnBlueTeamButtonPressed() => _droneSpawner.SpawnPlayerDrone(Team.Blue);
+        private static void RequestSpawnPlayerDrone(int team)
+        {
+            NetworkManager.Send(GameMessages.PlayerJoinTeam, new PlayerJoinTeamMessage { team = team });
+        }
     }
 }

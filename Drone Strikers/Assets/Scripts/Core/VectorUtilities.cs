@@ -16,6 +16,13 @@ namespace DroneStrikers.Core
         }
 
         /// <summary>
+        ///     Converts a Vector3 to a Vector2 by mapping x to x and z to y.
+        /// </summary>
+        /// <param name="v"> The Vector3 to convert. </param>
+        /// <returns> The resulting Vector2. </returns>
+        public static Vector2 ToVector2(this Vector3 v) => new(v.x, v.z);
+
+        /// <summary>
         ///     Returns true if the two vectors are approximately equal within a given tolerance.
         /// </summary>
         /// <param name="v"> The first vector.</param>
@@ -33,5 +40,13 @@ namespace DroneStrikers.Core
         /// <param name="magnitude"> The minimum magnitude. </param>
         /// <returns> True if the vector's magnitude is at least the given magnitude, false otherwise. </returns>
         public static bool AtLeast(this Vector3 v, float magnitude) => v.sqrMagnitude >= magnitude * magnitude;
+
+        /// <summary>
+        ///     Converts a Vector2 to a Vector3 by mapping x to x, y to z, and setting y to a specified value.
+        /// </summary>
+        /// <param name="v"> The Vector2 to convert. </param>
+        /// <param name="y"> The y component for the resulting Vector3. Default is 0. </param>
+        /// <returns></returns>
+        public static Vector3 ToVector3(this Vector2 v, float y = 0f) => new(v.x, y, v.y);
     }
 }

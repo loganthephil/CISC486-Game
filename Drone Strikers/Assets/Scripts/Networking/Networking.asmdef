@@ -1,0 +1,18 @@
+{
+    "name": "Networking",
+    "rootNamespace": "DroneStrikers",
+    "references": [
+        "GUID:c14a7f404e9c767418078647bcc52c76",
+        "GUID:03e2337db4bcc4d40ac8d40dd420c52a",
+        "GUID:7d8788162c0190c4c8b801543ada1607"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

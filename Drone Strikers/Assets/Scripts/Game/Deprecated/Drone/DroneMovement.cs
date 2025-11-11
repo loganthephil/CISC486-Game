@@ -44,12 +44,12 @@ namespace DroneStrikers.Game.Drone
         private void FixedUpdate()
         {
             float maxMoveSpeed = GetMoveSpeed();
-
+        
             // Determine target speed based on input
             Vector3 targetVelocity = Vector3.zero;
             if (!_normalizedMovementDirection.Approximately(Vector3.zero))
                 targetVelocity = _normalizedMovementDirection * maxMoveSpeed;
-
+    
             float currentSpeed = _rigidbody.linearVelocity.magnitude;
             bool isSlowingDown = currentSpeed > targetVelocity.magnitude;
 

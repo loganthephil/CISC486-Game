@@ -1,5 +1,6 @@
+using DroneStrikers.Core;
 using DroneStrikers.Core.Editor;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Networking;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,9 +8,6 @@ namespace DroneStrikers.Game.Player
 {
     public class PlayerInputController : MonoBehaviour
     {
-        [SerializeField] [RequiredField] private DroneTurret _turret;
-        [SerializeField] [RequiredField] private DroneMovement _droneMovement;
-
         [Tooltip("The transform to use for the Y level targeted by mouse raycasts.")]
         [SerializeField] [RequiredField] private Transform _mouseRayYLevelTransform;
 
@@ -19,6 +17,7 @@ namespace DroneStrikers.Game.Player
 
         private float _mouseRayYLevel;
 
+        private Vector2 _movementInput = Vector2.zero;
         private bool _fireHeld;
         private bool _autoFireEnabled;
 
@@ -62,20 +61,30 @@ namespace DroneStrikers.Game.Player
 
         private void Update()
         {
-            _turret.SetTarget(TryGetTargetPoint());
             UpdateMovement(); // Update movement based on input
         }
 
         private void FixedUpdate()
         {
-            if (_autoFireEnabled || _fireHeld) _turret.RequestFire();
+            // if (_autoFireEnabled || _fireHeld) _turret.RequestFire();
+
+            // Send movement input to the server
+            if (_movementInput != Vector2.zero) NetworkManager.Send(GameMessages.PlayerMove, new PlayerMoveMessage(_movementInput));
+
+            // Send aiming direction to the server
+            if (TryGetTargetPoint(out Vector3 targetPoint))
+            {
+                Vector3 direction = (targetPoint - transform.position).normalized;
+                NetworkManager.Send(GameMessages.PlayerAim, new PlayerAimMessage(direction.ToVector2()));
+            }
+
+            if (_autoFireEnabled || _fireHeld) NetworkManager.Send(GameMessages.PlayerShoot);
         }
 
         private void UpdateMovement()
         {
-            Vector3 rawMovement = _movementAction.ReadValue<Vector2>();
-            Vector3 direction = rawMovement.x * Vector3.right + rawMovement.y * Vector3.forward;
-            _droneMovement.SetMovementDirection(direction);
+            _movementInput = _movementAction.ReadValue<Vector2>();
+            // Debug.Log("Movement Input: " + _movementInput);
         }
 
         // Triggered on fire input action started/canceled
@@ -84,19 +93,33 @@ namespace DroneStrikers.Game.Player
         // Triggered on auto-fire input action started
         private void OnAutoFirePressed(InputAction.CallbackContext context) => _autoFireEnabled = !_autoFireEnabled; // Toggle auto-fire state
 
-        private Vector3 TryGetTargetPoint()
+        // Attempts to get the world point where the mouse is pointing at on a horizontal plane at _mouseRayYLevel
+        // If there is no mouse input or the raycast fails, returns false
+        private bool TryGetTargetPoint(out Vector3 targetPoint)
         {
+            Vector2 mousePosition = _mousePositionAction.ReadValue<Vector2>();
+            if (_raycastCamera == null)
+            {
+                targetPoint = Vector3.zero;
+                return false;
+            }
+
             // Cast a ray from the camera through the mouse position that intersects with a horizontal plane at y=0
-            Ray ray = _raycastCamera.ScreenPointToRay(_mousePositionAction.ReadValue<Vector2>());
+            Ray ray = _raycastCamera.ScreenPointToRay(mousePosition);
 
             // Horizontal plane at y = _mouseRayYLevel
-            Vector3 targetPoint = new(0f, _mouseRayYLevel, 0f);
+            targetPoint = new Vector3(0f, _mouseRayYLevel, 0f);
             Plane plane = new(Vector3.up, targetPoint);
 
-            // Cast a ray and get the intersection point with the plane
-            return plane.Raycast(ray, out float enter)
-                ? ray.GetPoint(enter) // Get the intersection point
-                : Vector3.zero; // If no intersection, return zero vector (this shouldn't happen)
+            if (plane.Raycast(ray, out float enter))
+            {
+                targetPoint = ray.GetPoint(enter); // Get the intersection point
+                return true;
+            }
+
+            // If no intersection, return zero vector (this shouldn't happen)
+            targetPoint = Vector3.zero;
+            return false;
         }
     }
 }

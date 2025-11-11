@@ -1,0 +1,42 @@
+import { Schema, type } from "@colyseus/schema";
+import { TransformState } from "@rooms/schema/TransformState";
+import { Vector2 } from "src/types/commonTypes";
+import { createFixedDrop, ExperienceDropStrategy } from "src/types/experience";
+import { ObjectTeam } from "src/types/team";
+
+export type ArenaObjectType = "small" | "medium" | "large";
+const ARENA_OBJECT_CONFIG: Record<ArenaObjectType, { health: number; expDrop: number; radius: number }> = {
+  small: { health: 5, expDrop: 5, radius: 0.6 },
+  medium: { health: 10, expDrop: 10, radius: 1.0 },
+  large: { health: 50, expDrop: 50, radius: 1.6 },
+};
+
+export class ArenaObjectState extends TransformState {
+  // -- BELOW ARE SYNCED TO ALL PLAYERS --
+  @type("string") objectType: ArenaObjectType;
+
+  @type("uint8") team: ObjectTeam = 0; // Arena objects are neutral
+
+  @type("number") maxHealth: number = 50; // Might set on drone spawn
+  @type("number") health: number = 50; // Might set on drone spawn
+  // -- ABOVE ARE SYNCED TO ALL PLAYERS --
+
+  public experienceDropStrategy: ExperienceDropStrategy;
+
+  constructor(objectType: ArenaObjectType, position: Vector2) {
+    const cfg = ARENA_OBJECT_CONFIG[objectType];
+    super(cfg.radius, position);
+
+    this.objectType = objectType;
+    this.maxHealth = cfg.health;
+    this.health = cfg.health;
+    this.experienceDropStrategy = createFixedDrop(cfg.expDrop);
+  }
+
+  public takeDamage(amount: number) {
+    this.health = Math.max(0, this.health - amount);
+    if (this.health <= 0) {
+      this.toDespawn = true;
+    }
+  }
+}

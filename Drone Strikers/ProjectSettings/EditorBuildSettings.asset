@@ -5,9 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Arena [2 Teams - 15x15].unity
     guid: bdde22fa633c01a4389757d9a80a14e7
+  - enabled: 1
+    path: Assets/Scenes/Networked Arena [2 Teams - 15x15].unity
+    guid: a63c85625e6bd8c489a83dd981b8d8cf
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3c71e681378778442a4520c57eabe018, type: 3}
   m_UseUCBPForAssetBundles: 0

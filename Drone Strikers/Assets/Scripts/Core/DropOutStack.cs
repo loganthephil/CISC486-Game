@@ -6,6 +6,9 @@ namespace DroneStrikers.Core
 {
     public class DropOutStack<T> : IReadOnlyCollection<T>, ICollection
     {
+        /// <summary>
+        ///     The number of items currently in the stack.
+        /// </summary>
         public int Count { get; private set; }
         public bool IsSynchronized { get; } // Always false because I don't care about thread safety
         public object SyncRoot { get; }
