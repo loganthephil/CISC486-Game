@@ -1,42 +1,56 @@
-import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
-import { AIDroneState } from "@rooms/schema/AIDroneState";
+import { MapSchema, type } from "@colyseus/schema";
 import { ArenaObjectState } from "@rooms/schema/ArenaObjectState";
 import { DroneState } from "@rooms/schema/DroneState";
 import { ProjectileState } from "@rooms/schema/ProjectileState";
 import { DroneType, Vector2 } from "src/types/commonTypes";
-import { ClientMessage, GameMessage } from "src/types/clientMessage";
+import { ClientMessage, ClientMessageType } from "src/types/clientMessage";
 import { DroneTeam, Team } from "src/types/team";
 import { Player } from "src/types/player";
 import { Constants } from "src/utils";
-import { DroneStats } from "src/types/stats";
-import { CollisionSystem } from "@rooms/controllers/collisionSystem";
-import { Collider, ColliderID, CollisionLayer } from "@rooms/controllers/collider";
+import { BehaviorState } from "@rooms/schema/BehaviourState";
+import { Room } from "colyseus";
+import { ArenaObjectSpawner } from "@rooms/systems/arenaObjectSpawner";
+import { Collider, CollisionLayer, ColliderID } from "@rooms/systems/collider";
+import { CollisionSystem } from "@rooms/systems/collisionSystem";
+import { DroneSpawner } from "@rooms/systems/droneSpawner";
 
-export class GameState extends Schema {
+export class GameState extends BehaviorState {
+  // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("number") gameTimeSeconds: number = 0;
 
   @type({ map: DroneState }) drones = new MapSchema<DroneState>();
   @type({ map: ArenaObjectState }) arenaObjects = new MapSchema<ArenaObjectState>();
   @type({ map: ProjectileState }) projectiles = new MapSchema<ProjectileState>();
+  // -- ABOVE ARE SYNCED TO ALL PLAYERS --
+
+  private room: Room;
 
   // Keep track of players that have joined the session (independent of drones)
   private players: Map<string, Player> = new Map<string, Player>();
 
   // Collision system
   private collisionSystem: CollisionSystem;
-  private collidersById: Map<ColliderID, Collider> = new Map<ColliderID, Collider>();
+  // private collidersById: Map<ColliderID, Collider> = new Map<ColliderID, Collider>();
 
-  constructor() {
+  private droneSpawner: DroneSpawner = new DroneSpawner();
+  private arenaObjectSpawner: ArenaObjectSpawner = new ArenaObjectSpawner(this);
+
+  constructor(room: Room) {
     super();
+    this.room = room;
     this.collisionSystem = new CollisionSystem({ cellSize: 3 });
   }
 
-  /**
-   * Update the game state by the specified delta time.
-   * @param deltaTime Time in seconds since the last update.
-   */
-  public update(deltaTime: number) {
+  public override update(deltaTime: number) {
     this.gameTimeSeconds += deltaTime;
+
+    // Spawn arena objects
+    const newArenaObjects = this.arenaObjectSpawner.doSpawnObjectsTick();
+    newArenaObjects.forEach((obj) => {
+      const objId = `arenaObj_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      this.arenaObjects.set(objId, obj);
+      this.registerArenaObjectCollider(objId, obj);
+    });
 
     // Update all drones
     const dronesToRemove: string[] = [];
@@ -52,25 +66,27 @@ export class GameState extends Schema {
       if (projectile.toDespawn) projectilesToRemove.push(id);
     });
 
-    // Update all projectiles
+    // Update all arena objects
     const toRemoveObjects: string[] = [];
     this.arenaObjects.forEach((obj, id) => {
-      // obj.update(deltaTime); // Arena objects might not need per-frame updates
+      obj.update(deltaTime);
       if (obj.toDespawn) toRemoveObjects.push(id);
     });
 
     // Handle collisions after updating all entities
-    this.collisionSystem.update();
+    this.collisionSystem.processCollisions();
 
     // Remove objects marked for despawn
     dronesToRemove.forEach((id) => {
       this.removeDrone(id);
+      this.unregisterCollider(id);
     });
     projectilesToRemove.forEach((id) => {
       this.projectiles.delete(id);
       this.unregisterCollider(id);
     });
     toRemoveObjects.forEach((id) => {
+      this.arenaObjects.get(id)?.onDestroy(); // Call onDestroy callback
       this.arenaObjects.delete(id);
       this.unregisterCollider(id);
     });
@@ -87,7 +103,7 @@ export class GameState extends Schema {
   public processMessage(clientId: string, message: ClientMessage): boolean {
     // Non-drone player messages
     switch (message.type) {
-      case GameMessage.PLAYER_SELECT_TEAM:
+      case ClientMessageType.PLAYER_SELECT_TEAM:
         const { team } = message.payload;
         // Ensure valid team
         if (team < Team.Red || team > Team.Blue) {
@@ -105,7 +121,7 @@ export class GameState extends Schema {
     if (!playerDrone) return false; // No drone found for this client
 
     switch (message.type) {
-      case GameMessage.PLAYER_MOVE:
+      case ClientMessageType.PLAYER_MOVE:
         const { movement } = message.payload;
         if (!movement) {
           console.log("Invalid movement payload:", message.payload);
@@ -114,12 +130,12 @@ export class GameState extends Schema {
         playerDrone.setRequestedMovement(movement);
         return true;
 
-      case GameMessage.PLAYER_AIM:
+      case ClientMessageType.PLAYER_AIM:
         const { direction } = message.payload;
         playerDrone.setRequestedAim(direction);
         return true;
 
-      case GameMessage.PLAYER_SHOOT:
+      case ClientMessageType.PLAYER_SHOOT:
         // Trigger shooting
         const projectile = this.droneShoot(clientId);
         if (!projectile) return false; // Shooting failed
@@ -130,11 +146,14 @@ export class GameState extends Schema {
         this.registerProjectileCollider(projectileId, projectile);
         return true;
 
-      case GameMessage.PLAYER_SELECT_UPGRADE:
+      case ClientMessageType.PLAYER_SELECT_UPGRADE:
         const { upgradeId } = message.payload;
+
+        playerDrone.droneUpgrader.tryApplyUpgrade(upgradeId);
         return true;
 
       default:
+        console.log("Unhandled client message type:", (message as any).type);
         return false; // Unhandled message type
     }
   }
@@ -156,10 +175,12 @@ export class GameState extends Schema {
   }
 
   public addDrone(id: string, name: string, team: DroneTeam, droneType: DroneType): DroneState | null {
-    // Spawn position
-    const spawnPosition: Vector2 = { x: 0, y: 0 }; // TODO: Replace with actual spawn logic
+    const drone = this.droneSpawner.createDrone(name, team, droneType);
+    if (!drone) {
+      console.warn(`Failed to spawn drone for player ${name} on team ${team}`);
+      return null;
+    }
 
-    const drone = droneType === "Player" ? new DroneState(name, team, spawnPosition) : new AIDroneState(name, team, spawnPosition);
     this.drones.set(id, drone);
     this.registerDroneCollider(id, drone); // Register collider for the drone
     return drone;
@@ -180,20 +201,24 @@ export class GameState extends Schema {
     const drone: DroneState = this.drones.get(droneId);
     if (!drone) return null; // Invalid drone
 
-    const droneStats: DroneStats = drone.getStats();
-
     // Check if drone can fire
     if (this.gameTimeSeconds - drone.nextShotAvailableTime < 0) {
       return null; // Cannot fire yet
     }
-    const attackCooldown = 1 / droneStats.attackSpeed;
+
+    const projectileSpeedStat = drone.getStatValue("projectileSpeed");
+    const attackSpeedStat = drone.getStatValue("attackSpeed");
+    const attackDamageStat = drone.getStatValue("attackDamage");
+    const attackPierceStat = drone.getStatValue("attackPierce");
+
+    const attackCooldown = 1 / attackSpeedStat;
     drone.nextShotAvailableTime = this.gameTimeSeconds + attackCooldown; // Update next shot available time
 
     // Create projectile
     const currentAim = drone.getAimVector();
     const velocity: Vector2 = {
-      x: currentAim.x * droneStats.projectileSpeed,
-      y: currentAim.y * droneStats.projectileSpeed,
+      x: currentAim.x * projectileSpeedStat,
+      y: currentAim.y * projectileSpeedStat,
     };
 
     // Calculate spawn position with offset
@@ -201,7 +226,7 @@ export class GameState extends Schema {
       x: drone.posX + currentAim.x * Constants.DRONE_WEAPON_PROJECTILE_OFFSET,
       y: drone.posY + currentAim.y * Constants.DRONE_WEAPON_PROJECTILE_OFFSET,
     };
-    return new ProjectileState(droneStats.attackDamage, droneStats.attackPierce, drone.team, spawnPosition, velocity);
+    return new ProjectileState(drone, attackDamageStat, attackPierceStat, drone.team, spawnPosition, velocity);
   }
 
   //#region Collision System
@@ -211,14 +236,14 @@ export class GameState extends Schema {
       id: id,
       transform: drone,
       layer: CollisionLayer.Drone,
-      mask: CollisionLayer.ArenaObject | CollisionLayer.Projectile | CollisionLayer.Drone,
+      mask: CollisionLayer.Drone | CollisionLayer.Projectile | CollisionLayer.ArenaObject,
       isTrigger: false,
       team: drone.team,
       handler: drone,
       rigidbody: drone.getRigidbody(),
     });
     this.collisionSystem.register(collider);
-    this.collidersById.set(id, collider);
+    // this.collidersById.set(id, collider);
   }
 
   private registerProjectileCollider(id: string, projectile: ProjectileState) {
@@ -226,13 +251,13 @@ export class GameState extends Schema {
       id,
       transform: projectile,
       layer: CollisionLayer.Projectile,
-      mask: CollisionLayer.Drone | CollisionLayer.ArenaObject | CollisionLayer.Projectile,
+      mask: CollisionLayer.Drone | CollisionLayer.Projectile | CollisionLayer.ArenaObject,
       isTrigger: true,
       team: projectile.team,
       handler: projectile,
     });
     this.collisionSystem.register(collider);
-    this.collidersById.set(id, collider);
+    // this.collidersById.set(id, collider);
   }
 
   public registerArenaObjectCollider(id: string, obj: ArenaObjectState) {
@@ -243,14 +268,15 @@ export class GameState extends Schema {
       mask: CollisionLayer.Drone | CollisionLayer.Projectile | CollisionLayer.ArenaObject,
       isTrigger: false,
       handler: obj,
+      rigidbody: obj.getRigidbody(),
     });
     this.collisionSystem.register(collider);
-    this.collidersById.set(id, collider);
+    // this.collidersById.set(id, collider);
   }
 
   private unregisterCollider(id: ColliderID) {
     this.collisionSystem.unregister(id);
-    this.collidersById.delete(id);
+    // this.collidersById.delete(id);
   }
   //#endregion
 }

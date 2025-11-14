@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DroneStrikers.Game.Stats
+namespace DroneStrikers.Game.Deprecated.Stats
 {
     [CreateAssetMenu(fileName = "StatType_", menuName = "Stats/Stat Type")]
     public class StatTypeSO : ScriptableObject

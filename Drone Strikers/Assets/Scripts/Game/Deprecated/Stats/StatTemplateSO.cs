@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Stats
+namespace DroneStrikers.Game.Deprecated.Stats
 {
     [CreateAssetMenu(fileName = "StatTemplate_", menuName = "Stats/Stat Template")]
     public class StatTemplateSO : ScriptableObject

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DroneStrikers.Networking
 {
-    public enum GameMessages : byte
+    public enum ClientMessages : byte
     {
         PlayerJoinTeam,
         PlayerMove,
@@ -40,5 +40,13 @@ namespace DroneStrikers.Networking
     {
         public Vector2Message direction;
         public PlayerAimMessage(Vector2 direction) => this.direction = new Vector2Message { x = direction.x, y = direction.y };
+    }
+
+    [Serializable]
+    public class PlayerSelectUpgradeMessage
+    {
+        public string upgradeId;
+
+        public PlayerSelectUpgradeMessage(string upgradeID) => upgradeId = upgradeID;
     }
 }

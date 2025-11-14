@@ -12,17 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d226c0f88d76340ab720ebc7a69269, type: 3}
   m_Name: Upgrade_MovementWalking1
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
+  _upgradeId: quadLegs
   _upgradeName: Quad Legs
   _upgradeType: 2
-  _modifiers:
-  - Stat: {fileID: 11400000, guid: fd835fb76a39e7a40b6280018a35828f, type: 2}
-    Value: 2
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: fcc2ed2d2b276df44944b93dac138dd1, type: 2}
-    Value: 2
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
-    Value: -0.25
-    ModType: 1
   _nextUpgrades: []
   _mesh: {fileID: 1499382305277628684, guid: b701e11b2f679de4ba86705728aa214f, type: 3}

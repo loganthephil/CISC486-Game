@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Types;
+using DroneStrikers.Events;
+using DroneStrikers.Events.EventSO;
 using DroneStrikers.Game.Combat;
+using DroneStrikers.Game.Player;
+using DroneStrikers.Game.UI;
 using DroneStrikers.Networking;
 using UnityEngine;
 
@@ -20,10 +25,23 @@ namespace DroneStrikers.Game.Drone
         [Header("References")]
         [SerializeField] [RequiredField] private Transform _bodyTransform;
         [SerializeField] [RequiredField] private Transform _movementTransform;
+        [SerializeField] [RequiredField] private WorldHealthBar _healthBar;
 
         [SerializeField] [RequiredField] private GameObject _playerModule;
 
         [SerializeField] [RequiredField] private TeamMember _teamMember;
+
+        [Header("Upgrade Visuals")]
+        [SerializeField] [RequiredField] private UpgradeTreeCollectionSO _upgradeCollection;
+        [SerializeField] [RequiredField] private MeshFilter _turretMeshFilter;
+        [SerializeField] [RequiredField] private MeshFilter _bodyMeshFilter;
+        [SerializeField] [RequiredField] private MeshFilter _movementMeshFilter;
+
+        [Header("Events")]
+        [SerializeField] [RequiredField] private LocalEvents _localEvents;
+        [SerializeField] [RequiredField] private VoidEventSO _onPlayerDeath;
+        [SerializeField] [RequiredField] private IntEventSO _onPlayerUpgradePointGained;
+        [SerializeField] [RequiredField] private StringEventSO _onPlayerUpgradeApplied;
 
         [Header("Interpolation Settings")]
         [Tooltip("How far (seconds) to rewind when choosing interpolation window.")]
@@ -34,6 +52,10 @@ namespace DroneStrikers.Game.Drone
         [SerializeField] private float _positionLerpSpeed = 15f;
         [Tooltip("Smoothing factor for applying interpolated rotation.")]
         [SerializeField] private float _rotationLerpSpeed = 15f;
+
+        public string DroneId { get; private set; }
+
+        public DroneState CurrentState { get; private set; }
 
         private Transform _transform;
 
@@ -47,18 +69,58 @@ namespace DroneStrikers.Game.Drone
             _transform = transform;
         }
 
-        public void Initialize(DroneState droneState, bool isLocalPlayer)
+        public void Initialize(DroneState droneState, string droneId, bool isLocalPlayer)
         {
+            DroneId = droneId; // Set the DroneId
+
             _isLocalPlayer = isLocalPlayer;
             _playerModule.SetActive(isLocalPlayer); // Enable player module only for local player
 
+            // Immediately set initial position
+            _transform.position = new Vector3(droneState.posX, 0f, droneState.posY);
+
+            CurrentState = droneState;
             PushSnapshot(droneState); // Initial snapshot
 
             _teamMember.Team = (Team)droneState.team; // Set team based on drone state
 
-            NetworkManager.Instance.GameStateCallbacks.OnChange(droneState, () =>
+            NetworkManager instance = NetworkManager.Instance;
+            instance.GameStateCallbacks.OnChange(droneState, () =>
             {
+                CurrentState = droneState;
                 PushSnapshot(droneState);
+                _healthBar.UpdatePercentage(droneState.health, droneState.maxHealth);
+            });
+
+            // TODO: Consider stopping capture of _localEvents
+            instance.GameStateCallbacks.Listen(droneState, state => state.experience, (currentValue, _) =>
+            {
+                _localEvents.Invoke(PlayerEvents.ExperienceGained, currentValue);
+            });
+
+            instance.GameStateCallbacks.Listen(droneState, state => state.level, (currentValue, _) =>
+            {
+                _localEvents.Invoke(PlayerEvents.LevelUp, currentValue);
+            });
+
+            instance.GameStateCallbacks.Listen(droneState, state => state.upgradePoints, (currentValue, _) =>
+            {
+                _onPlayerUpgradePointGained.Raise(currentValue);
+            });
+
+            instance.GameStateCallbacks.Listen(droneState, state => state.lastTurretUpgradeId, (currentValue, _) =>
+            {
+                OnUpgradeApplied(currentValue);
+            });
+
+            instance.GameStateCallbacks.Listen(droneState, state => state.lastBodyUpgradeId, (currentValue, _) =>
+            {
+                OnUpgradeApplied(currentValue);
+            });
+
+            instance.GameStateCallbacks.Listen(droneState, state => state.lastMovementUpgradeId, (currentValue, _) =>
+            {
+                OnUpgradeApplied(currentValue);
             });
         }
 
@@ -77,12 +139,18 @@ namespace DroneStrikers.Game.Drone
                 _snapshotBuffer.RemoveRange(0, _snapshotBuffer.Count - MaxBufferSize);
         }
 
+        private void OnUpgradeApplied(string upgradeId)
+        {
+            if (_upgradeCollection.TryGetUpgrade(upgradeId, out UpgradeSO upgrade)) ApplyUpgradeVisuals(upgrade);
+            _onPlayerUpgradeApplied.Raise(upgradeId);
+        }
+
         private void Update()
         {
             SynchronizeFromServer();
         }
 
-        
+
         // TODO: Handle local player prediction and reconciliation locally
         private void SynchronizeFromServer()
         {
@@ -170,6 +238,32 @@ namespace DroneStrikers.Game.Drone
             _transform.position = Vector3.Lerp(_transform.position, targetPos, Time.deltaTime * _positionLerpSpeed);
             Quaternion desiredRot = Quaternion.Euler(0f, targetRot, 0f);
             _bodyTransform.rotation = Quaternion.Slerp(_bodyTransform.rotation, desiredRot, Time.deltaTime * _rotationLerpSpeed);
+        }
+
+        private void ApplyUpgradeVisuals(UpgradeSO upgrade)
+        {
+            if (upgrade == null) throw new ArgumentNullException(nameof(upgrade));
+
+            // Update visuals of applicable mesh filter
+            switch (upgrade.UpgradeType)
+            {
+                case UpgradeType.Turret:
+                    if (upgrade.Mesh is not null) _turretMeshFilter.mesh = upgrade.Mesh;
+                    break;
+                case UpgradeType.Body:
+                    if (upgrade.Mesh is not null) _bodyMeshFilter.mesh = upgrade.Mesh;
+                    break;
+                case UpgradeType.Movement:
+                    if (upgrade.Mesh is not null) _movementMeshFilter.mesh = upgrade.Mesh;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_isLocalPlayer) _onPlayerDeath.Raise();
         }
     }
 }

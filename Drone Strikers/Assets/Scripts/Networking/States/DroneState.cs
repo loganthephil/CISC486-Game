@@ -28,16 +28,31 @@ public DroneState() { }
 		[Type(8, "uint8")]
 		public byte level = default(byte);
 
-		[Type(9, "number")]
-		public float maxHealth = default(float);
+		[Type(9, "uint8")]
+		public byte upgradePoints = default(byte);
 
 		[Type(10, "number")]
+		public float progressToNextLevel = default(float);
+
+		[Type(11, "string")]
+		public string lastTurretUpgradeId = default(string);
+
+		[Type(12, "string")]
+		public string lastBodyUpgradeId = default(string);
+
+		[Type(13, "string")]
+		public string lastMovementUpgradeId = default(string);
+
+		[Type(14, "number")]
+		public float maxHealth = default(float);
+
+		[Type(15, "number")]
 		public float health = default(float);
 
-		[Type(11, "number")]
+		[Type(16, "number")]
 		public float lowerRotation = default(float);
 
-		[Type(12, "number")]
+		[Type(17, "number")]
 		public float upperRotation = default(float);
 	}
 }

@@ -2,10 +2,10 @@ using DroneStrikers.Core;
 using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Game.Combat;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Deprecated.Drone;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Projectile
+namespace DroneStrikers.Game.Deprecated.Projectile
 {
     [RequireComponent(typeof(TeamMember))]
     [RequireComponent(typeof(Rigidbody))]

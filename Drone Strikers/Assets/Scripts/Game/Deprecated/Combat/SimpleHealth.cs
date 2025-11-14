@@ -1,7 +1,7 @@
 ﻿using DroneStrikers.Core.Interfaces;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Combat
+namespace DroneStrikers.Game.Deprecated.Combat
 {
     // TODO: Consider making SimpleHealth the base class for DroneHealth to reduce code duplication
     public class SimpleHealth : MonoBehaviour, IHealth

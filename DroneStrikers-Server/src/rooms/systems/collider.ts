@@ -1,5 +1,5 @@
-import { Rigidbody } from "@rooms/controllers/rigidbody";
 import { TransformState } from "@rooms/schema/TransformState";
+import { Rigidbody } from "@rooms/systems/rigidbody";
 import { Vector2 } from "src/types/commonTypes";
 import { Team } from "src/types/team";
 

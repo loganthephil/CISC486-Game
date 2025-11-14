@@ -2,7 +2,7 @@
 using DroneStrikers.Core;
 using UnityEngine;
 
-namespace DroneStrikers.Game.AI.Strategies
+namespace DroneStrikers.Game.Deprecated.AI.Strategies
 {
     public class AIDroneCreateDistanceStrategy : IStrategy
     {

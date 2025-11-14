@@ -1,6 +1,7 @@
 ﻿using System;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
+using DroneStrikers.Game.Deprecated.Combat;
 using UnityEngine;
 
 namespace DroneStrikers.Game.Combat

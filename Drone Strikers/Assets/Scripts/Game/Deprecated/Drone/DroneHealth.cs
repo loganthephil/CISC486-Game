@@ -1,11 +1,11 @@
 ﻿using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
-using DroneStrikers.Game.Combat;
-using DroneStrikers.Game.Stats;
+using DroneStrikers.Game.Deprecated.Combat;
+using DroneStrikers.Game.Deprecated.Stats;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     [RequireComponent(typeof(DroneStats))]
     public class DroneHealth : MonoBehaviour, IHealth

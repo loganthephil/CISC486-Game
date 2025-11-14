@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DroneStrikers.Game.ObjectSpawning
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning
 {
     public class TrackedObject : MonoBehaviour
     {

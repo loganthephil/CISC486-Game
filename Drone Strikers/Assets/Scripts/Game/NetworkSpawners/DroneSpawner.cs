@@ -2,10 +2,11 @@
 using Colyseus;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Events.EventSO;
+using DroneStrikers.Game.Drone;
 using DroneStrikers.Networking;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.NetworkSpawners
 {
     public class DroneSpawner : MonoBehaviour
     {
@@ -39,7 +40,7 @@ namespace DroneStrikers.Game.Drone
             }
 
             // Create and initialize the drone GameObject here
-            GameObject droneObject = Instantiate(_dronePrefab);
+            GameObject droneObject = Instantiate(_dronePrefab, transform);
             _spawnedDrones[droneId] = droneObject; // Store reference to spawned drone
 
             bool isLocalPlayer = droneId == room.SessionId;
@@ -48,7 +49,7 @@ namespace DroneStrikers.Game.Drone
             if (isLocalPlayer) _onPlayerSpawn.Raise(droneObject);
 
             NetworkedDrone networkedDrone = droneObject.GetComponent<NetworkedDrone>();
-            networkedDrone.Initialize(droneState, isLocalPlayer);
+            networkedDrone.Initialize(droneState, droneId, isLocalPlayer);
         }
 
         private void OnDroneRemoved(string droneId)

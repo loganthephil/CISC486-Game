@@ -1,0 +1,247 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &277260017270536074
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8124022566572097710}
+  - component: {fileID: 8101778322589044117}
+  - component: {fileID: 1461120907677126511}
+  - component: {fileID: 7636745430313357006}
+  - component: {fileID: 6197695203303328235}
+  m_Layer: 0
+  m_Name: NetworkedArenaObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8124022566572097710
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277260017270536074}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 7.54908, y: 43.439, z: -27.30184}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5112774144693773080}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &8101778322589044117
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277260017270536074}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: -876546973899608171, guid: 28a18f163c4190b419c052bbc8ea8117, type: 3}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1461120907677126511
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277260017270536074}
+  m_Mesh: {fileID: 2534964839176971238, guid: a2ed5f29c5578e343b0cb4070f9e2a4b, type: 3}
+--- !u!114 &7636745430313357006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277260017270536074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c579152476e74e04bfb0301b9f635749, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.Combat.NetworkedArenaObject
+  _healthBar: {fileID: 6952446477959230013}
+  _meshFilter: {fileID: 1461120907677126511}
+  _colorizer: {fileID: 6197695203303328235}
+  _smallObjectSO: {fileID: 11400000, guid: 4c226a8734b20294d80303f68d0ed1ed, type: 2}
+  _mediumObjectSO: {fileID: 11400000, guid: e80f82f29fb9c8849a959458739338e9, type: 2}
+  _largeObjectSO: {fileID: 11400000, guid: ad10694add65eb2409777b55b42b5693, type: 2}
+--- !u!114 &6197695203303328235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277260017270536074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 188cdf7b6c724344b50c808266bc42f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::DroneStrikers.Core.Colorizer
+  _setOnStart: 0
+  _color: {r: 0, g: 0, b: 0, a: 0}
+--- !u!1001 &8603528913418366133
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8124022566572097710}
+    m_Modifications:
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 86
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8660254
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5648117877231167035, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5648117877231167035, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5668064825539967468, guid: 31a968855c209634280bee44d471733b, type: 3}
+      propertyPath: m_Name
+      value: HealthBar
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 31a968855c209634280bee44d471733b, type: 3}
+--- !u!224 &5112774144693773080 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}
+  m_PrefabInstance: {fileID: 8603528913418366133}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6952446477959230013 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1664593306437705352, guid: 31a968855c209634280bee44d471733b, type: 3}
+  m_PrefabInstance: {fileID: 8603528913418366133}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd9c791ded145a44e88fe71b3813f07e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.UI.WorldHealthBar

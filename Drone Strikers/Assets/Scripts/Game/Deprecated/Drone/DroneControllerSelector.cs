@@ -1,7 +1,7 @@
 ﻿using DroneStrikers.Core.Types;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     public class DroneControllerSelector : MonoBehaviour
     {

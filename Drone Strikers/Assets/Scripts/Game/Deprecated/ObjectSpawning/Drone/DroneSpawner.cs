@@ -5,13 +5,13 @@ using System.Linq;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events.EventSO;
-using DroneStrikers.Game.AI;
 using DroneStrikers.Game.Combat;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Deprecated.AI;
+using DroneStrikers.Game.Deprecated.Drone;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace DroneStrikers.Game.ObjectSpawning.Drone
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning.Drone
 {
     public class DroneSpawner : MonoBehaviour
     {

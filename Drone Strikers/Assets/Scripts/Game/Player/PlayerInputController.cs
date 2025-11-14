@@ -69,16 +69,16 @@ namespace DroneStrikers.Game.Player
             // if (_autoFireEnabled || _fireHeld) _turret.RequestFire();
 
             // Send movement input to the server
-            if (_movementInput != Vector2.zero) NetworkManager.Send(GameMessages.PlayerMove, new PlayerMoveMessage(_movementInput));
+            if (_movementInput != Vector2.zero) NetworkManager.Send(ClientMessages.PlayerMove, new PlayerMoveMessage(_movementInput));
 
             // Send aiming direction to the server
             if (TryGetTargetPoint(out Vector3 targetPoint))
             {
                 Vector3 direction = (targetPoint - transform.position).normalized;
-                NetworkManager.Send(GameMessages.PlayerAim, new PlayerAimMessage(direction.ToVector2()));
+                NetworkManager.Send(ClientMessages.PlayerAim, new PlayerAimMessage(direction.ToVector2()));
             }
 
-            if (_autoFireEnabled || _fireHeld) NetworkManager.Send(GameMessages.PlayerShoot);
+            if (_autoFireEnabled || _fireHeld) NetworkManager.Send(ClientMessages.PlayerShoot);
         }
 
         private void UpdateMovement()

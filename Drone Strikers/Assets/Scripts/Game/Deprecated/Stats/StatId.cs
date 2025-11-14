@@ -1,4 +1,4 @@
-﻿namespace DroneStrikers.Game.Stats
+﻿namespace DroneStrikers.Game.Deprecated.Stats
 {
     /// <summary>
     ///     Possible IDs for different stats.

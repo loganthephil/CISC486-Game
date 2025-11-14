@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DroneStrikers.Game.Stats
+namespace DroneStrikers.Game.Deprecated.Stats
 {
     public class Stat
     {

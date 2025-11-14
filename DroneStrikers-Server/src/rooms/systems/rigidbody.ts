@@ -52,10 +52,11 @@ export class Rigidbody {
   }
 
   /**
-   * Physics step update (called once per frame).
-   * @param deltaTime Time elapsed since last update (in seconds). Defaults to fixed time step.
+   * Physics step update.
+   * Should be called once per frame within parent to integrate forces and update position/velocity.
+   * @param deltaTime Time elapsed since last update (in seconds).
    */
-  public update(deltaTime: number = Constants.FIXED_TIME_STEP_S) {
+  public updatePhysics(deltaTime: number) {
     if (this.isKinematic || this.properties.mass <= 0) {
       // Kinematic/infinite-mass objects aren't integrated by forces
       this.accumulatedForce = { x: 0, y: 0 };

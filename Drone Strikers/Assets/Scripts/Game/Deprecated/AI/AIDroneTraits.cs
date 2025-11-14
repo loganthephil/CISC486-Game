@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DroneStrikers.Game.AI
+namespace DroneStrikers.Game.Deprecated.AI
 {
     public class AIDroneTraits : MonoBehaviour
     {

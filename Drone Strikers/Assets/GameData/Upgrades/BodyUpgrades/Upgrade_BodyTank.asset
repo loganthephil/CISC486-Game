@@ -12,17 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d226c0f88d76340ab720ebc7a69269, type: 3}
   m_Name: Upgrade_BodyTank
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
+  _upgradeId: tank
   _upgradeName: Tank
   _upgradeType: 1
-  _modifiers:
-  - Stat: {fileID: 11400000, guid: 0b05a3c864f5dda4b8aa667a56408363, type: 2}
-    Value: 0.25
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
-    Value: -0.1
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: 88d415f29253b224d80f22dcdcab8d1c, type: 2}
-    Value: -0.15
-    ModType: 1
   _nextUpgrades: []
   _mesh: {fileID: 6877492002447952740, guid: ad2e0a8665691214680a96562e3b59c6, type: 3}

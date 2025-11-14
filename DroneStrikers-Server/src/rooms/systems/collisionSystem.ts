@@ -1,6 +1,6 @@
-import { Collider, ColliderID, CollisionLayer } from "@rooms/controllers/collider";
+import { Collider, ColliderID } from "@rooms/systems/collider";
 import { Vector2 } from "src/types/commonTypes";
-import { VectorUtils } from "src/utils";
+import { Constants, VectorUtils } from "src/utils";
 
 export interface CollisionSystemProperties {
   cellSize?: number; // Size of each grid cell for spatial partitioning
@@ -39,7 +39,11 @@ export class CollisionSystem {
     // The grid and pair sets will be cleaned up in the update step
   }
 
-  public update() {
+  /**
+   * Process collisions for all registered colliders.
+   * Should be called once per update cycle.
+   */
+  public processCollisions() {
     // Rebuild the grid
     this.grid.clear();
     for (const collider of this.colliders.values()) {
@@ -67,7 +71,10 @@ export class CollisionSystem {
             for (const otherId of cellColliders) {
               // Don't check self or already checked
               if (otherId === collider.id || checkedColliders.has(otherId)) continue;
-              checkedColliders.add(otherId);
+              checkedColliders.add(otherId); // Mark as checked because we check multiple cells and the same collider may appear in multiple cells
+
+              const key = pairKey(collider.id, otherId);
+              if (this.currentPairs.has(key)) continue; // Already processed this pair
 
               const other = this.colliders.get(otherId);
               if (!other) continue;
@@ -85,8 +92,7 @@ export class CollisionSystem {
               if (distSq > sumRadius * sumRadius) continue; // No collision
 
               // Narrow phase collision detected
-              const key = pairKey(collider.id, other.id);
-              this.currentPairs.add(key);
+              this.currentPairs.add(key); // Mark this pair as processed
 
               const isTriggerPair = collider.isTrigger || other.isTrigger;
 
@@ -137,6 +143,9 @@ export class CollisionSystem {
         }
       }
     }
+
+    // Enforce world bounds for all colliders
+    this.enforceWorldBounds();
 
     // Set prevPairs for next frame
     this.prevPairs = new Set(this.currentPairs);
@@ -205,6 +214,45 @@ export class CollisionSystem {
     }
   }
 
+  private enforceWorldBounds() {
+    const mapHalfSize = Constants.MAP_MAX_COORDINATE;
+
+    for (const collider of this.colliders.values()) {
+      const r = collider.radius;
+      const minX = -mapHalfSize + r;
+      const maxX = mapHalfSize - r;
+      const minY = -mapHalfSize + r;
+      const maxY = mapHalfSize - r;
+
+      const t = collider.transform;
+      let clampedX = t.posX;
+      let clampedY = t.posY;
+
+      if (clampedX < minX) clampedX = minX;
+      else if (clampedX > maxX) clampedX = maxX;
+
+      if (clampedY < minY) clampedY = minY;
+      else if (clampedY > maxY) clampedY = maxY;
+
+      const dx = clampedX - t.posX;
+      const dy = clampedY - t.posY;
+
+      if (dx !== 0 || dy !== 0) {
+        // Move using rigidbody if available, otherwise set directly
+        if (collider.rigidbody) {
+          collider.rigidbody.translate(dx, dy);
+        } else {
+          t.posX += dx;
+          t.posY += dy;
+        }
+
+        // Stop motion into the wall along clamped axes
+        if (dx !== 0) t.velX = 0;
+        if (dy !== 0) t.velY = 0;
+      }
+    }
+  }
+
   // Insert collider into spatial hash grid
   private insertIntoGrid(collider: Collider) {
     const cells = this.coveredCells(collider);
@@ -252,19 +300,5 @@ function decodeCellKey(key: string): Vector2 {
 
 function canLayersInteract(a: Collider, b: Collider): boolean {
   // If either collider's mask doesn't include the other's layer, they can't interact
-  if ((a.mask & b.layer) === 0 || (b.mask & a.layer) === 0) return false;
-
-  // Team filtering for projectiles vs drones
-  const aIsProj = a.layer === CollisionLayer.Projectile;
-  const bIsProj = b.layer === CollisionLayer.Projectile;
-  const aIsDrone = a.layer === CollisionLayer.Drone;
-  const bIsDrone = b.layer === CollisionLayer.Drone;
-
-  if ((aIsProj && bIsDrone) || (bIsProj && aIsDrone)) {
-    if (a.team !== undefined && b.team !== undefined && a.team === b.team) {
-      return false;
-    }
-  }
-
-  return true;
+  return !((a.mask & b.layer) === 0 || (b.mask & a.layer) === 0);
 }

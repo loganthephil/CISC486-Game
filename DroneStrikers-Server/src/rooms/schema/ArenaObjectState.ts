@@ -1,17 +1,18 @@
-import { Schema, type } from "@colyseus/schema";
+import { type } from "@colyseus/schema";
 import { TransformState } from "@rooms/schema/TransformState";
+import { Rigidbody } from "@rooms/systems/rigidbody";
 import { Vector2 } from "src/types/commonTypes";
-import { createFixedDrop, ExperienceDropStrategy } from "src/types/experience";
+import { IDamageable } from "src/types/interfaces/damageableInterface";
 import { ObjectTeam } from "src/types/team";
 
 export type ArenaObjectType = "small" | "medium" | "large";
 const ARENA_OBJECT_CONFIG: Record<ArenaObjectType, { health: number; expDrop: number; radius: number }> = {
-  small: { health: 5, expDrop: 5, radius: 0.6 },
-  medium: { health: 10, expDrop: 10, radius: 1.0 },
-  large: { health: 50, expDrop: 50, radius: 1.6 },
+  small: { health: 5, expDrop: 5, radius: 0.4 },
+  medium: { health: 10, expDrop: 10, radius: 0.6 },
+  large: { health: 50, expDrop: 50, radius: 0.8 },
 };
 
-export class ArenaObjectState extends TransformState {
+export class ArenaObjectState extends TransformState implements IDamageable {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("string") objectType: ArenaObjectType;
 
@@ -21,22 +22,42 @@ export class ArenaObjectState extends TransformState {
   @type("number") health: number = 50; // Might set on drone spawn
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
 
-  public experienceDropStrategy: ExperienceDropStrategy;
+  public readonly rigidbody: Rigidbody = new Rigidbody(this, { mass: 10, drag: 10 });
+  private onDestroyAction: () => void;
 
-  constructor(objectType: ArenaObjectType, position: Vector2) {
+  constructor(objectType: ArenaObjectType, position: Vector2, onDestroy?: () => void) {
     const cfg = ARENA_OBJECT_CONFIG[objectType];
     super(cfg.radius, position);
 
     this.objectType = objectType;
     this.maxHealth = cfg.health;
     this.health = cfg.health;
-    this.experienceDropStrategy = createFixedDrop(cfg.expDrop);
+    this.onDestroyAction = onDestroy ?? (() => {});
   }
 
-  public takeDamage(amount: number) {
+  public override update(deltaTime: number) {
+    // Update physics
+    this.rigidbody.updatePhysics(deltaTime);
+  }
+
+  public onDestroy() {
+    this.onDestroyAction();
+  }
+
+  public takeDamage(amount: number): boolean {
     this.health = Math.max(0, this.health - amount);
     if (this.health <= 0) {
       this.toDespawn = true;
     }
+    return this.toDespawn;
+  }
+
+  public getExperienceDrop(): number {
+    const cfg = ARENA_OBJECT_CONFIG[this.objectType];
+    return cfg.expDrop;
+  }
+
+  public getRigidbody(): Rigidbody {
+    return this.rigidbody;
   }
 }

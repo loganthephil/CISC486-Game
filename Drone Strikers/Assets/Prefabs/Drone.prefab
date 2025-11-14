@@ -846,8 +846,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee13e29b4c5749741bfa4e9aca3226b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::DroneStrikers.Game.Player.PlayerMovement
-  _turret: {fileID: 3181656630450666972}
-  _droneMovement: {fileID: 6440334462628246409}
   _mouseRayYLevelTransform: {fileID: 1545149168181699020}
 --- !u!114 &1051405302490573825
 MonoBehaviour:
@@ -861,8 +859,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a538b0ab95604318a988af5fd2661882, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::DroneStrikers.Game.Player.PlayerUpgradeSelection
-  <DroneUpgrader>k__BackingField: {fileID: 7668862864678098203}
-  _localEvents: {fileID: 794553181151540361}
+  _upgradeCollection: {fileID: 11400000, guid: a29db9b3662c1c64a91eec4e79fe9f6e, type: 2}
   _upgradeSelectionUIParent: {fileID: 6539017670223041718}
   _upgradeSelectionUIPrefab: {fileID: 4968395535760740024, guid: 21106e9b30605d2438337c364fc70569, type: 3}
 --- !u!1 &7241307362011782259

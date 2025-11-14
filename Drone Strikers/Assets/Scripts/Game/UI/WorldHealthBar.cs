@@ -1,4 +1,3 @@
-using DroneStrikers.Core.Interfaces;
 using UnityEngine;
 
 namespace DroneStrikers.Game.UI
@@ -11,26 +10,19 @@ namespace DroneStrikers.Game.UI
         private static readonly Color LowHealthColor = new(0.92f, 0.38f, 0.38f, 1f);
 
         private Canvas _canvas;
-        private IHealth _health;
 
         protected override void Awake()
         {
             _canvas = GetComponent<Canvas>();
-            _health = GetComponentInParent<IHealth>();
-            if (_health == null)
-            {
-                Debug.LogError("WorldHealthBar could not find IHealth component in parent.");
-                Destroy(this);
-            }
-
+            _canvas.enabled = false; // Initially hidden
             base.Awake();
         }
 
-        private void Update()
+        public void UpdatePercentage(float currentHealth, float maxHealth)
         {
-            float percentage = UpdateValue(_health.CurrentHealth, _health.MaxHealth);
+            float percentage = UpdateValue(currentHealth, maxHealth);
 
-            _canvas.enabled = percentage < 1; // Only show if not full health
+            _canvas.enabled = percentage is < 1 and > 0; // Only show if not full health or empty
 
             // Change color based on health percentage
             _fillImage.color = percentage switch

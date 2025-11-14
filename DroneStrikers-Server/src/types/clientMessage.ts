@@ -1,7 +1,8 @@
 import { Prettify, Vector2 } from "src/types/commonTypes";
+import { DroneUpgradeID } from "src/types/droneUpgrade";
 import { DroneTeam } from "src/types/team";
 
-export enum GameMessage {
+export enum ClientMessageType {
   PLAYER_SELECT_TEAM,
   PLAYER_MOVE,
   PLAYER_AIM,
@@ -13,16 +14,16 @@ export type PlayerSelectTeamPayload = { team: DroneTeam };
 export type PlayerMovePayload = { movement: Vector2 };
 export type PlayerAimPayload = { direction: Vector2 };
 export type PlayerShootPayload = {};
-export type PlayerSelectUpgradePayload = { upgradeId: string };
+export type PlayerSelectUpgradePayload = { upgradeId: DroneUpgradeID };
 
-export type MessagePayloads = {
-  [GameMessage.PLAYER_SELECT_TEAM]: Prettify<PlayerSelectTeamPayload>;
-  [GameMessage.PLAYER_MOVE]: Prettify<PlayerMovePayload>;
-  [GameMessage.PLAYER_AIM]: Prettify<PlayerAimPayload>;
-  [GameMessage.PLAYER_SHOOT]: Prettify<PlayerShootPayload>;
-  [GameMessage.PLAYER_SELECT_UPGRADE]: Prettify<PlayerSelectUpgradePayload>;
+export type ClientMessagePayloads = {
+  [ClientMessageType.PLAYER_SELECT_TEAM]: Prettify<PlayerSelectTeamPayload>;
+  [ClientMessageType.PLAYER_MOVE]: Prettify<PlayerMovePayload>;
+  [ClientMessageType.PLAYER_AIM]: Prettify<PlayerAimPayload>;
+  [ClientMessageType.PLAYER_SHOOT]: Prettify<PlayerShootPayload>;
+  [ClientMessageType.PLAYER_SELECT_UPGRADE]: Prettify<PlayerSelectUpgradePayload>;
 };
 
 export type ClientMessage = {
-  [K in GameMessage]: { type: K; payload: MessagePayloads[K] };
-}[GameMessage];
+  [K in ClientMessageType]: { type: K; payload: ClientMessagePayloads[K] };
+}[ClientMessageType];

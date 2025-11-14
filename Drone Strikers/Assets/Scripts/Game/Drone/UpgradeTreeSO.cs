@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Upgrades
+namespace DroneStrikers.Game.Drone
 {
     [CreateAssetMenu(fileName = "UpgradeTree_", menuName = "Upgrades/Upgrade Tree")]
     public class UpgradeTreeSO : ScriptableObject

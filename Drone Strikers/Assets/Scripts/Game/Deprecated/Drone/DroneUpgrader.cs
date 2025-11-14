@@ -5,10 +5,11 @@ using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
-using DroneStrikers.Game.Upgrades;
+using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Player;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     [RequireComponent(typeof(DroneStats))]
     public class DroneUpgrader : MonoBehaviour, IExperienceProvider, IDestructionContextReceiver
@@ -89,8 +90,8 @@ namespace DroneStrikers.Game.Drone
             _lastUpgradeInTrees[upgradeTree] = upgrade; // Set the last upgrade in this tree to the applied upgrade
 
             // Apply each modifier to the drone stats with the upgrade as the source
-            foreach (StatUpgradeModifier modifier in upgrade.Modifiers)
-                _droneStats.AddModifier(modifier.Stat, modifier.ModType, modifier.Value, upgrade);
+            // foreach (StatUpgradeModifier modifier in upgrade.Modifiers)
+            //     _droneStats.AddModifier(modifier.Stat, modifier.ModType, modifier.Value, upgrade);
 
             // Update visuals of applicable mesh filter
             switch (upgrade.UpgradeType)
@@ -165,14 +166,14 @@ namespace DroneStrikers.Game.Drone
                 {
                     // Get an upgrade point if this level grants one
                     AvailableUpgradePoints++;
-                    _localEvents.Invoke(DroneEvents.UpgradePointGained, AvailableUpgradePoints);
+                    _localEvents.Invoke(PlayerEvents.UpgradePointGained, AvailableUpgradePoints);
                 }
 
-                _localEvents.Invoke(DroneEvents.LevelUp, Level);
+                _localEvents.Invoke(PlayerEvents.LevelUp, Level);
             }
 
             // Notify experience after leveling up due to subscribers possibly needing updated level info
-            _localEvents.Invoke(DroneEvents.ExperienceGained, amount);
+            _localEvents.Invoke(PlayerEvents.ExperienceGained, amount);
         }
     }
 }

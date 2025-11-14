@@ -1,8 +1,9 @@
 ﻿using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
+using DroneStrikers.Game.Combat;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Combat
+namespace DroneStrikers.Game.Deprecated.Combat
 {
     /// <summary>
     ///     Required component that resolves contact damage between two colliding objects.
@@ -41,7 +42,7 @@ namespace DroneStrikers.Game.Combat
             GameObject thisObject = gameObject;
 
             // TODO: Only check each object for null once
-            
+
             // TODO: Somehow track instigator context receivers such that the last one that caused damage is rewarded with kill credit
             // This would be to avoid situations where a drone is attacking another drone,
             // but the drone being attacked dies from environmental damage, not rewarding the attacker who deserved the kill.

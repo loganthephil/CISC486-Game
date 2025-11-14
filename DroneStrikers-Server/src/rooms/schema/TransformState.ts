@@ -1,8 +1,9 @@
 import { Schema, type } from "@colyseus/schema";
-import { Collider } from "@rooms/controllers/collider";
+import { BehaviorState } from "@rooms/schema/BehaviourState";
+import { Collider } from "@rooms/systems/collider";
 import { Vector2 } from "src/types/commonTypes";
 
-export abstract class TransformState extends Schema {
+export abstract class TransformState extends BehaviorState {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("number") posX: number;
   @type("number") posY: number;

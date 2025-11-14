@@ -1,9 +1,9 @@
 ﻿using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
-using DroneStrikers.Game.Stats;
+using DroneStrikers.Game.Deprecated.Stats;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     [CreateAssetMenu(fileName = "AttackDefinition", menuName = "Scriptable Objects/AttackDefinitionSO")]
     public class AttackDefinitionSO : ScriptableObject

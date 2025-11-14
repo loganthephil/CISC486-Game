@@ -1,11 +1,11 @@
 ﻿using DroneStrikers.BehaviourTrees;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Events;
-using DroneStrikers.Game.AI.Strategies;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Deprecated.AI.Strategies;
+using DroneStrikers.Game.Deprecated.Drone;
 using UnityEngine;
 
-namespace DroneStrikers.Game.AI
+namespace DroneStrikers.Game.Deprecated.AI
 {
     [RequireComponent(typeof(ObjectDetector))]
     [RequireComponent(typeof(AINavigation))]

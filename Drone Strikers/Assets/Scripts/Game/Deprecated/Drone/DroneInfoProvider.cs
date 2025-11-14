@@ -4,7 +4,7 @@ using DroneStrikers.Core.Types;
 using DroneStrikers.Game.Combat;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     public class DroneInfoProvider : MonoBehaviour
     {

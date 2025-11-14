@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace DroneStrikers.Game.ObjectSpawning
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning
 {
     /// <summary>
     ///     Directs the spawning of objects within a chunk.

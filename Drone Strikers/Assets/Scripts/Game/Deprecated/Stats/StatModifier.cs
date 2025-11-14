@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DroneStrikers.Game.Stats
+namespace DroneStrikers.Game.Deprecated.Stats
 {
     [Serializable]
     public class StatModifier

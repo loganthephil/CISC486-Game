@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace DroneStrikers.Game.ObjectSpawning
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning
 {
     [CreateAssetMenu(fileName = "SpawnProfile_", menuName = "Spawning/Chunk Spawn Profile")]
     public class ChunkSpawnProfileSO : ScriptableObject

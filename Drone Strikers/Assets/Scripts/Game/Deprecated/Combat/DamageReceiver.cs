@@ -4,7 +4,7 @@ using DroneStrikers.Events;
 using DroneStrikers.Events.EventSO;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Combat
+namespace DroneStrikers.Game.Deprecated.Combat
 {
     /// <summary>
     ///     Basic implementation of IDamageable that reduces health on taking damage.

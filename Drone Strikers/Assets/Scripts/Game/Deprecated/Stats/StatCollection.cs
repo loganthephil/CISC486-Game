@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
-namespace DroneStrikers.Game.Stats
+namespace DroneStrikers.Game.Deprecated.Stats
 {
     public class StatCollection
     {
@@ -16,7 +16,7 @@ namespace DroneStrikers.Game.Stats
         {
             get
             {
-                if (stat is null) throw new System.Exception("StatCollection: Attempted to access a stat with a null StatTypeSO.");
+                if (stat is null) throw new Exception("StatCollection: Attempted to access a stat with a null StatTypeSO.");
                 // Lazy initialization of stats
                 if (!_dict.ContainsKey(stat)) _dict[stat] = new Stat(stat);
                 return _dict[stat];

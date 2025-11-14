@@ -1,4 +1,4 @@
-﻿namespace DroneStrikers.Game.Stats
+﻿namespace DroneStrikers.Game.Deprecated.Stats
 {
     public enum StatModType
     {

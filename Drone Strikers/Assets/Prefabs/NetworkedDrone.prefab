@@ -53,8 +53,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Networking::DroneStrikers.Networking.NetworkedDroneMovement
   _bodyTransform: {fileID: 2917294513694613669}
   _movementTransform: {fileID: 3710341624154179848}
+  _healthBar: {fileID: 5073930842314743501}
   _playerModule: {fileID: 5892627512980801802}
   _teamMember: {fileID: 6587718172633206434}
+  _upgradeCollection: {fileID: 11400000, guid: a29db9b3662c1c64a91eec4e79fe9f6e, type: 2}
+  _turretMeshFilter: {fileID: 2654018971681635095}
+  _bodyMeshFilter: {fileID: 2342707569089915926}
+  _movementMeshFilter: {fileID: 4314785019254856206}
+  _localEvents: {fileID: 811997326081082960}
+  _onPlayerDeath: {fileID: 11400000, guid: fac67669d03021b4cadcdc1535ff6d7b, type: 2}
+  _onPlayerUpgradePointGained: {fileID: 11400000, guid: 18c6ac7cf34ae7249a10ae719ec2698d, type: 2}
+  _onPlayerUpgradeApplied: {fileID: 11400000, guid: fc17a4072224e0d489a8e4b8530980ca, type: 2}
   _interpolationBackTime: 0.1
   _extrapolationLimit: 0.25
   _positionLerpSpeed: 15
@@ -286,6 +295,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1808823533911002727}
   - component: {fileID: 4574638509779556958}
+  - component: {fileID: 1244181606775834316}
+  - component: {fileID: 7971729159384236802}
+  - component: {fileID: 7511076481490284449}
   m_Layer: 0
   m_Name: PlayerModule
   m_TagString: Untagged
@@ -305,7 +317,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0.75, z: -0.27448}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2282575978700634797}
   m_Father: {fileID: 8763781677960678377}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4574638509779556958
@@ -321,6 +334,77 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::DroneStrikers.Game.Player.PlayerInputController
   _mouseRayYLevelTransform: {fileID: 5646341719228060273}
+--- !u!114 &1244181606775834316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5892627512980801802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a538b0ab95604318a988af5fd2661882, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.UI.PlayerUpgradeSelector
+  _upgradeCollection: {fileID: 11400000, guid: a29db9b3662c1c64a91eec4e79fe9f6e, type: 2}
+  _upgradeSelectionUIParent: {fileID: 7048241126125244034}
+  _upgradeSelectionUIPrefab: {fileID: 4968395535760740024, guid: 21106e9b30605d2438337c364fc70569, type: 3}
+--- !u!114 &7971729159384236802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5892627512980801802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b8b9802d92e0794b9780a8171c88766, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Events::DroneStrikers.Events.EventSOListeners.IntEventListener
+  EventSO: {fileID: 11400000, guid: 18c6ac7cf34ae7249a10ae719ec2698d, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1244181606775834316}
+        m_TargetAssemblyTypeName: DroneStrikers.Game.UI.PlayerUpgradeSelector, Game
+        m_MethodName: OnUpgradePointsChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &7511076481490284449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5892627512980801802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1611f6f12e168104e8641b93b6e60ea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Events::DroneStrikers.Events.EventSOListeners.StringEventListener
+  EventSO: {fileID: 11400000, guid: fc17a4072224e0d489a8e4b8530980ca, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1244181606775834316}
+        m_TargetAssemblyTypeName: DroneStrikers.Game.UI.PlayerUpgradeSelector, Game
+        m_MethodName: OnUpgradeApplied
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6249445633273432433
 GameObject:
   m_ObjectHideFlags: 0
@@ -441,6 +525,125 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &2184000154339442845
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1808823533911002727}
+    m_Modifications:
+    - target: {fileID: 16459942272217392, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_Name
+      value: PlayerUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990320281441616571, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: _drone
+      value: 
+      objectReference: {fileID: 7878038737943039609}
+    - target: {fileID: 4990320281441616571, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: _localEvents
+      value: 
+      objectReference: {fileID: 811997326081082960}
+    - target: {fileID: 8955307307270742179, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+      propertyPath: _localEvents
+      value: 
+      objectReference: {fileID: 811997326081082960}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+--- !u!224 &2282575978700634797 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 135801041446206000, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+  m_PrefabInstance: {fileID: 2184000154339442845}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &7048241126125244034 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 9196140877590007327, guid: 3bfcbe2ca63292d488cc844432f9e0fc, type: 3}
+  m_PrefabInstance: {fileID: 2184000154339442845}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5869294211968778309
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -531,11 +734,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5648117877231167035, guid: 31a968855c209634280bee44d471733b, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.152
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5648117877231167035, guid: 31a968855c209634280bee44d471733b, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5668064825539967468, guid: 31a968855c209634280bee44d471733b, type: 3}
       propertyPath: m_Name
@@ -543,7 +746,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5668064825539967468, guid: 31a968855c209634280bee44d471733b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6883186631666053247, guid: 31a968855c209634280bee44d471733b, type: 3}
       propertyPath: m_PresetInfoIsWorld
@@ -558,6 +761,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 31a968855c209634280bee44d471733b, type: 3}
+--- !u!114 &5073930842314743501 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1664593306437705352, guid: 31a968855c209634280bee44d471733b, type: 3}
+  m_PrefabInstance: {fileID: 5869294211968778309}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd9c791ded145a44e88fe71b3813f07e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.UI.WorldHealthBar
 --- !u!224 &6981156619975086056 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3571890002845274029, guid: 31a968855c209634280bee44d471733b, type: 3}

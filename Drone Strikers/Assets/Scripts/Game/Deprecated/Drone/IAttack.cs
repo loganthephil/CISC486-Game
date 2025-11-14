@@ -1,4 +1,4 @@
-﻿namespace DroneStrikers.Game.Drone
+﻿namespace DroneStrikers.Game.Deprecated.Drone
 {
     public interface IAttack
     {

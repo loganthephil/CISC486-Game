@@ -2,7 +2,7 @@
 {
     public class UpgradeSelectionNoneState : UpgradeSelectionBaseState
     {
-        public UpgradeSelectionNoneState(PlayerUpgradeSelection upgradeSelection) : base(upgradeSelection) { }
+        public UpgradeSelectionNoneState(PlayerUpgradeSelector upgradeSelector) : base(upgradeSelector) { }
 
         public override void OnEnter() => ClearUI();
     }

@@ -5,13 +5,17 @@ namespace DroneStrikers.Game.UI.UpgradeSelectionStates
 {
     public abstract class UpgradeSelectionBaseState : BaseState
     {
-        protected PlayerUpgradeSelection _upgradeSelection;
+        protected PlayerUpgradeSelector _upgradeSelector;
 
-        protected UpgradeSelectionBaseState(PlayerUpgradeSelection upgradeSelection) => _upgradeSelection = upgradeSelection;
+        protected UpgradeSelectionBaseState(PlayerUpgradeSelector upgradeSelector) => _upgradeSelector = upgradeSelector;
 
         protected void ClearUI()
         {
-            foreach (Transform child in _upgradeSelection.UpgradeSelectionUIParent) Object.Destroy(child.gameObject);
+            foreach (Transform child in _upgradeSelector.UpgradeSelectionUIParent)
+            {
+                Debug.Log($"Destroying child UI element: {child.gameObject.name}");
+                Object.Destroy(child.gameObject);
+            }
         }
     }
 }

@@ -2,10 +2,10 @@
 using DroneStrikers.Core;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Game.Combat;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Deprecated.Drone;
 using UnityEngine;
 
-namespace DroneStrikers.Game.AI
+namespace DroneStrikers.Game.Deprecated.AI
 {
     [RequireComponent(typeof(AIDroneTraits))]
     public class AINavigation : MonoBehaviour

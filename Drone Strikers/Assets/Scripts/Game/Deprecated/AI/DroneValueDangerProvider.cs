@@ -1,9 +1,9 @@
 ﻿using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Interfaces;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Deprecated.Drone;
 using UnityEngine;
 
-namespace DroneStrikers.Game.AI
+namespace DroneStrikers.Game.Deprecated.AI
 {
     public class DroneValueDangerProvider : MonoBehaviour, IValueDangerProvider
     {

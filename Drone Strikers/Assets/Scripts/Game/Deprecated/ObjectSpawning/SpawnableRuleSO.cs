@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DroneStrikers.Game.ObjectSpawning
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning
 {
     [CreateAssetMenu(fileName = "SpawnableRule_", menuName = "Spawning/Spawnable Rule")]
     public class SpawnableRuleSO : ScriptableObject

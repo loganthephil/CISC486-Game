@@ -1,8 +1,8 @@
 ﻿using System;
-using DroneStrikers.Game.Stats;
+using DroneStrikers.Game.Deprecated.Stats;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Upgrades
+namespace DroneStrikers.Game.Deprecated.Upgrades
 {
     [Serializable]
     public struct StatUpgradeModifier

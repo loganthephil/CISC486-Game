@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace DroneStrikers.Game.ObjectSpawning
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning
 {
     public class SpawnWithinCollider : MonoBehaviour
     {

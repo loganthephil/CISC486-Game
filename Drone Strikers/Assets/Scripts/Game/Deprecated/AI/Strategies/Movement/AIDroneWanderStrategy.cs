@@ -1,7 +1,7 @@
 ﻿using DroneStrikers.BehaviourTrees;
 using UnityEngine;
 
-namespace DroneStrikers.Game.AI.Strategies
+namespace DroneStrikers.Game.Deprecated.AI.Strategies
 {
     public class AIDroneWanderStrategy : IStrategy
     {

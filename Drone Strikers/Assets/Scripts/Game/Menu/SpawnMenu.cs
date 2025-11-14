@@ -11,7 +11,7 @@ namespace DroneStrikers.Game.Menu
 
         private static void RequestSpawnPlayerDrone(int team)
         {
-            NetworkManager.Send(GameMessages.PlayerJoinTeam, new PlayerJoinTeamMessage { team = team });
+            NetworkManager.Send(ClientMessages.PlayerJoinTeam, new PlayerJoinTeamMessage { team = team });
         }
     }
 }

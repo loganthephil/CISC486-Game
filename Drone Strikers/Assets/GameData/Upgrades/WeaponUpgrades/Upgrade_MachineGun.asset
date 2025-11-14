@@ -12,17 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d226c0f88d76340ab720ebc7a69269, type: 3}
   m_Name: Upgrade_MachineGun
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
+  _upgradeId: machineGun
   _upgradeName: Machine Gun
   _upgradeType: 0
-  _modifiers:
-  - Stat: {fileID: 11400000, guid: 29cc99971868de04c8126b9bcec030ef, type: 2}
-    Value: -0.2
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: e168c785962c4824d94197efaeae26e2, type: 2}
-    Value: 0.5
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: d11807f650e17ae4cbc9ab8facc28646, type: 2}
-    Value: -0.1
-    ModType: 1
   _nextUpgrades: []
   _mesh: {fileID: 2662557848000082424, guid: 2c8908415a15c204c9b0430cc3678874, type: 3}

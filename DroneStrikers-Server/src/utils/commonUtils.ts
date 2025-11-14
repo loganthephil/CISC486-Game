@@ -53,6 +53,17 @@ export function degToVec2(degrees: number): Vector2 {
 }
 
 /**
+ * Linearly interpolates between two numbers.
+ * @param start The starting value
+ * @param end The ending value
+ * @param t The interpolation factor between 0 and 1
+ * @returns The interpolated value
+ */
+export function lerp(start: number, end: number, t: number): number {
+  return start + (end - start) * t;
+}
+
+/**
  * Spherically interpolates between two radian angles.
  * @param startRad The starting angle in radians
  * @param endRad The ending angle in radians

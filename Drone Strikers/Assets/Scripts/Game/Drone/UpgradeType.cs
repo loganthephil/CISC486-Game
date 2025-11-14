@@ -1,4 +1,4 @@
-﻿namespace DroneStrikers.Game.Upgrades
+﻿namespace DroneStrikers.Game.Drone
 {
     public enum UpgradeType
     {

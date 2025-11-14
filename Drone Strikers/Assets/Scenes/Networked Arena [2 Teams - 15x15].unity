@@ -271,6 +271,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6bfff355f0f4a43a41926f3ffdd7385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.SpawnMenu
+--- !u!1 &458833403
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 458833404}
+  - component: {fileID: 458833405}
+  m_Layer: 0
+  m_Name: ArenaObjectSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &458833404
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 458833403}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -32.64003, y: 133.18912, z: -93.794365}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1034557212}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &458833405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 458833403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14de9280d6a54057a0ac550ba2216286, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::DroneStrikers.Game.Combat.ArenaObjectSpawner
+  _arenaObjectPrefab: {fileID: 277260017270536074, guid: 5925cc8fcb45fe440aabf96a87d7a4c6, type: 3}
 --- !u!1 &560839824
 GameObject:
   m_ObjectHideFlags: 0
@@ -722,8 +767,6 @@ Transform:
   m_Children:
   - {fileID: 1076998974}
   - {fileID: 685823851}
-  - {fileID: 1265993037}
-  - {fileID: 817654736}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &767291666
@@ -884,12 +927,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 817654735}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -32.64003, y: 133.18912, z: -93.794365}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 744393422}
+  m_Father: {fileID: 1034557212}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &817654737
 MonoBehaviour:
@@ -1130,6 +1173,40 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 11400000, guid: 59f46080255fe8344bf4a3e0b6598249, type: 2}
+--- !u!1 &1034557211
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1034557212}
+  m_Layer: 0
+  m_Name: --NETWORK SPAWNERS--
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1034557212
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034557211}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 31.79251, y: -70.9028, z: 24.81172}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1265993037}
+  - {fileID: 817654736}
+  - {fileID: 458833404}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1076998972
 GameObject:
   m_ObjectHideFlags: 0
@@ -1347,11 +1424,11 @@ Transform:
   m_GameObject: {fileID: 1265993035}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -32.64003, y: 133.18912, z: -93.794365}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 744393422}
+  m_Father: {fileID: 1034557212}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1353434938
 GameObject:
@@ -2208,17 +2285,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1836652172}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ac03205d176448bb7b5ab7499887919, type: 3}
+  m_Script: {fileID: 11500000, guid: 22e2bcdc4d402a64a8bf51fe92b801e2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Events::DroneStrikers.Events.EventSOListeners.DamageContextEventListener
-  EventSO: {fileID: 11400000, guid: 3fc12578ef1d91d41855f9e52a00561a, type: 2}
+  m_EditorClassIdentifier: Events::DroneStrikers.Events.EventSOListeners.VoidEventListener
+  Event: {fileID: 11400000, guid: fac67669d03021b4cadcdc1535ff6d7b, type: 2}
   Response:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1836652178}
         m_TargetAssemblyTypeName: DroneStrikers.Game.Player.PlayerDroneCamera, Game
         m_MethodName: OnPlayerDeath
-        m_Mode: 0
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2481,7 +2558,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.GameMenu
   _spawnUI: {fileID: 428821560}
-  _playerObject: {fileID: 0}
 --- !u!114 &1968888747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2519,17 +2595,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1968888740}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ac03205d176448bb7b5ab7499887919, type: 3}
+  m_Script: {fileID: 11500000, guid: 22e2bcdc4d402a64a8bf51fe92b801e2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Events::DroneStrikers.Events.EventSOListeners.DamageContextEventListener
-  EventSO: {fileID: 11400000, guid: 3fc12578ef1d91d41855f9e52a00561a, type: 2}
+  m_EditorClassIdentifier: Events::DroneStrikers.Events.EventSOListeners.VoidEventListener
+  Event: {fileID: 11400000, guid: fac67669d03021b4cadcdc1535ff6d7b, type: 2}
   Response:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1968888745}
         m_TargetAssemblyTypeName: DroneStrikers.Game.Menu.GameMenu, Game
-        m_MethodName: OnDroneDeath
-        m_Mode: 0
+        m_MethodName: OnPlayerDeath
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2938,6 +3014,7 @@ SceneRoots:
   - {fileID: 142821679}
   - {fileID: 744393422}
   - {fileID: 2087015585}
+  - {fileID: 1034557212}
   - {fileID: 1968888744}
   - {fileID: 1564825365}
   - {fileID: 1707002073}

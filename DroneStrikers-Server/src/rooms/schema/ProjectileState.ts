@@ -1,29 +1,32 @@
-import { Schema, type } from "@colyseus/schema";
-import { Collider } from "@rooms/controllers/collider";
-import { ArenaObjectState } from "@rooms/schema/ArenaObjectState";
+import { type } from "@colyseus/schema";
 import { DroneState } from "@rooms/schema/DroneState";
 import { TransformState } from "@rooms/schema/TransformState";
+import { Collider } from "@rooms/systems/collider";
 import { Vector2 } from "src/types/commonTypes";
+import { isDamageable } from "src/types/interfaces/damageableInterface";
 import { Team } from "src/types/team";
-import { Constants } from "src/utils";
 
 export class ProjectileState extends TransformState {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("uint8") team: Team; // Team that fired the projectile
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
+
+  public firedBy: DroneState; // Reference to the drone that fired the projectile
+
   public contactDamage: number;
 
   private pierceRemaining: number;
-  private remainingLifeTimeSeconds: number = 3;
+  private remainingLifeTimeSeconds: number = 2.0; // Projectiles expire after 2 seconds
 
-  constructor(damage: number, pierce: number, team: Team, position: Vector2, velocity: Vector2) {
+  constructor(firedBy: DroneState, damage: number, pierce: number, team: Team, position: Vector2, velocity: Vector2) {
     super(0.3, position, velocity);
+    this.firedBy = firedBy;
     this.contactDamage = damage;
     this.team = team;
     this.pierceRemaining = pierce;
   }
 
-  public update(deltaTime: number) {
+  public override update(deltaTime: number) {
     // Update position based on velocity
     this.posX += this.velX * deltaTime;
     this.posY += this.velY * deltaTime;
@@ -37,9 +40,13 @@ export class ProjectileState extends TransformState {
 
   public override onTriggerEnter(self: Collider, other: Collider) {
     const target = other.transform;
-
-    if (target instanceof DroneState || target instanceof ArenaObjectState) {
-      target.takeDamage(this.contactDamage);
+    if (isDamageable(target)) {
+      // Apply damage to the target
+      if (target.takeDamage(this.contactDamage)) {
+        // If the target was destroyed, award experience to the firing drone
+        const expDrop = target.getExperienceDrop();
+        this.firedBy.awardExperience(expDrop);
+      }
     }
 
     if (!this.reducePierce()) {

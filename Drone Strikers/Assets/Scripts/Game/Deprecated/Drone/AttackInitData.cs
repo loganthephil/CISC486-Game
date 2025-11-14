@@ -2,7 +2,7 @@
 using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     [Serializable]
     public struct AttackInitData

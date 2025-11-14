@@ -17,6 +17,9 @@ namespace DroneStrikers.Networking
         private Action<string, ProjectileState> _onDroneProjectileAdded;
         private Action<string, ProjectileState> _onDroneProjectileRemoved;
 
+        private Action<string, ArenaObjectState> _onArenaObjectAdded;
+        private Action<string> _onArenaObjectRemoved;
+
         protected override void Awake()
         {
             base.Awake();
@@ -49,20 +52,31 @@ namespace DroneStrikers.Networking
             // Implement actual networking logic here.
         }
 
+        // -- Drones --
         public void AddOnDroneAddedListener(Action<string, DroneState> listener) => _onDroneAdded += listener;
         public void RemoveOnDroneAddedListener(Action<string, DroneState> listener) => _onDroneAdded -= listener;
 
         public void AddOnDroneRemovedListener(Action<string> listener) => _onDroneRemoved += listener;
         public void RemoveOnDroneRemovedListener(Action<string> listener) => _onDroneRemoved -= listener;
 
+        // -- Projectiles --
         public void AddOnProjectileAddedListener(Action<string, ProjectileState> listener) => _onDroneProjectileAdded += listener;
         public void RemoveOnProjectileAddedListener(Action<string, ProjectileState> listener) => _onDroneProjectileAdded -= listener;
 
         public void AddOnProjectileRemovedListener(Action<string, ProjectileState> listener) => _onDroneProjectileRemoved += listener;
         public void RemoveOnProjectileRemovedListener(Action<string, ProjectileState> listener) => _onDroneProjectileRemoved -= listener;
 
+        // -- Arena Objects --
+        public void AddOnArenaObjectAddedListener(Action<string, ArenaObjectState> listener) => _onArenaObjectAdded += listener;
+        public void RemoveOnArenaObjectAddedListener(Action<string, ArenaObjectState> listener) => _onArenaObjectAdded -= listener;
+
+        public void AddOnArenaObjectRemovedListener(Action<string> listener) => _onArenaObjectRemoved += listener;
+        public void RemoveOnArenaObjectRemovedListener(Action<string> listener) => _onArenaObjectRemoved -= listener;
+
         private void RegisterListeners()
         {
+            Room.OnMessage<byte[]>("__playground_message_types", _ => { }); // Get rid of warning
+
             GameStateCallbacks.OnAdd(addedState => addedState.drones, (droneId, drone) =>
             {
                 _onDroneAdded?.Invoke(droneId, drone);
@@ -82,9 +96,19 @@ namespace DroneStrikers.Networking
             {
                 _onDroneProjectileRemoved?.Invoke(projectileId, projectile);
             });
+
+            GameStateCallbacks.OnAdd(addedState => addedState.arenaObjects, (objectId, arenaObject) =>
+            {
+                _onArenaObjectAdded?.Invoke(objectId, arenaObject);
+            });
+
+            GameStateCallbacks.OnRemove(addedState => addedState.arenaObjects, (objectId, arenaObject) =>
+            {
+                _onArenaObjectRemoved?.Invoke(objectId);
+            });
         }
 
-        public static void Send(GameMessages type, object message = null)
+        public static void Send(ClientMessages type, object message = null)
         {
             if (Instance.Room == null) return;
 

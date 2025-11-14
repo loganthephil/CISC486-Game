@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DroneStrikers.Game.ObjectSpawning
+namespace DroneStrikers.Game.Deprecated.ObjectSpawning
 {
     [RequireComponent(typeof(BoxCollider))]
     public class SpawnBoundsProvider : MonoBehaviour

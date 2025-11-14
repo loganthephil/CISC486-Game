@@ -2,7 +2,7 @@
 using DroneStrikers.Core.Interfaces;
 using UnityEngine;
 
-namespace DroneStrikers.Game.AI.Strategies
+namespace DroneStrikers.Game.Deprecated.AI.Strategies
 {
     public class AIDroneTickGiveUpStrategy : IStrategy
     {

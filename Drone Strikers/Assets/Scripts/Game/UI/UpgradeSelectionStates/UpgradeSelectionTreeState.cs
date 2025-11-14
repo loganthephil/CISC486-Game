@@ -1,26 +1,26 @@
 ﻿using System.Collections.Generic;
-using DroneStrikers.Game.Upgrades;
+using DroneStrikers.Game.Drone;
 using UnityEngine;
 
 namespace DroneStrikers.Game.UI.UpgradeSelectionStates
 {
     public class UpgradeSelectionTreeState : UpgradeSelectionBaseState
     {
-        public UpgradeSelectionTreeState(PlayerUpgradeSelection upgradeSelection) : base(upgradeSelection) { }
+        public UpgradeSelectionTreeState(PlayerUpgradeSelector upgradeSelector) : base(upgradeSelector) { }
 
         public override void OnEnter()
         {
             ClearUI();
 
-            IReadOnlyList<UpgradeTreeSO> trees = _upgradeSelection.DroneUpgrader.UpgradeTrees;
+            IReadOnlyList<UpgradeTreeSO> trees = _upgradeSelector.UpgradeTrees;
 
             // Create a UI element for each upgrade tree
-            foreach (UpgradeTreeSO tree in _upgradeSelection.DroneUpgrader.UpgradeTrees)
+            foreach (UpgradeTreeSO tree in trees)
             {
                 // Only show trees that have available upgrades
-                if (!_upgradeSelection.DroneUpgrader.HasAvailableUpgradesInTree(tree)) continue;
+                if (!_upgradeSelector.HasAvailableUpgradesInTree(tree)) continue;
 
-                GameObject selectableUIObj = Object.Instantiate(_upgradeSelection.UpgradeSelectionUIPrefab, _upgradeSelection.UpgradeSelectionUIParent);
+                GameObject selectableUIObj = Object.Instantiate(_upgradeSelector.UpgradeSelectionUIPrefab, _upgradeSelector.UpgradeSelectionUIParent);
                 SelectableItemUI itemUI = selectableUIObj.GetComponent<SelectableItemUI>();
                 if (itemUI == null)
                 {
@@ -28,7 +28,10 @@ namespace DroneStrikers.Game.UI.UpgradeSelectionStates
                     continue;
                 }
 
-                itemUI.Initialize(tree.UpgradeTreeName, () => { _upgradeSelection.SelectedTree = tree; });
+                itemUI.Initialize(tree.UpgradeTreeName, () =>
+                {
+                    _upgradeSelector.SelectedTree = tree;
+                });
             }
         }
     }

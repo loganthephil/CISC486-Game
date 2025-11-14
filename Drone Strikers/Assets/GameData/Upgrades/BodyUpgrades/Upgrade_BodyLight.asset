@@ -12,17 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d226c0f88d76340ab720ebc7a69269, type: 3}
   m_Name: Upgrade_BodyLight
   m_EditorClassIdentifier: Assembly-CSharp::DroneStrikers.Upgrades.UpgradeSO
+  _upgradeId: light
   _upgradeName: Light
   _upgradeType: 1
-  _modifiers:
-  - Stat: {fileID: 11400000, guid: 5b291be45f491954791a179df812b76f, type: 2}
-    Value: 0.1
-    ModType: 1
-  - Stat: {fileID: 11400000, guid: 16fe2be1acc504f4a8fc4a79893175c3, type: 2}
-    Value: 2
-    ModType: 0
-  - Stat: {fileID: 11400000, guid: 0b05a3c864f5dda4b8aa667a56408363, type: 2}
-    Value: -0.25
-    ModType: 1
   _nextUpgrades: []
   _mesh: {fileID: 3485042308081170693, guid: 6d5f443b7989c4d449d26ebe77b79a5a, type: 3}

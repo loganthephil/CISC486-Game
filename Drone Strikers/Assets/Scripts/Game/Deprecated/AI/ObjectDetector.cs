@@ -3,11 +3,11 @@ using DroneStrikers.Core;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Game.Combat;
-using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Deprecated.Drone;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace DroneStrikers.Game.AI
+namespace DroneStrikers.Game.Deprecated.AI
 {
     [RequireComponent(typeof(AIDroneTraits))]
     public class ObjectDetector : MonoBehaviour

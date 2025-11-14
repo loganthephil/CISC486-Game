@@ -1,30 +1,32 @@
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Events;
 using DroneStrikers.Game.Drone;
+using DroneStrikers.Game.Player;
 using UnityEngine;
 
 namespace DroneStrikers.Game.UI
 {
     public class ExperienceBar : ProgressBar
     {
-        [SerializeField] private DroneUpgrader _droneUpgrader;
-        [SerializeField] private LocalEvents _localEvents;
+        [SerializeField] [RequiredField] private LocalEvents _localEvents;
+        [SerializeField] [RequiredField] private NetworkedDrone _drone;
 
         private void Start()
         {
             UpdateUI();
         }
 
-        private void OnEnable() => _localEvents.Subscribe(DroneEvents.ExperienceGained, OnPlayerExperienceGained);
-        private void OnDisable() => _localEvents.Unsubscribe(DroneEvents.ExperienceGained, OnPlayerExperienceGained);
+        private void OnEnable() => _localEvents.Subscribe(PlayerEvents.ExperienceGained, OnPlayerExperienceGained);
+        private void OnDisable() => _localEvents.Unsubscribe(PlayerEvents.ExperienceGained, OnPlayerExperienceGained);
 
-        private void OnPlayerExperienceGained(float experienceGained)
+        private void OnPlayerExperienceGained(float totalExperience)
         {
             UpdateUI();
         }
 
         private void UpdateUI()
         {
-            UpdateValue(_droneUpgrader.ProgressToNextLevel, 1f);
+            UpdateValue(_drone.CurrentState.progressToNextLevel, 1f);
         }
     }
 }

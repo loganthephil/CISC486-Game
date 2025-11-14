@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using DroneStrikers.Core.Types;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -33,9 +32,9 @@ namespace DroneStrikers.Game.Player
         /// <summary>
         ///     Event listener. Do not call directly.
         /// </summary>
-        public void OnPlayerDeath(DamageContext ctx)
+        public void OnPlayerDeath()
         {
-            if (ctx.Receiver != _followingPlayerObject) return; // Only respond if the drone that died is the player drone being followed
+            // if (ctx.Receiver != _followingPlayerObject) return; // Only respond if the drone that died is the player drone being followed
 
             _cinemachineCamera.Target.TrackingTarget = null;
             StartCoroutine(DisablePlayerCameraNextFrame());

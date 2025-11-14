@@ -1,16 +1,19 @@
 import { Room, Client } from "@colyseus/core";
+import { Encoder } from "@colyseus/schema";
 import { GameState } from "./schema/GameState";
 import { PlayerOptions } from "src/types/playerOptions";
 import { Constants } from "src/utils";
 import { ClientMessage } from "src/types/clientMessage";
 import { createPlayer } from "src/types/player";
 
+Encoder.BUFFER_SIZE = 32 * 1024;
+
 export class GameRoom extends Room<GameState> {
   maxClients = 10;
-  state = new GameState();
+  state: GameState;
 
   onCreate(options: any) {
-    this.state = new GameState();
+    this.state = new GameState(this);
 
     this.patchRate = Constants.PATCH_RATE_MS;
     this.setSimulationInterval((dt) => this.handleTick(dt / 1000), Constants.FIXED_TIME_STEP_MS);

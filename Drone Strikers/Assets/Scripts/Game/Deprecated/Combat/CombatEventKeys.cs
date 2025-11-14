@@ -1,7 +1,7 @@
 ﻿using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
 
-namespace DroneStrikers.Game.Combat
+namespace DroneStrikers.Game.Deprecated.Combat
 {
     // Event keys for combat-related events:
 

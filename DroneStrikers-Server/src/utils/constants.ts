@@ -1,6 +1,8 @@
-// export class Constants {
-//   static readonly MAP_MAX_COORDINATE =  75;
-// }
+// -- DEVELOPMENT CONSTANTS --
+/**
+ * Enable debug drone spawns for development purposes.
+ */
+export const ENABLE_DEBUG_DRONE_SPAWNS = true;
 
 // -- TIMING CONSTANTS --
 /**

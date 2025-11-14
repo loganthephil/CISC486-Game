@@ -11,7 +11,7 @@ using UnityEngine.Scripting;
 #endif
 
 namespace DroneStrikers.Networking {
-	public partial class TransformState : Schema {
+	public partial class TransformState : BehaviorState {
 #if UNITY_5_3_OR_NEWER
 [Preserve]
 #endif

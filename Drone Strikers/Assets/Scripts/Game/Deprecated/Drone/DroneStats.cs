@@ -1,8 +1,8 @@
 ﻿using System;
-using DroneStrikers.Game.Stats;
+using DroneStrikers.Game.Deprecated.Stats;
 using UnityEngine;
 
-namespace DroneStrikers.Game.Drone
+namespace DroneStrikers.Game.Deprecated.Drone
 {
     /// <summary>
     ///     This component manages the stat values for a drone.
