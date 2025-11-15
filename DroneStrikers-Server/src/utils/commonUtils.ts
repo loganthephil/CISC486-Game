@@ -1,12 +1,25 @@
 import { Vector2 } from "src/types/commonTypes";
 
 /**
+ * Clamps a number between a minimum and maximum value
+ * @param value The number to clamp
+ * @param min The minimum value
+ * @param max The maximum value
+ * @returns The clamped value
+ * @see clamp01 for clamping between 0 and 1
+ */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+/**
  * Clamps a number between 0 and 1
  * @param value The number to clamp
  * @returns The clamped value between 0 and 1
+ * @see clamp for clamping between arbitrary min and max values
  */
 export function clamp01(value: number): number {
-  return Math.max(0, Math.min(1, value));
+  return clamp(value, 0, 1);
 }
 
 /**

@@ -69,6 +69,8 @@ export class DroneUpgrader {
     // Check if the upgrade is available in the current upgrade tree for its upgrade type
     const upgradeType = upgrade.type;
     const currentNode = this.currentUpgradeNode.get(upgradeType);
+    if (!currentNode) return false; // Invalid upgrade type
+
     const nextNode = currentNode.children.find((child) => child.upgradeId === upgradeId);
     if (!nextNode) return false; // Upgrade not available in current tree
 
@@ -103,6 +105,6 @@ export class DroneUpgrader {
       this.experienceToNextLevelMap.set(level, experienceRequired);
       return experienceRequired;
     }
-    return this.experienceToNextLevelMap.get(level);
+    return this.experienceToNextLevelMap.get(level) ?? 0;
   }
 }

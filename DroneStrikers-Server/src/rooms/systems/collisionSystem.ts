@@ -192,7 +192,7 @@ export class CollisionSystem {
     const velAlongNormal = relativeVel.x * normal.x + relativeVel.y * normal.y;
     if (velAlongNormal >= 0) return; // Currently separating or stationary
 
-    const elasticity = Math.max(rigidbodyA.elasticity, rigidbodyB.elasticity);
+    const elasticity = Math.max(rigidbodyA?.elasticity ?? 0, rigidbodyB?.elasticity ?? 0);
     const impulseScalar = (-(1 + elasticity) * velAlongNormal) / totalInv;
 
     const impulseA: Vector2 = {

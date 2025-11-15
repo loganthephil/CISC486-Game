@@ -13,6 +13,7 @@ import { ArenaObjectSpawner } from "@rooms/systems/arenaObjectSpawner";
 import { Collider, CollisionLayer, ColliderID } from "@rooms/systems/collider";
 import { CollisionSystem } from "@rooms/systems/collisionSystem";
 import { DroneSpawner } from "@rooms/systems/droneSpawner";
+import { DetectionSystem } from "@rooms/systems/detectionSystem";
 
 export class GameState extends BehaviorState {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
@@ -30,7 +31,7 @@ export class GameState extends BehaviorState {
 
   // Collision system
   private collisionSystem: CollisionSystem;
-  // private collidersById: Map<ColliderID, Collider> = new Map<ColliderID, Collider>();
+  private detectionSystem: DetectionSystem;
 
   private droneSpawner: DroneSpawner = new DroneSpawner();
   private arenaObjectSpawner: ArenaObjectSpawner = new ArenaObjectSpawner(this);
@@ -39,6 +40,7 @@ export class GameState extends BehaviorState {
     super();
     this.room = room;
     this.collisionSystem = new CollisionSystem({ cellSize: 3 });
+    this.detectionSystem = new DetectionSystem(this, 4);
   }
 
   public override update(deltaTime: number) {
@@ -175,9 +177,9 @@ export class GameState extends BehaviorState {
   }
 
   public addDrone(id: string, name: string, team: DroneTeam, droneType: DroneType): DroneState | null {
-    const drone = this.droneSpawner.createDrone(name, team, droneType);
+    const drone = droneType === "Player" ? this.droneSpawner.createPlayerDrone(name, team) : this.droneSpawner.createAIDrone(name, team, this.detectionSystem);
     if (!drone) {
-      console.warn(`Failed to spawn drone for player ${name} on team ${team}`);
+      console.warn(`Failed to spawn drone for ${droneType}, ${name}, on team ${team}`);
       return null;
     }
 
@@ -198,7 +200,7 @@ export class GameState extends BehaviorState {
    */
   public droneShoot(droneId: string): ProjectileState | null {
     // Spawn position (get from drone)
-    const drone: DroneState = this.drones.get(droneId);
+    const drone = this.drones.get(droneId);
     if (!drone) return null; // Invalid drone
 
     // Check if drone can fire

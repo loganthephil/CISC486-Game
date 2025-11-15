@@ -10,11 +10,9 @@ Encoder.BUFFER_SIZE = 32 * 1024;
 
 export class GameRoom extends Room<GameState> {
   maxClients = 10;
-  state: GameState;
+  state: GameState = new GameState(this);
 
   onCreate(options: any) {
-    this.state = new GameState(this);
-
     this.patchRate = Constants.PATCH_RATE_MS;
     this.setSimulationInterval((dt) => this.handleTick(dt / 1000), Constants.FIXED_TIME_STEP_MS);
 
