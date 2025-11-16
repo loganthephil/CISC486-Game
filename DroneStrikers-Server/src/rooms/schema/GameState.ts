@@ -14,20 +14,25 @@ import { Collider, CollisionLayer, ColliderID } from "@rooms/systems/collider";
 import { CollisionSystem } from "@rooms/systems/collisionSystem";
 import { DroneSpawner } from "@rooms/systems/droneSpawner";
 import { DetectionSystem } from "@rooms/systems/detectionSystem";
+import { AIPlayerManager } from "@rooms/systems/aiPlayerManager";
 
 export class GameState extends BehaviorState {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("number") gameTimeSeconds: number = 0;
+
+  @type("number") redTeamDroneCount: number = 0;
+  @type("number") blueTeamDroneCount: number = 0;
 
   @type({ map: DroneState }) drones = new MapSchema<DroneState>();
   @type({ map: ArenaObjectState }) arenaObjects = new MapSchema<ArenaObjectState>();
   @type({ map: ProjectileState }) projectiles = new MapSchema<ProjectileState>();
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
 
-  private room: Room;
-
   // Keep track of players that have joined the session (independent of drones)
-  private players: Map<string, Player> = new Map<string, Player>();
+  private _humanPlayers: Map<string, Player> = new Map<string, Player>();
+  private _aiPlayers: Map<string, Player> = new Map<string, Player>();
+
+  private room: Room;
 
   // Collision system
   private collisionSystem: CollisionSystem;
@@ -35,6 +40,7 @@ export class GameState extends BehaviorState {
 
   private droneSpawner: DroneSpawner = new DroneSpawner();
   private arenaObjectSpawner: ArenaObjectSpawner = new ArenaObjectSpawner(this);
+  private aiPlayerManager: AIPlayerManager = new AIPlayerManager(this);
 
   constructor(room: Room) {
     super();
@@ -45,6 +51,9 @@ export class GameState extends BehaviorState {
 
   public override update(deltaTime: number) {
     this.gameTimeSeconds += deltaTime;
+
+    // Update AI players
+    this.aiPlayerManager.update(deltaTime);
 
     // Spawn arena objects
     const newArenaObjects = this.arenaObjectSpawner.doSpawnObjectsTick();
@@ -94,14 +103,7 @@ export class GameState extends BehaviorState {
     });
   }
 
-  public onPlayerJoin(id: string, player: Player) {
-    this.players.set(id, player);
-  }
-
-  public onPlayerLeave(id: string) {
-    this.players.delete(id);
-  }
-
+  //#region Client Message Processing
   public processMessage(clientId: string, message: ClientMessage): boolean {
     // Non-drone player messages
     switch (message.type) {
@@ -139,14 +141,7 @@ export class GameState extends BehaviorState {
 
       case ClientMessageType.PLAYER_SHOOT:
         // Trigger shooting
-        const projectile = this.droneShoot(clientId);
-        if (!projectile) return false; // Shooting failed
-
-        // Add projectile to game state
-        const projectileId = `${clientId}_proj_${Date.now()}`;
-        this.projectiles.set(projectileId, projectile);
-        this.registerProjectileCollider(projectileId, projectile);
-        return true;
+        return this.requestDroneShoot(clientId);
 
       case ClientMessageType.PLAYER_SELECT_UPGRADE:
         const { upgradeId } = message.payload;
@@ -160,13 +155,80 @@ export class GameState extends BehaviorState {
     }
   }
 
+  public onPlayerJoin(id: string, player: Player) {
+    this._humanPlayers.set(id, player);
+  }
+
+  public onPlayerLeave(id: string) {
+    this._humanPlayers.delete(id);
+  }
+  //#endregion
+
+  //#region AI Player Management
+  /**
+   * Add an AI player to the game state.
+   * @param id The ID of the AI player.
+   * @param player The Player object representing the AI player.
+   */
+  public AIPlayerJoin(id: string, player: Player) {
+    this._aiPlayers.set(id, player);
+  }
+
+  /**
+   * Remove an AI player from the game state.
+   * @param id The ID of the AI player to remove.
+   */
+  public AIPlayerLeave(id: string) {
+    this._aiPlayers.delete(id);
+  }
+  //#endregion
+
+  //#region Getters
+  public get humanPlayers(): Map<string, Player> {
+    return new Map(this._humanPlayers);
+  }
+
+  public get humanPlayerCount(): number {
+    return this._humanPlayers.size;
+  }
+
+  public get aiPlayers(): Map<string, Player> {
+    return new Map(this._aiPlayers);
+  }
+
+  public get aiPlayerCount(): number {
+    return this._aiPlayers.size;
+  }
+
+  public getTeamsNotFull(): DroneTeam[] {
+    const teams: DroneTeam[] = [];
+    if (this.redTeamDroneCount < Constants.MAX_DRONE_PER_TEAM) {
+      teams.push(Team.Red);
+    }
+    if (this.blueTeamDroneCount < Constants.MAX_DRONE_PER_TEAM) {
+      teams.push(Team.Blue);
+    }
+    return teams;
+  }
+  //#endregion
+
+  //#region Drone Management
   private attemptSpawnDroneForPlayer(playerId: string, team: DroneTeam): boolean {
     // If the player has a drone, reject team change (teams are locked once a drone is spawned)
     if (this.drones.has(playerId)) {
       return false; // Cannot change team once drone is spawned
     }
 
-    const player = this.players.get(playerId);
+    switch (team) {
+      case Team.Red:
+        if (this.redTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Red team is full
+        break;
+      case Team.Blue:
+        if (this.blueTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Blue team is full
+        break;
+    }
+
+    const player = this._humanPlayers.get(playerId);
     if (!player) {
       return false; // No player found
     }
@@ -176,11 +238,46 @@ export class GameState extends BehaviorState {
     return true;
   }
 
+  public attemptSpawnDroneForAIPlayer(aiPlayerId: string, team: DroneTeam): boolean {
+    // If the AI player has a drone, do nothing
+    if (this.drones.has(aiPlayerId)) {
+      return false; // AI already has a drone
+    }
+
+    switch (team) {
+      case Team.Red:
+        if (this.redTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Red team is full
+        break;
+      case Team.Blue:
+        if (this.blueTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Blue team is full
+        break;
+    }
+
+    const aiPlayer = this._aiPlayers.get(aiPlayerId);
+    if (!aiPlayer) {
+      return false; // No AI player found
+    }
+
+    // Add drone for AI player on selected team
+    this.addDrone(aiPlayerId, aiPlayer.name, team, "AI");
+    return true;
+  }
+
   public addDrone(id: string, name: string, team: DroneTeam, droneType: DroneType): DroneState | null {
-    const drone = droneType === "Player" ? this.droneSpawner.createPlayerDrone(name, team) : this.droneSpawner.createAIDrone(name, team, this.detectionSystem);
+    const drone = droneType === "Player" ? this.droneSpawner.createPlayerDrone(id, name, team) : this.droneSpawner.createAIDrone(id, name, team, this, this.detectionSystem);
     if (!drone) {
       console.warn(`Failed to spawn drone for ${droneType}, ${name}, on team ${team}`);
       return null;
+    }
+
+    // Update team drone count
+    switch (team) {
+      case Team.Red:
+        this.redTeamDroneCount += 1;
+        break;
+      case Team.Blue:
+        this.blueTeamDroneCount += 1;
+        break;
     }
 
     this.drones.set(id, drone);
@@ -189,8 +286,36 @@ export class GameState extends BehaviorState {
   }
 
   public removeDrone(id: string) {
+    const drone = this.drones.get(id);
+    if (!drone) return; // No drone found
+
+    // Update team drone count
+    switch (drone.team) {
+      case Team.Red:
+        this.redTeamDroneCount = Math.max(0, this.redTeamDroneCount - 1);
+        break;
+      case Team.Blue:
+        this.blueTeamDroneCount = Math.max(0, this.blueTeamDroneCount - 1);
+        break;
+    }
+
     this.drones.delete(id);
     this.unregisterCollider(id);
+  }
+
+  public droneExists(id: string): boolean {
+    return this.drones.has(id);
+  }
+
+  public requestDroneShoot(droneId: string): boolean {
+    const projectile = this.droneTryShoot(droneId);
+    if (!projectile) return false; // Shooting failed
+
+    // Add projectile to game state
+    const projectileId = `${droneId}_proj_${Date.now()}`;
+    this.projectiles.set(projectileId, projectile);
+    this.registerProjectileCollider(projectileId, projectile);
+    return true;
   }
 
   /**
@@ -198,7 +323,7 @@ export class GameState extends BehaviorState {
    * @param droneId The ID of the drone that is firing the projectile.
    * @returns The created ProjectileState, or null if no projectile was created.
    */
-  public droneShoot(droneId: string): ProjectileState | null {
+  private droneTryShoot(droneId: string): ProjectileState | null {
     // Spawn position (get from drone)
     const drone = this.drones.get(droneId);
     if (!drone) return null; // Invalid drone
@@ -230,6 +355,8 @@ export class GameState extends BehaviorState {
     };
     return new ProjectileState(drone, attackDamageStat, attackPierceStat, drone.team, spawnPosition, velocity);
   }
+
+  //#endregion
 
   //#region Collision System
   // TODO: Consider moving how colliders are added into each specific class (if possible)

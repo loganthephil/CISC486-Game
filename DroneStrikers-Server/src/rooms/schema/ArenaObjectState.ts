@@ -14,7 +14,7 @@ const ARENA_OBJECT_CONFIG: Record<ArenaObjectType, { health: number; expDrop: nu
 
 export class ArenaObjectState extends TransformState implements IDamageable {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
-  @type("string") objectType: ArenaObjectType;
+  @type("string") arenaObjectType: ArenaObjectType;
 
   @type("uint8") team: ObjectTeam = 0; // Arena objects are neutral
 
@@ -25,11 +25,11 @@ export class ArenaObjectState extends TransformState implements IDamageable {
   public readonly rigidbody: Rigidbody = new Rigidbody(this, { mass: 10, drag: 10 });
   private onDestroyAction: () => void;
 
-  constructor(objectType: ArenaObjectType, position: Vector2, onDestroy?: () => void) {
-    const cfg = ARENA_OBJECT_CONFIG[objectType];
-    super(cfg.radius, position);
+  constructor(arenaObjectType: ArenaObjectType, position: Vector2, onDestroy?: () => void) {
+    const cfg = ARENA_OBJECT_CONFIG[arenaObjectType];
+    super("ArenaObject", cfg.radius, position);
 
-    this.objectType = objectType;
+    this.arenaObjectType = arenaObjectType;
     this.maxHealth = cfg.health;
     this.health = cfg.health;
     this.onDestroyAction = onDestroy ?? (() => {});
@@ -53,7 +53,7 @@ export class ArenaObjectState extends TransformState implements IDamageable {
   }
 
   public getExperienceDrop(): number {
-    const cfg = ARENA_OBJECT_CONFIG[this.objectType];
+    const cfg = ARENA_OBJECT_CONFIG[this.arenaObjectType];
     return cfg.expDrop;
   }
 

@@ -9,7 +9,7 @@ import { createPlayer } from "src/types/player";
 Encoder.BUFFER_SIZE = 32 * 1024;
 
 export class GameRoom extends Room<GameState> {
-  maxClients = 10;
+  maxClients = Constants.MAX_HUMAN_PLAYERS;
   state: GameState = new GameState(this);
 
   onCreate(options: any) {

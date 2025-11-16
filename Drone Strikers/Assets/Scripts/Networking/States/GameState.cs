@@ -19,13 +19,19 @@ public GameState() { }
 		[Type(0, "number")]
 		public float gameTimeSeconds = default(float);
 
-		[Type(1, "map", typeof(MapSchema<DroneState>))]
+		[Type(1, "number")]
+		public float redTeamDroneCount = default(float);
+
+		[Type(2, "number")]
+		public float blueTeamDroneCount = default(float);
+
+		[Type(3, "map", typeof(MapSchema<DroneState>))]
 		public MapSchema<DroneState> drones = null;
 
-		[Type(2, "map", typeof(MapSchema<ArenaObjectState>))]
+		[Type(4, "map", typeof(MapSchema<ArenaObjectState>))]
 		public MapSchema<ArenaObjectState> arenaObjects = null;
 
-		[Type(3, "map", typeof(MapSchema<ProjectileState>))]
+		[Type(5, "map", typeof(MapSchema<ProjectileState>))]
 		public MapSchema<ProjectileState> projectiles = null;
 	}
 }

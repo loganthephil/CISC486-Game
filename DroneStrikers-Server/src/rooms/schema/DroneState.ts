@@ -12,6 +12,7 @@ import { CommonUtils, Constants, VectorUtils } from "src/utils";
 
 export class DroneState extends TransformState implements IDamageable {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
+  @type("string") id: string;
   @type("string") name: string;
   @type("uint8") team: DroneTeam;
 
@@ -45,8 +46,9 @@ export class DroneState extends TransformState implements IDamageable {
 
   private requestedAim: number = 0; // Radian angle to aim towards
 
-  constructor(name: string, team: DroneTeam, position: Vector2) {
-    super(0.5, position);
+  constructor(id: string, name: string, team: DroneTeam, position: Vector2) {
+    super("Drone", 0.5, position);
+    this.id = id; 
     this.name = name;
     this.team = team;
 

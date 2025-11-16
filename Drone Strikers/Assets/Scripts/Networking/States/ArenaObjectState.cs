@@ -17,7 +17,7 @@ namespace DroneStrikers.Networking {
 #endif
 public ArenaObjectState() { }
 		[Type(5, "string")]
-		public string objectType = default(string);
+		public string arenaObjectType = default(string);
 
 		[Type(6, "uint8")]
 		public byte team = default(byte);

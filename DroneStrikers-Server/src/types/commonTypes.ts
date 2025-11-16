@@ -9,4 +9,6 @@ export interface Vector2 {
   y: number;
 }
 
+export type ObjectType = "Drone" | "ArenaObject" | "Projectile";
+
 export type DroneType = "Player" | "AI";

@@ -21,6 +21,12 @@ export const FIXED_TIME_STEP_S = 0.02;
 export const PATCH_RATE_MS = 50;
 
 // -- GAME CONSTANTS --
+export const MAX_HUMAN_PLAYERS = 10;
+
+export const MAX_AI_PLAYERS = 1;
+
+export const MAX_DRONE_PER_TEAM = 5;
+
 /**
  * Maximum coordinate value for the game map (both X and Y axes).
  */

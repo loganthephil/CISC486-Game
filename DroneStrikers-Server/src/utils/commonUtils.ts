@@ -22,6 +22,15 @@ export function clamp01(value: number): number {
   return clamp(value, 0, 1);
 }
 
+export function randomRange(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
+}
+
+export function randomChoice<T>(array: T[]): T {
+  const index = Math.floor(Math.random() * array.length);
+  return array[index];
+}
+
 /**
  * Converts a given degree value to radians
  * @param degrees The degree value to convert

@@ -30,7 +30,7 @@ namespace DroneStrikers.Game.Combat
             _transform.position = new Vector3(objectState.posX, 0f, objectState.posY);
 
             // Set object appearance based on type
-            switch (objectState.objectType)
+            switch (objectState.arenaObjectType)
             {
                 case "large":
                     _meshFilter.mesh = _largeObjectSO.Mesh;

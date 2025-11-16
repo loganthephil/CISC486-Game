@@ -50,5 +50,5 @@ export interface BehaviourTreeDefinition<TSchema extends IBlackboardSchema> {
   root: NodeDefinition;
   actions: Record<string, Action<TSchema>>;
   conditions: Record<string, Condition<TSchema>>;
-  initialBlackboard?: Partial<TSchema>;
+  initialBlackboard: TSchema;
 }

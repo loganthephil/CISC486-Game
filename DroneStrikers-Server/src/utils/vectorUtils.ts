@@ -1,4 +1,5 @@
 import { Vector2 } from "src/types/commonTypes";
+import { CommonUtils } from "src/utils";
 
 export function magnitude(vector: Vector2): number {
   return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
@@ -41,6 +42,10 @@ export function divide(vector: Vector2, scalar: number): Vector2 {
   return { x: vector.x / scalar, y: vector.y / scalar };
 }
 
+export function dot(v1: Vector2, v2: Vector2): number {
+  return v1.x * v2.x + v1.y * v2.y;
+}
+
 export function equals(v1: Vector2, v2: Vector2): boolean {
   return v1.x === v2.x && v1.y === v2.y;
 }
@@ -76,4 +81,29 @@ export function moveTowards(current: Vector2, target: Vector2, maxDistanceDelta:
     x: current.x + (toVector_x / dist) * maxDistanceDelta,
     y: current.y + (toVector_y / dist) * maxDistanceDelta,
   };
+}
+
+export function lerp(v1: Vector2, v2: Vector2, t: number): Vector2 {
+  // Clamp t to the range [0, 1]
+  t = Math.max(0, Math.min(1, t));
+  return {
+    x: v1.x + (v2.x - v1.x) * t,
+    y: v1.y + (v2.y - v1.y) * t,
+  };
+}
+
+/**
+ * Spherically interpolates between two vectors.
+ * @param v1 The starting vector.
+ * @param v2 The ending vector.
+ * @param t The interpolation factor between 0 and 1.
+ * @returns The interpolated vector.
+ */
+export function slerp(v1: Vector2, v2: Vector2, t: number): Vector2 {
+  // Clamp t to the range [0, 1]
+  t = Math.max(0, Math.min(1, t));
+  const dotProduct = CommonUtils.clamp(dot(v1, v2), -1, 1);
+  const theta = Math.acos(dotProduct) * t;
+  const relativeVec = normalize(subtract(v2, scale(v1, dotProduct)));
+  return add(scale(v1, Math.cos(theta)), scale(relativeVec, Math.sin(theta)));
 }

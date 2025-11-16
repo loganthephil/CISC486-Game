@@ -1,7 +1,7 @@
 import { Schema, type } from "@colyseus/schema";
 import { BehaviorState } from "@rooms/schema/BehaviourState";
 import { Collider } from "@rooms/systems/collider";
-import { Vector2 } from "src/types/commonTypes";
+import { ObjectType, Vector2 } from "src/types/commonTypes";
 
 export abstract class TransformState extends BehaviorState {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
@@ -14,13 +14,17 @@ export abstract class TransformState extends BehaviorState {
   @type("number") collisionRadius: number; // Radius in units for collision
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
 
+  public readonly objectType: ObjectType;
+
   /**
    * Indicates whether this object is marked for despawning/removal from the game.
    */
   public toDespawn: boolean = false;
 
-  constructor(collisionRadius: number, position?: Vector2, velocity?: Vector2) {
+  constructor(objectType: ObjectType, collisionRadius: number, position?: Vector2, velocity?: Vector2) {
     super();
+
+    this.objectType = objectType;
 
     this.posX = position?.x ?? 0;
     this.posY = position?.y ?? 0;

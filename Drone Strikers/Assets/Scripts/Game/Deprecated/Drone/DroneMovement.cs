@@ -44,7 +44,7 @@ namespace DroneStrikers.Game.Deprecated.Drone
         private void FixedUpdate()
         {
             float maxMoveSpeed = GetMoveSpeed();
-
+    
             // Determine target speed based on input
             Vector3 targetVelocity = Vector3.zero;
             if (!_normalizedMovementDirection.Approximately(Vector3.zero))

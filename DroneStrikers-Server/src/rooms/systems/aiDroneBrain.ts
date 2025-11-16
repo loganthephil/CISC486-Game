@@ -1,38 +1,78 @@
+import { AIDroneState } from "@rooms/schema/AIDroneState";
+import { DroneState } from "@rooms/schema/DroneState";
+import { TransformState } from "@rooms/schema/TransformState";
+import { AINavigation } from "@rooms/systems/aiNavigation";
 import { createBehaviourTreeInstance } from "src/behaviour_tree/behaviourTreeFactory";
 import { BehaviourNode } from "src/types/behaviour_tree/behaviourTree";
 import { BehaviourContext, IBlackboardSchema } from "src/types/behaviour_tree/behaviourTreeBlackboard";
 import { BehaviourTreeDefinition } from "src/types/behaviour_tree/behaviourTreeDefinition";
+import { PriorityTargets } from "src/types/detection";
+import { VectorUtils } from "src/utils";
+
+const DESIRED_CREATE_DISTANCE = 20.0;
+const GIVE_UP_PATIENCE_TIME = 15.0; // seconds
 
 export class AIDroneBrain {
+  private parentDrone: AIDroneState;
+  private aiNavigation: AINavigation;
+
   private behaviourTree: BehaviourNode<AIDroneBlackboard>;
   private context: BehaviourContext<AIDroneBlackboard>;
 
-  constructor() {
+  constructor(parentDrone: AIDroneState, aiNavigation: AINavigation) {
+    this.parentDrone = parentDrone;
+    this.aiNavigation = aiNavigation;
+
     // Initialize the behaviour tree and context using the factory function
     const { tree, context } = createBehaviourTreeInstance(droneBehaviourTree);
     this.behaviourTree = tree;
     this.context = context;
+
+    // Set initial blackboard values
+    this.context.blackboard.set("aiDroneState", this.parentDrone);
+    this.context.blackboard.set("aiNavigation", this.aiNavigation);
+    this.context.blackboard.set("fleeHealthThreshold", this.parentDrone.getTraits().fleeHealthThreshold);
   }
 
   public update(deltaTime: number): void {
     this.context.deltaTime = deltaTime;
     this.behaviourTree.tick(this.context);
+    this.aiNavigation.update(deltaTime);
   }
 
   public reset(): void {
     this.behaviourTree.reset();
+  }
+
+  public updateDetectionState(priorityTargets: PriorityTargets): void {
+    // If current target is no longer valid, clear it
+    const currentTarget = this.context.blackboard.get("currentTarget");
+    if (currentTarget && currentTarget.toDespawn) {
+      this.context.blackboard.set("currentTarget", null);
+    }
+
+    // Update blackboard with detection results
+    this.context.blackboard.set("bestDrone", priorityTargets.bestDrone);
+    this.context.blackboard.set("bestArenaObject", priorityTargets.bestArenaObject);
+    this.context.blackboard.set("highestLevelDrone", priorityTargets.highestLevelDrone);
+
+    // Update health percentage for flee conditions
+    this.context.blackboard.set("healthPercent", this.parentDrone.health / this.parentDrone.maxHealth);
   }
 }
 
 //#region Behaviour Tree Definition
 
 interface AIDroneBlackboard extends IBlackboardSchema {
+  aiDroneState: AIDroneState | null;
+  aiNavigation: AINavigation | null;
   healthPercent: number;
   fleeHealthThreshold: number;
-  currentTarget: any;
+  currentTarget: TransformState | null;
   giveUpTimer: number;
-  hasDroneInRange: boolean;
-  hasObjectInRange: boolean;
+  highestLevelDrone: DroneState | null;
+  bestDrone: DroneState | null;
+  bestArenaObject: TransformState | null;
 }
 
 const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
@@ -58,7 +98,7 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
           {
             type: "action",
             name: "Update Drone Target",
-            config: { action: "updateDroneTarget" },
+            config: { action: "updateFleeTarget" },
           },
           {
             type: "parallel",
@@ -205,41 +245,63 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
     ],
   },
   actions: {
+    updateFleeTarget: (context) => {
+      const highestLevelDrone = context.blackboard.get("highestLevelDrone");
+      if (!highestLevelDrone) {
+        // No "highest level drone" in detection range (should not be in this node)
+        console.error("AI Drone Brain: No highest level drone found in updateFleeTarget action. Should not happen if condition checks are correct.");
+        return "FAILURE";
+      }
+
+      context.blackboard.set("currentTarget", highestLevelDrone);
+      context.blackboard.set("giveUpTimer", 0); // Reset give up timer as new target acquired
+      return "SUCCESS";
+    },
+
     updateDroneTarget: (context) => {
-      // Type-safe access to blackboard
-      const currentTarget = context.blackboard.get("currentTarget");
-      // Implementation would update target based on detected drones
+      const bestDrone = context.blackboard.get("bestDrone");
+      if (!bestDrone) {
+        // No "best drone" in detection range (should not be in this node)
+        console.error("AI Drone Brain: No best drone found in updateDroneTarget action. Should not happen if condition checks are correct.");
+        return "FAILURE";
+      }
+
+      context.blackboard.set("currentTarget", bestDrone);
+      context.blackboard.set("giveUpTimer", 0); // Reset give up timer as new target acquired
       return "SUCCESS";
     },
 
     updateObjectTarget: (context) => {
-      // Implementation would update target based on detected objects
+      const bestObject = context.blackboard.get("bestArenaObject");
+      if (!bestObject) {
+        // No "best object" in detection range (should not be in this node)
+        console.error("AI Drone Brain: No best object found in updateObjectTarget action. Should not happen if condition checks are correct.");
+        return "FAILURE";
+      }
+
+      context.blackboard.set("currentTarget", bestObject);
+      context.blackboard.set("giveUpTimer", 0); // Reset give up timer as new target acquired
       return "SUCCESS";
     },
 
     setAttackTarget: (context) => {
       const target = context.blackboard.get("currentTarget");
       if (!target) return "FAILURE";
-      // Implementation would set target in target provider
+      const aiDroneState = context.blackboard.get("aiDroneState");
+      if (!aiDroneState) {
+        console.error("AI Drone Brain: No AI Drone State found in setAttackTarget action.");
+        return "FAILURE";
+      }
+      aiDroneState.setAimTarget(target);
       return "SUCCESS";
-    },
-
-    flee: (context) => {
-      // Implementation for fleeing behavior
-      return "RUNNING";
     },
 
     tickGiveUpTimer: (context) => {
-      const giveUpTimer = context.blackboard.get("giveUpTimer") || 0;
+      const giveUpTimer = context.blackboard.get("giveUpTimer");
       const deltaTime = context.deltaTime;
-      // Implementation would update give up timer based on conditions
+      // TODO: More sophisticated patience based on damage dealt within time span
       context.blackboard.set("giveUpTimer", giveUpTimer + deltaTime);
       return "SUCCESS";
-    },
-
-    createDistance: (context) => {
-      // Implementation for creating distance from target
-      return "RUNNING";
     },
 
     clearTarget: (context) => {
@@ -247,13 +309,62 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
       return "SUCCESS";
     },
 
+    flee: (context) => {
+      const highestLevelDrone = context.blackboard.get("highestLevelDrone");
+      if (!highestLevelDrone) return "SUCCESS"; // No target to flee from, count as success from fleeing
+
+      const aiNavigation = context.blackboard.get("aiNavigation");
+      if (!aiNavigation) {
+        console.error("AI Drone Brain: No AI Navigation system found in flee action.");
+        return "FAILURE";
+      }
+      aiNavigation.fleeTarget(highestLevelDrone);
+      return "RUNNING";
+    },
+
     pursue: (context) => {
-      // Implementation for pursuing target
+      const currentTarget = context.blackboard.get("currentTarget");
+      if (!currentTarget) return "FAILURE"; // No target to pursue
+
+      const aiNavigation = context.blackboard.get("aiNavigation");
+      if (!aiNavigation) {
+        console.error("AI Drone Brain: No AI Navigation system found in pursue action.");
+        return "FAILURE";
+      }
+
+      aiNavigation.followTarget(currentTarget);
+      return "RUNNING";
+    },
+
+    createDistance: (context) => {
+      const aiDroneState = context.blackboard.get("aiDroneState");
+      const targetState = context.blackboard.get("currentTarget");
+      if (!aiDroneState || !targetState) return "FAILURE"; // Cannot create distance without states
+
+      const distanceToTarget = VectorUtils.magnitude({
+        x: targetState.posX - aiDroneState.posX,
+        y: targetState.posY - aiDroneState.posY,
+      });
+      if (distanceToTarget >= DESIRED_CREATE_DISTANCE) return "SUCCESS"; // Already at desired distance
+
+      const aiNavigation = context.blackboard.get("aiNavigation");
+      if (!aiNavigation) {
+        console.error("AI Drone Brain: No AI Navigation system found in createDistance action.");
+        return "FAILURE";
+      }
+      aiNavigation.fleeTarget(targetState);
+
       return "RUNNING";
     },
 
     wander: (context) => {
-      // Implementation for wandering behavior
+      const aiNavigation = context.blackboard.get("aiNavigation");
+      if (!aiNavigation) {
+        console.error("AI Drone Brain: No AI Navigation system found in wander action.");
+        return "FAILURE";
+      }
+
+      aiNavigation.wander();
       return "RUNNING";
     },
   },
@@ -266,26 +377,28 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
 
     shouldGiveUp: (context) => {
       const giveUpTimer = context.blackboard.get("giveUpTimer");
-      const GIVE_UP_PATIENCE_TIME = 15; // seconds
       return giveUpTimer >= GIVE_UP_PATIENCE_TIME;
     },
 
     hasDroneInRange: (context) => {
-      return context.blackboard.get("hasDroneInRange") || false;
+      return context.blackboard.get("bestDrone") !== null;
     },
 
     hasObjectInRange: (context) => {
-      return context.blackboard.get("hasObjectInRange") || false;
+      return context.blackboard.get("bestArenaObject") !== null;
     },
   },
   initialBlackboard: {
+    aiDroneState: null,
+    aiNavigation: null,
     healthPercent: 1.0,
     fleeHealthThreshold: 0.3,
     currentTarget: null,
     giveUpTimer: 0,
-    hasDroneInRange: false,
-    hasObjectInRange: false,
+    highestLevelDrone: null,
+    bestDrone: null,
+    bestArenaObject: null,
   },
 };
 
-//#endregion Behaviour Tree Definition
+//#endregion

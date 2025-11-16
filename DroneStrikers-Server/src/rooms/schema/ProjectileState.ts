@@ -19,7 +19,7 @@ export class ProjectileState extends TransformState {
   private remainingLifeTimeSeconds: number = 2.0; // Projectiles expire after 2 seconds
 
   constructor(firedBy: DroneState, damage: number, pierce: number, team: Team, position: Vector2, velocity: Vector2) {
-    super(0.3, position, velocity);
+    super("Projectile", 0.3, position, velocity);
     this.firedBy = firedBy;
     this.contactDamage = damage;
     this.team = team;
@@ -39,7 +39,9 @@ export class ProjectileState extends TransformState {
   }
 
   public override onTriggerEnter(self: Collider, other: Collider) {
+    if (other.team === this.team) return; // Ignore collisions with same team
     const target = other.transform;
+
     if (isDamageable(target)) {
       // Apply damage to the target
       if (target.takeDamage(this.contactDamage)) {

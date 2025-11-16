@@ -1,7 +1,8 @@
 import { AIDroneState } from "@rooms/schema/AIDroneState";
 import { DroneState } from "@rooms/schema/DroneState";
+import { GameState } from "@rooms/schema/GameState";
 import { DetectionSystem } from "@rooms/systems/detectionSystem";
-import { DroneType, Vector2 } from "src/types/commonTypes";
+import { Vector2 } from "src/types/commonTypes";
 import { DroneTeam, Team } from "src/types/team";
 import { ENABLE_DEBUG_DRONE_SPAWNS } from "src/utils/constants";
 
@@ -24,16 +25,16 @@ const DEBUG_SPAWN_ZONES: Record<DroneTeam, TeamSpawnZone> = {
 const SPAWN_ZONES: Record<DroneTeam, TeamSpawnZone> = ENABLE_DEBUG_DRONE_SPAWNS ? DEBUG_SPAWN_ZONES : DEFAULT_SPAWN_ZONES;
 
 export class DroneSpawner {
-  public createPlayerDrone(name: string, team: DroneTeam): DroneState | null {
+  public createPlayerDrone(id: string, name: string, team: DroneTeam): DroneState | null {
     const spawnPosition = this.getRandomSpawnPositionForTeam(team);
     if (!spawnPosition) return null;
-    return new DroneState(name, team, spawnPosition);
+    return new DroneState(id, name, team, spawnPosition);
   }
 
-  public createAIDrone(name: string, team: DroneTeam, detectionSystem: DetectionSystem): AIDroneState | null {
+  public createAIDrone(id: string, name: string, team: DroneTeam, gameState: GameState, detectionSystem: DetectionSystem): AIDroneState | null {
     const spawnPosition = this.getRandomSpawnPositionForTeam(team);
     if (!spawnPosition) return null;
-    return new AIDroneState(name, team, spawnPosition, detectionSystem);
+    return new AIDroneState(id, name, team, spawnPosition, gameState, detectionSystem);
   }
 
   private getRandomSpawnPositionForTeam(team: DroneTeam): Vector2 | null {
