@@ -48,7 +48,7 @@ export class DroneState extends TransformState implements IDamageable {
 
   constructor(id: string, name: string, team: DroneTeam, position: Vector2) {
     super("Drone", 0.5, position);
-    this.id = id; 
+    this.id = id;
     this.name = name;
     this.team = team;
 
@@ -115,6 +115,7 @@ export class DroneState extends TransformState implements IDamageable {
 
   /**
    * Sets the requested movement vector for this drone.
+   * Must be called every frame to maintain movement.
    * @param movement The movement vector requested by the controlling force.
    */
   public setRequestedMovement(movement: Vector2) {

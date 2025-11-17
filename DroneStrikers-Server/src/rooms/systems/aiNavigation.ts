@@ -1,9 +1,18 @@
 import { AIDroneState } from "@rooms/schema/AIDroneState";
 import { TransformState } from "@rooms/schema/TransformState";
+import { DetectionSystem } from "@rooms/systems/detectionSystem";
 import { Vector2 } from "src/types/commonTypes";
+import { DetectionResult } from "src/types/detection";
 import { CommonUtils, VectorUtils } from "src/utils";
 
 type NavigationMode = "None" | "Wander" | "Follow" | "Flee";
+
+interface Threat {
+  timeToClosestApproach: number;
+  distanceAtClosestApproach: number;
+  awayFromThreat: Vector2;
+  urgency: number;
+}
 
 const MIN_RANDOM_DIRECTION_CHANGE_INTERVAL = 2.0;
 const MAX_RANDOM_DIRECTION_CHANGE_INTERVAL = 5.0;
@@ -13,26 +22,44 @@ const CENTER_RADIUS = 10.0;
 const MIN_DISTANCE_TO_TARGET = 5.0;
 const MAX_DISTANCE_TO_TARGET = 10.0;
 
+const MIN_STEERING_UPDATE_INTERVAL = 0.1; // Minimum time between steering updates
+const MAX_STEERING_UPDATE_INTERVAL = 0.2; // Maximum time between steering updates
+const OBSTACLE_DETECTION_RADIUS = 10.0; // Radius to scan for obstacles
+const MAX_TIME_LOOKAHEAD = 1.5; // How far ahead to predict collisions
+const MAX_THREATS_CONSIDERED = 3; // Max number of threats to consider when steering
+
 export class AINavigation {
-  private aiDroneState: AIDroneState;
+  private readonly aiDroneState: AIDroneState;
+  private readonly detectionSystem: DetectionSystem;
 
   private navigationMode: NavigationMode = "None";
-  private desiredDirection: Vector2 = { x: 0, y: 0 };
   private targetState: TransformState | null = null;
+  private desiredDirection: Vector2 = { x: 0, y: 0 };
+  private movementDirection: Vector2 = { x: 0, y: 0 };
 
   private withinRange: boolean = false; // Whether the drone is within a certain range of the target and should stop moving
 
   private nextRandomDirectionChangeTimer: number = 0;
+  private nextSteeringUpdateTimer: number = 0;
 
-  constructor(aiDroneState: AIDroneState) {
+  private threats: Threat[] = [];
+
+  constructor(aiDroneState: AIDroneState, detectionSystem: DetectionSystem) {
     this.aiDroneState = aiDroneState;
+    this.detectionSystem = detectionSystem;
   }
 
   public update(deltaTime: number) {
-    let movementDirection: Vector2 = this.getDesiredDirection(deltaTime);
-    this.desiredDirection = { ...movementDirection }; // Store for next frame
+    this.desiredDirection = this.getDesiredDirection(deltaTime);
+    let movementDirection: Vector2 = { ...this.desiredDirection };
+
+    movementDirection = this.steerMovement(movementDirection, deltaTime);
+    // console.log(
+    //   `Desired Direction: (${this.desiredDirection.x.toFixed(2)}, ${this.desiredDirection.y.toFixed(2)}) | Movement Direction: (${movementDirection.x.toFixed(2)}, ${movementDirection.y.toFixed(2)})`
+    // );
 
     this.aiDroneState.setRequestedMovement(movementDirection);
+    this.movementDirection = movementDirection;
   }
 
   public stop() {
@@ -130,5 +157,99 @@ export class AINavigation {
     const directionToCenter = VectorUtils.normalize(toCenter);
     const weightedRandomDirection = VectorUtils.slerp(randomDirection, directionToCenter, weightTowardsCenter);
     return VectorUtils.normalize(weightedRandomDirection);
+  }
+
+  private steerMovement(desiredDirection: Vector2, deltaTime: number): Vector2 {
+    // Get current position and velocity
+    const selfPosition: Vector2 = { x: this.aiDroneState.posX, y: this.aiDroneState.posY };
+    const selfVelocity: Vector2 = { x: this.aiDroneState.velX, y: this.aiDroneState.velY };
+    const selfRadius: number = this.aiDroneState.collisionRadius;
+
+    // Gather perceived potential obstacles
+    const hits = this.detectionSystem.scanArea(this.aiDroneState.id, selfPosition, OBSTACLE_DETECTION_RADIUS, this.aiDroneState.team);
+
+    this.threats = [];
+    for (const hit of hits) {
+      // If the state is a projectile on the same team, ignore
+      if (hit.objectType === "Projectile" && hit.team === this.aiDroneState.team) continue;
+
+      const hitState = hit.object;
+
+      const hitRadius = hitState.collisionRadius;
+      const hitClosestPoint: Vector2 = CommonUtils.closestPointOnCircle({ x: hitState.posX, y: hitState.posY }, hitRadius, selfPosition);
+      const hitVelocity: Vector2 = { x: hitState.velX, y: hitState.velY };
+
+      const relativePosition: Vector2 = VectorUtils.subtract(hitClosestPoint, selfPosition);
+      const relativeVelocity: Vector2 = VectorUtils.subtract(hitVelocity, selfVelocity);
+
+      // Get how long until closest approach
+      const relativeSpeedSq = VectorUtils.sqrMagnitude(relativeVelocity);
+      let timeToClosestApproach = relativeSpeedSq > 0 ? -VectorUtils.dot(relativePosition, relativeVelocity) / relativeSpeedSq : 0;
+      timeToClosestApproach = CommonUtils.clamp(timeToClosestApproach, 0, MAX_TIME_LOOKAHEAD); // Treat anything beyond max lookahead as being at max lookahead
+
+      // Get distance at closest approach
+      const separationAtClosestApproach = VectorUtils.add(relativePosition, VectorUtils.scale(relativeVelocity, timeToClosestApproach));
+      const distanceAtClosestApproach = VectorUtils.magnitude(separationAtClosestApproach);
+
+      const combinedRadii = Math.max(0.001, selfRadius + hitRadius); // Prevent division by zero
+
+      // If relative speed is zero (parallel movement or stationary), simply push away if already within combined radii
+      if (relativeSpeedSq === 0) {
+        const distance = VectorUtils.magnitude(relativePosition);
+        if (distance < combinedRadii) {
+          const awayFromThreat = VectorUtils.normalize(VectorUtils.scale(relativePosition, -1));
+          this.threats.push({
+            timeToClosestApproach: 0,
+            distanceAtClosestApproach: distance,
+            awayFromThreat: awayFromThreat,
+            urgency: CommonUtils.clamp01((combinedRadii - distance) / combinedRadii), // 0 = at or beyond safe distance, 1 = collision
+          });
+          continue;
+        }
+      }
+
+      // If we will be within the combined radius at closest approach, consider this a threat
+      if (distanceAtClosestApproach >= combinedRadii) continue;
+      const awayFromThreat = VectorUtils.normalize(VectorUtils.scale(separationAtClosestApproach, -1));
+
+      // Calculate urgency
+      const proximityFactor = CommonUtils.clamp01((combinedRadii - distanceAtClosestApproach) / combinedRadii); // 0 = at or beyond safe distance, 1 = collision
+      const timeFactor = 1 - timeToClosestApproach / MAX_TIME_LOOKAHEAD; // 0 = at max lookahead, 1 = immediate
+      this.threats.push({
+        timeToClosestApproach: timeToClosestApproach,
+        distanceAtClosestApproach: distanceAtClosestApproach,
+        awayFromThreat: awayFromThreat,
+        urgency: CommonUtils.clamp01(proximityFactor * timeFactor),
+      });
+    }
+
+    // Sort threats by urgency
+    this.threats.sort((a, b) => {
+      const comparison = b.urgency - a.urgency;
+      if (comparison !== 0) return comparison;
+      return a.timeToClosestApproach - b.timeToClosestApproach; // If equal urgency, prioritize earlier collisions
+    });
+
+    let rawAvoidanceVector: Vector2 = { x: 0, y: 0 };
+    const numThreatsToConsider = Math.min(this.threats.length, MAX_THREATS_CONSIDERED);
+    for (let i = 0; i < numThreatsToConsider; i++) {
+      const threat = this.threats[i];
+      const weight = CommonUtils.lerp(0.25, 1.0, threat.urgency); // Weight avoidance more heavily for more urgent threats
+      rawAvoidanceVector = VectorUtils.add(rawAvoidanceVector, VectorUtils.scale(threat.awayFromThreat, weight));
+    }
+
+    // Avoid map boundaries
+    // TODO: Implement map boundary avoidance
+
+    const rawAvoidanceSqrMagnitude = VectorUtils.sqrMagnitude(rawAvoidanceVector);
+    if (rawAvoidanceSqrMagnitude === 0) return desiredDirection; // No adjustment needed
+    rawAvoidanceVector = VectorUtils.normalize(rawAvoidanceVector);
+
+    // TODO: Smooth the avoidance vector
+
+    // Combine desired direction and avoidance
+    const avoidanceWeight = this.aiDroneState.calculateAvoidanceWeight();
+    const steeredMovement = VectorUtils.normalize(VectorUtils.add(desiredDirection, VectorUtils.scale(rawAvoidanceVector, avoidanceWeight)));
+    return steeredMovement;
   }
 }

@@ -47,8 +47,11 @@ export class GameRoom extends Room<GameState> {
     console.log("Room", this.roomId, "disposing...");
   }
 
-  handleTick = (deltaTime: number) => this.state.update(deltaTime); // Update the game state each tick
-
+  handleTick = (deltaTime: number) => {
+    // console.time("GameRoom Tick");
+    this.state.update(deltaTime); // Update the game state each tick
+    // console.timeEnd("GameRoom Tick");
+  };
   private registerMessageHandlers() {
     this.onMessage("*", (client, type, payload) => {
       if (typeof type !== "number") return; // ignore string-typed messages

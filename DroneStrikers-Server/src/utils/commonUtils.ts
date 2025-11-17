@@ -111,3 +111,30 @@ export function radianSmoothStep(currentRad: number, targetRad: number, maxDelta
   const clampedDelta = Math.max(-maxDeltaRad, Math.min(maxDeltaRad, difference));
   return currentRad + clampedDelta;
 }
+
+/**
+ * Returns the closest point on or inside a circle to a given position.
+ * @param center The center of the circle
+ * @param radius The radius of the circle
+ * @param position The position to find the closest point to
+ * @returns The closest point on or inside the circle to the given position
+ */
+export function closestPointOnCircle(center: Vector2, radius: number, position: Vector2): Vector2 {
+  const r = Math.max(0, radius);
+  const dx = position.x - center.x;
+  const dy = position.y - center.y;
+  const distSq = dx * dx + dy * dy;
+
+  if (r === 0) return { x: center.x, y: center.y };
+
+  if (distSq === 0) return position; // At center, inside circle
+
+  const dist = Math.sqrt(distSq);
+  if (dist <= r) return position; // Inside or on the circle
+
+  const scale = r / dist;
+  return {
+    x: center.x + dx * scale,
+    y: center.y + dy * scale,
+  };
+}

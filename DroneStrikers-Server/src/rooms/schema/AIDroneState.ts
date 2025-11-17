@@ -11,15 +11,15 @@ import { CommonUtils, VectorUtils } from "src/utils";
 
 @entity
 export class AIDroneState extends DroneState {
-  private readonly aiNavigation: AINavigation = new AINavigation(this);
+  private readonly aiNavigation: AINavigation;
   private readonly aiDroneBrain: AIDroneBrain;
 
   private readonly gameState: GameState;
   private readonly detectionSystem: DetectionSystem;
 
   // AI Drone Traits
-  private skill: number;
-  private aggression: number;
+  private readonly skill: number;
+  private readonly aggression: number;
 
   // Detection state
   private lastDetectionTime: number = 0;
@@ -36,6 +36,7 @@ export class AIDroneState extends DroneState {
     this.skill = Math.random();
     this.aggression = CommonUtils.clamp01(this.skill + (Math.random() - 0.5));
 
+    this.aiNavigation = new AINavigation(this, this.detectionSystem);
     this.aiDroneBrain = new AIDroneBrain(this, this.aiNavigation);
   }
 
@@ -64,19 +65,8 @@ export class AIDroneState extends DroneState {
     const detectionRadius = 15; // Configurable
 
     // Update AI brain blackboard
-    const priorityTargets = this.detectionSystem.findPriorityTarget(this.id, position, detectionRadius, this.team, this.getTraits());
+    const priorityTargets = this.detectionSystem.findPriorityTarget(this.id, position, detectionRadius, this.team, { skill: this.skill, aggression: this.aggression });
     this.aiDroneBrain.updateDetectionState(priorityTargets);
-  }
-
-  // TODO: Redo AI traits system
-  public getTraits() {
-    return {
-      skill: this.skill,
-      aggression: this.aggression,
-      fleeHealthThreshold: this.calculateFleeHealthThreshold(),
-      fleeLevelDifferenceThreshold: this.calculateFleeLevelThreshold(),
-      giveUpDistanceMultiplier: this.calculateGiveUpDistanceMultiplier(),
-    };
   }
 
   public setAimTarget(target: TransformState | null) {
@@ -93,15 +83,19 @@ export class AIDroneState extends DroneState {
     return VectorUtils.normalize(direction);
   }
 
-  private calculateFleeHealthThreshold(): number {
-    return 0.25 * this.skill + 0.25 * (1 - this.aggression);
+  public calculateFleeHealthThreshold(): number {
+    return CommonUtils.lerp(0, 0.25, this.skill) + CommonUtils.lerp(0.25, 0, this.aggression);
   }
 
-  private calculateFleeLevelThreshold(): number {
-    return 0.05 + 0.2 * this.aggression;
+  public calculateFleeLevelDifferenceThreshold(): number {
+    return CommonUtils.lerp(0.05, 0.25, this.aggression);
   }
 
-  private calculateGiveUpDistanceMultiplier(): number {
-    return 1 + this.aggression;
+  public calculateGiveUpDistanceMultiplier(): number {
+    return CommonUtils.lerp(1, 2,this.aggression); 
+  }
+
+  public calculateAvoidanceWeight(): number {
+    return CommonUtils.lerp(0.7, 1.5, this.skill);
   }
 }

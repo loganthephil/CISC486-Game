@@ -7,7 +7,7 @@ import { Team } from "src/types/team";
 export interface BaseDetectionResult<T, K extends ObjectType = ObjectType> {
   object: T;
   distance: number;
-  radius: number;
+  scanRadius: number;
   team: Team;
   objectType: K;
 }

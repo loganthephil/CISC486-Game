@@ -11,12 +11,15 @@ export class DetectionSystem {
   private readonly cellSize: number;
   private grid = new Map<string, Set<string>>(); // cellKey -> Set of entity IDs
 
+  private lastGridUpdateTime: number = 0;
+
   constructor(private gameState: GameState, cellSize: number = 4) {
     this.cellSize = cellSize;
   }
 
   /**
-   * Scan for objects within radius of a position, filtered by team and type
+   * Scan for objects within radius of a position, filtered by team and type.
+   * All options default to true, specify false to exclude.
    */
   public scanArea(
     scannerId: string,
@@ -32,7 +35,7 @@ export class DetectionSystem {
       includeNeutral?: boolean;
     } = {}
   ): DetectionResult[] {
-    const { includeDrones = true, includeObjects = true, includeProjectiles = true, includeAllies = false, includeEnemies = true, includeNeutral = true } = options;
+    const { includeDrones = true, includeObjects = true, includeProjectiles = true, includeAllies = true, includeEnemies = true, includeNeutral = true } = options;
 
     this.updateGrid();
 
@@ -71,7 +74,7 @@ export class DetectionSystem {
           const detectionResult: DroneDetectionResult = {
             object: entity,
             distance,
-            radius,
+            scanRadius: radius,
             team: entityTeam,
             objectType: "Drone",
             healthPercent,
@@ -88,7 +91,7 @@ export class DetectionSystem {
           const detectionResult: ArenaObjectDetectionResult = {
             object: entity,
             distance,
-            radius,
+            scanRadius: radius,
             team: entityTeam,
             objectType: "ArenaObject",
             healthPercent,
@@ -102,7 +105,7 @@ export class DetectionSystem {
           const detectionResult: ProjectileDetectionResult = {
             object: entity,
             distance,
-            radius,
+            scanRadius: radius,
             team: entityTeam,
             objectType: "Projectile",
           };
@@ -118,19 +121,10 @@ export class DetectionSystem {
   /**
    * Find the most important target based on AI priorities
    */
-  public findPriorityTarget(
-    scannerId: string,
-    center: Vector2,
-    radius: number,
-    scannerTeam: Team,
-    traits: { aggression: number; skill: number }
-  ): PriorityTargets {
+  public findPriorityTarget(scannerId: string, center: Vector2, radius: number, scannerTeam: Team, traits: { aggression: number; skill: number }): PriorityTargets {
     // Scan area for all relevant objects
     const detected = this.scanArea(scannerId, center, radius, scannerTeam, {
-      includeDrones: true,
-      includeObjects: true,
-      includeEnemies: true,
-      includeNeutral: true,
+      includeAllies: false,
     });
 
     let bestDrone: DroneState | null = null;
@@ -176,8 +170,8 @@ export class DetectionSystem {
   }
 
   private scoreDroneTarget(detection: DroneDetectionResult, traits: { aggression: number; skill: number }): number {
-    const healthFactor = 1 - (detection.healthPercent); // Prefer lower health
-    const distanceFactor = 1 - detection.distance / detection.radius; // Prefer closer
+    const healthFactor = 1 - detection.healthPercent; // Prefer lower health
+    const distanceFactor = 1 - detection.distance / detection.scanRadius; // Prefer closer
     const levelFactor = detection.level;
 
     // More aggressive drones care less about danger, more about value
@@ -190,7 +184,7 @@ export class DetectionSystem {
 
   private scoreArenaObjectTarget(detection: ArenaObjectDetectionResult, traits: { aggression: number; skill: number }): number {
     const healthFactor = 1 - (detection.healthPercent || 1);
-    const distanceFactor = 1 - detection.distance / detection.radius;
+    const distanceFactor = 1 - detection.distance / detection.scanRadius;
 
     // Less aggressive drones prefer objects more
     const aggressionPenalty = traits.aggression * 0.5;
@@ -199,7 +193,11 @@ export class DetectionSystem {
     return healthFactor * 1.25 + distanceFactor * 2.0 + (detection.value || 0) - aggressionPenalty;
   }
 
+  // Lazy grid update (only updates when needed, but only once per tick)
   private updateGrid(): void {
+    if (this.gameState.gameTimeSeconds === this.lastGridUpdateTime) return; // Already updated this tick
+    this.lastGridUpdateTime = this.gameState.gameTimeSeconds;
+
     this.grid.clear();
 
     // Add drones to grid
@@ -250,7 +248,7 @@ export class DetectionSystem {
   }
 
   private getEntityById(id: string): TransformState | null {
-    return this.gameState.drones.get(id) || this.gameState.arenaObjects.get(id) || null;
+    return this.gameState.drones.get(id) || this.gameState.arenaObjects.get(id) || this.gameState.projectiles.get(id) || null;
   }
 
   private calculateDistance(a: Vector2, b: TransformState): number {

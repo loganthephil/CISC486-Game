@@ -39,6 +39,8 @@ export class ProjectileState extends TransformState {
   }
 
   public override onTriggerEnter(self: Collider, other: Collider) {
+    if (this.toDespawn) return; // Already marked for despawn
+
     if (other.team === this.team) return; // Ignore collisions with same team
     const target = other.transform;
 

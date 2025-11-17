@@ -23,7 +23,7 @@ export const PATCH_RATE_MS = 50;
 // -- GAME CONSTANTS --
 export const MAX_HUMAN_PLAYERS = 10;
 
-export const MAX_AI_PLAYERS = 1;
+export const MAX_AI_PLAYERS = 1; // Normally should be 9, but change for testing
 
 export const MAX_DRONE_PER_TEAM = 5;
 

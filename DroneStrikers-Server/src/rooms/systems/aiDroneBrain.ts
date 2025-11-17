@@ -19,6 +19,8 @@ export class AIDroneBrain {
   private behaviourTree: BehaviourNode<AIDroneBlackboard>;
   private context: BehaviourContext<AIDroneBlackboard>;
 
+  private readonly fleeLevelDifferenceThreshold: number;
+
   constructor(parentDrone: AIDroneState, aiNavigation: AINavigation) {
     this.parentDrone = parentDrone;
     this.aiNavigation = aiNavigation;
@@ -28,10 +30,12 @@ export class AIDroneBrain {
     this.behaviourTree = tree;
     this.context = context;
 
+    this.fleeLevelDifferenceThreshold = this.parentDrone.calculateFleeLevelDifferenceThreshold();
+
     // Set initial blackboard values
     this.context.blackboard.set("aiDroneState", this.parentDrone);
     this.context.blackboard.set("aiNavigation", this.aiNavigation);
-    this.context.blackboard.set("fleeHealthThreshold", this.parentDrone.getTraits().fleeHealthThreshold);
+    this.context.blackboard.set("fleeHealthThreshold", this.parentDrone.calculateFleeHealthThreshold());
   }
 
   public update(deltaTime: number): void {
@@ -57,22 +61,26 @@ export class AIDroneBrain {
     this.context.blackboard.set("highestLevelDrone", priorityTargets.highestLevelDrone);
 
     // Update health percentage for flee conditions
+    const parentLevel = this.parentDrone.level;
+    this.context.blackboard.set("fleeLevel", parentLevel + parentLevel * this.fleeLevelDifferenceThreshold);
     this.context.blackboard.set("healthPercent", this.parentDrone.health / this.parentDrone.maxHealth);
   }
 }
 
 //#region Behaviour Tree Definition
 
+// prettier-ignore
 interface AIDroneBlackboard extends IBlackboardSchema {
-  aiDroneState: AIDroneState | null;
-  aiNavigation: AINavigation | null;
-  healthPercent: number;
-  fleeHealthThreshold: number;
-  currentTarget: TransformState | null;
-  giveUpTimer: number;
-  highestLevelDrone: DroneState | null;
-  bestDrone: DroneState | null;
-  bestArenaObject: TransformState | null;
+  aiDroneState: AIDroneState | null;      // State of the AI drone
+  aiNavigation: AINavigation | null;      // Navigation system for the AI drone
+  fleeLevel: number;                      // Level at which to start fleeing
+  healthPercent: number;                  // Current percentage of health
+  fleeHealthThreshold: number;            // Health percentage threshold to trigger fleeing
+  currentTarget: TransformState | null;   // Current target to pursue or flee from
+  giveUpTimer: number;                    // Track patience time for giving up on target
+  highestLevelDrone: DroneState | null;   // Highest level drone detected
+  bestDrone: DroneState | null;           // Best drone target detected
+  bestArenaObject: TransformState | null; // Best arena object detected
 }
 
 const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
@@ -370,6 +378,14 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
   },
   conditions: {
     shouldFlee: (context) => {
+      const highestLevelDrone = context.blackboard.get("highestLevelDrone");
+      if (!highestLevelDrone) return false;
+
+      // Flee if the highest level drone is significantly higher level
+      const fleeLevel = context.blackboard.get("fleeLevel");
+      if (highestLevelDrone.level > fleeLevel) return true;
+
+      // Or if current health is below threshold
       const health = context.blackboard.get("healthPercent");
       const fleeThreshold = context.blackboard.get("fleeHealthThreshold");
       return health < fleeThreshold;
@@ -391,6 +407,7 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
   initialBlackboard: {
     aiDroneState: null,
     aiNavigation: null,
+    fleeLevel: 1,
     healthPercent: 1.0,
     fleeHealthThreshold: 0.3,
     currentTarget: null,
