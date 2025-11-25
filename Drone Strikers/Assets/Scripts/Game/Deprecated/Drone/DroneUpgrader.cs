@@ -6,7 +6,6 @@ using DroneStrikers.Core.Interfaces;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
 using DroneStrikers.Game.Drone;
-using DroneStrikers.Game.Player;
 using UnityEngine;
 
 namespace DroneStrikers.Game.Deprecated.Drone
@@ -159,21 +158,23 @@ namespace DroneStrikers.Game.Deprecated.Drone
         private void AddExperience(float amount)
         {
             Experience += amount;
+
             while (Experience >= RequiredExperienceToNextLevel)
             {
                 Level++;
+
                 if (UpgradePointLevels.Contains(Level))
                 {
                     // Get an upgrade point if this level grants one
                     AvailableUpgradePoints++;
-                    _localEvents.Invoke(PlayerEvents.UpgradePointGained, AvailableUpgradePoints);
+                    _localEvents.Invoke(DroneEvents.UpgradePointGained, AvailableUpgradePoints);
                 }
 
-                _localEvents.Invoke(PlayerEvents.LevelUp, Level);
+                _localEvents.Invoke(DroneEvents.LevelUp, Level);
             }
 
             // Notify experience after leveling up due to subscribers possibly needing updated level info
-            _localEvents.Invoke(PlayerEvents.ExperienceGained, amount);
+            _localEvents.Invoke(DroneEvents.ExperienceGained, amount);
         }
     }
 }

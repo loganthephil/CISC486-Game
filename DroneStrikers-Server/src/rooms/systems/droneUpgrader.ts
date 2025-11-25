@@ -98,6 +98,30 @@ export class DroneUpgrader {
     return true; // Upgrade successfully applied
   }
 
+  /**
+   * Returns a list of available upgrade types that have remaining upgrades in their respective trees.
+   */
+  public getAvailableTrees(): UpgradeType[] {
+    const availableTrees: UpgradeType[] = [];
+    for (const [upgradeType, currentNode] of this.currentUpgradeNode.entries()) {
+      if (currentNode.children.length > 0) {
+        availableTrees.push(upgradeType);
+      }
+    }
+    return availableTrees;
+  }
+
+  /**
+   * Returns a list of available upgrade IDs in the specified upgrade tree.
+   * @param upgradeType The type of upgrade tree to query.
+   * @returns A list of available upgrade IDs.
+   */
+  public getAvailableUpgradesInTree(upgradeType: UpgradeType): DroneUpgradeID[] {
+    const currentNode = this.currentUpgradeNode.get(upgradeType);
+    if (!currentNode) return [];
+    return currentNode.children.map((child) => child.upgradeId).filter((id): id is DroneUpgradeID => id !== undefined);
+  }
+
   private static experienceToLevel(level: number): number {
     if (!this.experienceToNextLevelMap.has(level)) {
       // Calculate experience required for the given level if not already cached

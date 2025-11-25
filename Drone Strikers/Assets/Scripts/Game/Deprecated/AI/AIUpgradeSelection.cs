@@ -4,7 +4,6 @@ using DroneStrikers.Core.Editor;
 using DroneStrikers.Events;
 using DroneStrikers.Game.Deprecated.Drone;
 using DroneStrikers.Game.Drone;
-using DroneStrikers.Game.Player;
 using UnityEngine;
 
 namespace DroneStrikers.Game.Deprecated.AI
@@ -19,8 +18,8 @@ namespace DroneStrikers.Game.Deprecated.AI
 
         private Coroutine _currentUpgradeSelectionCoroutine;
 
-        private void OnEnable() => _localEvents.Subscribe(PlayerEvents.UpgradePointGained, OnDroneUpgradePointGained);
-        private void OnDisable() => _localEvents.Unsubscribe(PlayerEvents.UpgradePointGained, OnDroneUpgradePointGained);
+        private void OnEnable() => _localEvents.Subscribe(DroneEvents.UpgradePointGained, OnDroneUpgradePointGained);
+        private void OnDisable() => _localEvents.Unsubscribe(DroneEvents.UpgradePointGained, OnDroneUpgradePointGained);
 
         /// <summary>
         ///     Event handler for when the drone gains an upgrade point.

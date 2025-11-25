@@ -67,7 +67,7 @@ namespace DroneStrikers.Game.UI
         /// <summary>
         ///     Event listener. Do not call directly.
         /// </summary>
-        public void OnUpgradeApplied(string upgradeId)
+        public void OnPlayerUpgradeApplied(string upgradeId)
         {
             if (!_upgradeCollection.TryGetUpgrade(upgradeId, out UpgradeSO appliedUpgrade)) return;
 

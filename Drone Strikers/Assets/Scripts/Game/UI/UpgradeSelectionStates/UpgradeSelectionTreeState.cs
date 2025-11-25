@@ -20,14 +20,18 @@ namespace DroneStrikers.Game.UI.UpgradeSelectionStates
                 // Only show trees that have available upgrades
                 if (!_upgradeSelector.HasAvailableUpgradesInTree(tree)) continue;
 
+                // Instantiate UI element
                 GameObject selectableUIObj = Object.Instantiate(_upgradeSelector.UpgradeSelectionUIPrefab, _upgradeSelector.UpgradeSelectionUIParent);
                 SelectableItemUI itemUI = selectableUIObj.GetComponent<SelectableItemUI>();
+
+                // Sanity check
                 if (itemUI == null)
                 {
                     Debug.LogError("SelectableItemUI component missing on UpgradeSelectionUIPrefab.");
                     continue;
                 }
 
+                // Setup UI element such that clicking it selects the tree
                 itemUI.Initialize(tree.UpgradeTreeName, () =>
                 {
                     _upgradeSelector.SelectedTree = tree;

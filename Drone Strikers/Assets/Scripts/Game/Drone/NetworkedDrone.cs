@@ -1,33 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
 using DroneStrikers.Events.EventSO;
 using DroneStrikers.Game.Combat;
-using DroneStrikers.Game.Player;
 using DroneStrikers.Game.UI;
 using DroneStrikers.Networking;
 using UnityEngine;
 
 namespace DroneStrikers.Game.Drone
 {
-    public class NetworkedDrone : MonoBehaviour
+    public class NetworkedDrone : NetworkedEntityBase<DroneState>
     {
-        private struct DroneSnapshot
-        {
-            public float Time;
-            public float PosX;
-            public float PosY;
-            public float UpperRotation;
-        }
-
         [Header("References")]
         [SerializeField] [RequiredField] private Transform _bodyTransform;
         [SerializeField] [RequiredField] private Transform _movementTransform;
         [SerializeField] [RequiredField] private WorldHealthBar _healthBar;
 
-        [SerializeField] [RequiredField] private GameObject _playerModule;
+        [SerializeField] [RequiredField] private GameObject _playerModule; // Module for the local player
+        [SerializeField] [RequiredField] private GameObject _serverModule; // Module for server-side drones
 
         [SerializeField] [RequiredField] private TeamMember _teamMember;
 
@@ -43,69 +34,55 @@ namespace DroneStrikers.Game.Drone
         [SerializeField] [RequiredField] private IntEventSO _onPlayerUpgradePointGained;
         [SerializeField] [RequiredField] private StringEventSO _onPlayerUpgradeApplied;
 
-        [Header("Interpolation Settings")]
-        [Tooltip("How far (seconds) to rewind when choosing interpolation window.")]
-        [SerializeField] private float _interpolationBackTime = 0.10f; // 100 ms
-        [Tooltip("Max extrapolation time (seconds) if we are ahead of newest snapshot.")]
-        [SerializeField] private float _extrapolationLimit = 0.25f;
-        [Tooltip("Smoothing factor for applying interpolated position.")]
-        [SerializeField] private float _positionLerpSpeed = 15f;
-        [Tooltip("Smoothing factor for applying interpolated rotation.")]
-        [SerializeField] private float _rotationLerpSpeed = 15f;
-
         public string DroneId { get; private set; }
-
         public DroneState CurrentState { get; private set; }
-
-        private Transform _transform;
 
         private bool _isLocalPlayer;
 
-        private const int MaxBufferSize = 20;
-        private readonly List<DroneSnapshot> _snapshotBuffer = new(MaxBufferSize + 1);
-
-        private void Awake()
-        {
-            _transform = transform;
-        }
+        protected override bool UsesInterpolation => true;
+        protected override bool UsesExtrapolation => true;
 
         public void Initialize(DroneState droneState, string droneId, bool isLocalPlayer)
         {
             DroneId = droneId; // Set the DroneId
-
             _isLocalPlayer = isLocalPlayer;
+
             _playerModule.SetActive(isLocalPlayer); // Enable player module only for local player
-
-            // Immediately set initial position
-            _transform.position = new Vector3(droneState.posX, 0f, droneState.posY);
-
-            CurrentState = droneState;
-            PushSnapshot(droneState); // Initial snapshot
+            _serverModule.SetActive(!isLocalPlayer); // Enable server module for non-local players
 
             _teamMember.Team = (Team)droneState.team; // Set team based on drone state
+
+            InitializeFromState(droneState);
+            CurrentState = droneState;
 
             NetworkManager instance = NetworkManager.Instance;
             instance.GameStateCallbacks.OnChange(droneState, () =>
             {
                 CurrentState = droneState;
-                PushSnapshot(droneState);
-                _healthBar.UpdatePercentage(droneState.health, droneState.maxHealth);
+                OnNetworkStateUpdated(droneState);
             });
 
             // TODO: Consider stopping capture of _localEvents
+            instance.GameStateCallbacks.Listen(droneState, state => state.name, (currentValue, _) =>
+            {
+                _localEvents.Invoke(DroneEvents.NameChanged, currentValue);
+            });
+
             instance.GameStateCallbacks.Listen(droneState, state => state.experience, (currentValue, _) =>
             {
-                _localEvents.Invoke(PlayerEvents.ExperienceGained, currentValue);
+                _localEvents.Invoke(DroneEvents.ExperienceGained, currentValue);
             });
 
             instance.GameStateCallbacks.Listen(droneState, state => state.level, (currentValue, _) =>
             {
-                _localEvents.Invoke(PlayerEvents.LevelUp, currentValue);
+                _localEvents.Invoke(DroneEvents.LevelUp, currentValue);
             });
 
             instance.GameStateCallbacks.Listen(droneState, state => state.upgradePoints, (currentValue, _) =>
             {
-                _onPlayerUpgradePointGained.Raise(currentValue);
+                // Notify only if this is the local player
+                // TODO: Consider using a LocalEvent for this and player upgrade applied.
+                if (_isLocalPlayer) _onPlayerUpgradePointGained.Raise(currentValue);
             });
 
             instance.GameStateCallbacks.Listen(droneState, state => state.lastTurretUpgradeId, (currentValue, _) =>
@@ -124,120 +101,44 @@ namespace DroneStrikers.Game.Drone
             });
         }
 
-        private void PushSnapshot(DroneState state)
-        {
-            _snapshotBuffer.Add(new DroneSnapshot
-            {
-                Time = Time.time,
-                PosX = state.posX,
-                PosY = state.posY,
-                UpperRotation = state.upperRotation
-            });
+        protected override float ExtractYawDeg(DroneState state) => state.upperRotation * Mathf.Rad2Deg;
 
-            // Trim old snapshots.
-            if (_snapshotBuffer.Count > MaxBufferSize)
-                _snapshotBuffer.RemoveRange(0, _snapshotBuffer.Count - MaxBufferSize);
+        protected override void ApplyInterpolatedTransform(Vector3 targetPos, float targetYawDeg)
+        {
+            // Position uses base interpolation
+            _transform.position = Vector3.Lerp(
+                _transform.position,
+                targetPos,
+                Time.deltaTime * _positionLerpSpeed);
+
+            // Rotation only on body transform
+            Quaternion desiredRot = Quaternion.Euler(0f, targetYawDeg, 0f);
+            _bodyTransform.rotation = Quaternion.Slerp(
+                _bodyTransform.rotation,
+                desiredRot,
+                Time.deltaTime * _rotationLerpSpeed);
+        }
+
+        protected override void OnStateSideEffects(DroneState state)
+        {
+            _healthBar.UpdatePercentage(state.health, state.maxHealth);
+        }
+
+        protected override void ApplySettingOverrides()
+        {
+            // Temporary local player settings (replace with proper client-side prediction later)
+            // TODO: Implement client-side prediction for local player drone
+            if (_isLocalPlayer)
+            {
+                _interpolationBackTime = 0f;
+                _extrapolationLimit = 0f;
+            }
         }
 
         private void OnUpgradeApplied(string upgradeId)
         {
             if (_upgradeCollection.TryGetUpgrade(upgradeId, out UpgradeSO upgrade)) ApplyUpgradeVisuals(upgrade);
-            _onPlayerUpgradeApplied.Raise(upgradeId);
-        }
-
-        private void Update()
-        {
-            SynchronizeFromServer();
-        }
-
-
-        // TODO: Handle local player prediction and reconciliation locally
-        private void SynchronizeFromServer()
-        {
-            if (_snapshotBuffer.Count == 0) return;
-
-            float renderTime = Time.time - (_isLocalPlayer ? 0f : _interpolationBackTime);
-
-            // Find interpolation pair.
-            DroneSnapshot newer = default;
-            DroneSnapshot older = default;
-            bool foundPair = false;
-
-            for (int i = _snapshotBuffer.Count - 1; i >= 0; i--)
-                if (_snapshotBuffer[i].Time <= renderTime)
-                {
-                    older = _snapshotBuffer[i];
-                    // If there is a newer one, use it.
-                    if (i + 1 < _snapshotBuffer.Count)
-                    {
-                        newer = _snapshotBuffer[i + 1];
-                        foundPair = true;
-                    }
-                    else
-                    {
-                        // We are exactly on the newest available snapshot.
-                        newer = older;
-                        foundPair = false;
-                    }
-
-                    break;
-                }
-
-            Vector3 targetPos;
-            float targetRot;
-
-            if (foundPair)
-            {
-                float tRange = newer.Time - older.Time;
-                float t = tRange > 0.0001f ? (renderTime - older.Time) / tRange : 0f;
-                t = Mathf.Clamp01(t);
-
-                float posX = Mathf.Lerp(older.PosX, newer.PosX, t);
-                float posY = Mathf.Lerp(older.PosY, newer.PosY, t);
-                float rot = Mathf.LerpAngle(older.UpperRotation * Mathf.Rad2Deg, newer.UpperRotation * Mathf.Rad2Deg, t);
-
-                targetPos = new Vector3(posX, 0f, posY);
-                targetRot = rot;
-            }
-            else
-            {
-                // Either before oldest or after newest snapshot.
-                DroneSnapshot latest = _snapshotBuffer[_snapshotBuffer.Count - 1];
-                if (renderTime > latest.Time)
-                {
-                    // Extrapolate forward (clamped).
-                    float dt = Mathf.Min(renderTime - latest.Time, _extrapolationLimit);
-                    // Velocity estimate (simple): use last two snapshots if possible.
-                    Vector2 velocity = Vector2.zero;
-                    if (_snapshotBuffer.Count >= 2)
-                    {
-                        DroneSnapshot prev = _snapshotBuffer[_snapshotBuffer.Count - 2];
-                        float dvTime = Mathf.Max(latest.Time - prev.Time, 0.0001f);
-                        velocity = new Vector2(
-                            (latest.PosX - prev.PosX) / dvTime,
-                            (latest.PosY - prev.PosY) / dvTime
-                        );
-                    }
-
-                    float extrapolatedPosX = latest.PosX + velocity.x * dt;
-                    float extrapolatedPosY = latest.PosY + velocity.y * dt;
-
-                    targetPos = new Vector3(extrapolatedPosX, 0f, extrapolatedPosY);
-                    targetRot = latest.UpperRotation * Mathf.Rad2Deg;
-                }
-                else
-                {
-                    // Before oldest: just use oldest.
-                    DroneSnapshot oldest = _snapshotBuffer[0];
-                    targetPos = new Vector3(oldest.PosX, 0f, oldest.PosY);
-                    targetRot = oldest.UpperRotation * Mathf.Rad2Deg;
-                }
-            }
-
-            // Smooth application.
-            _transform.position = Vector3.Lerp(_transform.position, targetPos, Time.deltaTime * _positionLerpSpeed);
-            Quaternion desiredRot = Quaternion.Euler(0f, targetRot, 0f);
-            _bodyTransform.rotation = Quaternion.Slerp(_bodyTransform.rotation, desiredRot, Time.deltaTime * _rotationLerpSpeed);
+            if (_isLocalPlayer) _onPlayerUpgradeApplied.Raise(upgradeId); // If this is the local player, raise the event
         }
 
         private void ApplyUpgradeVisuals(UpgradeSO upgrade)

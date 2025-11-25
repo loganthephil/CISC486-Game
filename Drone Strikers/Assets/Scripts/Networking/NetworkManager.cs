@@ -8,8 +8,12 @@ namespace DroneStrikers.Networking
 {
     public class NetworkManager : ColyseusManager<NetworkManager>
     {
+        public const int TicksPerSecond = 50;
+        public const float NetworkTickInterval = 0.02f; // 50 ticks per second
+
         public ColyseusRoom<GameState> Room { get; private set; }
         public StateCallbackStrategy<GameState> GameStateCallbacks { get; private set; }
+        public GameState CurrentGameState { get; private set; }
 
         private Action<string, DroneState> _onDroneAdded; // Called when a new drone is added
         private Action<string> _onDroneRemoved; // Called when a drone is removed
@@ -19,6 +23,16 @@ namespace DroneStrikers.Networking
 
         private Action<string, ArenaObjectState> _onArenaObjectAdded;
         private Action<string> _onArenaObjectRemoved;
+
+        public float GameTimeSeconds
+        {
+            get
+            {
+                if (CurrentGameState != null) return CurrentGameState.gameTimeSeconds;
+                Debug.LogWarning("Requested GameTimeSeconds but CurrentGameState is null.");
+                return 0f;
+            }
+        }
 
         protected override void Awake()
         {
@@ -41,6 +55,8 @@ namespace DroneStrikers.Networking
         {
             Room = await client.JoinOrCreate<GameState>("game_room");
             Debug.Log("Joined or created room: " + Room.RoomId);
+
+            CurrentGameState = Room.State;
             GameStateCallbacks = Callbacks.Get(Room);
 
             RegisterListeners();

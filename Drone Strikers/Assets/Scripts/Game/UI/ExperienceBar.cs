@@ -1,7 +1,6 @@
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Events;
 using DroneStrikers.Game.Drone;
-using DroneStrikers.Game.Player;
 using UnityEngine;
 
 namespace DroneStrikers.Game.UI
@@ -16,8 +15,8 @@ namespace DroneStrikers.Game.UI
             UpdateUI();
         }
 
-        private void OnEnable() => _localEvents.Subscribe(PlayerEvents.ExperienceGained, OnPlayerExperienceGained);
-        private void OnDisable() => _localEvents.Unsubscribe(PlayerEvents.ExperienceGained, OnPlayerExperienceGained);
+        private void OnEnable() => _localEvents.Subscribe(DroneEvents.ExperienceGained, OnPlayerExperienceGained);
+        private void OnDisable() => _localEvents.Unsubscribe(DroneEvents.ExperienceGained, OnPlayerExperienceGained);
 
         private void OnPlayerExperienceGained(float totalExperience)
         {

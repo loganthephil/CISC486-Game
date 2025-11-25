@@ -26,7 +26,13 @@ export function randomRange(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
 
+/**
+ * Selects a random element from an array.
+ * @param array The array to select from. Must be non-empty.
+ * @returns A random element from the array.
+ */
 export function randomChoice<T>(array: T[]): T {
+  if (array.length === 0) throw new Error("Cannot select a random choice from an empty array.");
   const index = Math.floor(Math.random() * array.length);
   return array[index];
 }
@@ -78,7 +84,7 @@ export function degToVec2(degrees: number): Vector2 {
  * Linearly interpolates between two numbers.
  * @param start The starting value
  * @param end The ending value
- * @param t The interpolation factor between 0 and 1
+ * @param t The interpolation factor between 0 and 1 (unchecked)
  * @returns The interpolated value
  */
 export function lerp(start: number, end: number, t: number): number {

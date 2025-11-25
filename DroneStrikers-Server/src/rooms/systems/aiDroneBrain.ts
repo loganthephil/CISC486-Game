@@ -12,6 +12,8 @@ import { VectorUtils } from "src/utils";
 const DESIRED_CREATE_DISTANCE = 20.0;
 const GIVE_UP_PATIENCE_TIME = 15.0; // seconds
 
+const FLAT_FLEE_LEVEL_BUFFER = 2; // Additional levels above own level to trigger flee
+
 export class AIDroneBrain {
   private parentDrone: AIDroneState;
   private aiNavigation: AINavigation;
@@ -62,7 +64,7 @@ export class AIDroneBrain {
 
     // Update health percentage for flee conditions
     const parentLevel = this.parentDrone.level;
-    this.context.blackboard.set("fleeLevel", parentLevel + parentLevel * this.fleeLevelDifferenceThreshold);
+    this.context.blackboard.set("fleeLevel", FLAT_FLEE_LEVEL_BUFFER + parentLevel + parentLevel * this.fleeLevelDifferenceThreshold);
     this.context.blackboard.set("healthPercent", this.parentDrone.health / this.parentDrone.maxHealth);
   }
 }
@@ -383,6 +385,7 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
 
       // Flee if the highest level drone is significantly higher level
       const fleeLevel = context.blackboard.get("fleeLevel");
+      console.log(`AI Drone Brain: Checking flee condition. Highest Level Drone: ${highestLevelDrone.level}, Flee Level: ${fleeLevel}`);
       if (highestLevelDrone.level > fleeLevel) return true;
 
       // Or if current health is below threshold

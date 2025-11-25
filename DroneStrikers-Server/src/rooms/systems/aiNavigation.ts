@@ -2,8 +2,8 @@ import { AIDroneState } from "@rooms/schema/AIDroneState";
 import { TransformState } from "@rooms/schema/TransformState";
 import { DetectionSystem } from "@rooms/systems/detectionSystem";
 import { Vector2 } from "src/types/commonTypes";
-import { DetectionResult } from "src/types/detection";
 import { CommonUtils, VectorUtils } from "src/utils";
+import { MAP_MAX_COORDINATE } from "src/utils/constants";
 
 type NavigationMode = "None" | "Wander" | "Follow" | "Flee";
 
@@ -14,19 +14,28 @@ interface Threat {
   urgency: number;
 }
 
+// -- Wander --
 const MIN_RANDOM_DIRECTION_CHANGE_INTERVAL = 2.0;
 const MAX_RANDOM_DIRECTION_CHANGE_INTERVAL = 5.0;
 const WANDER_BOUNDARY_RADIUS = 50.0;
 const CENTER_RADIUS = 10.0;
 
+// -- Follow --
 const MIN_DISTANCE_TO_TARGET = 5.0;
 const MAX_DISTANCE_TO_TARGET = 10.0;
 
+// -- Steering --
 const MIN_STEERING_UPDATE_INTERVAL = 0.1; // Minimum time between steering updates
 const MAX_STEERING_UPDATE_INTERVAL = 0.2; // Maximum time between steering updates
 const OBSTACLE_DETECTION_RADIUS = 10.0; // Radius to scan for obstacles
 const MAX_TIME_LOOKAHEAD = 1.5; // How far ahead to predict collisions
 const MAX_THREATS_CONSIDERED = 3; // Max number of threats to consider when steering
+
+// -- Map boundary avoidance --
+const BOUNDARY_WARNING_DISTANCE = 3.0; // Start steering away when this close to wall
+const BOUNDARY_HARD_PUSH_DISTANCE = 1.0; // Treat as very urgent when this close
+const BOUNDARY_WARNING_LENGTH = BOUNDARY_WARNING_DISTANCE - BOUNDARY_HARD_PUSH_DISTANCE; // Precomputed for efficiency
+const BOUNDARY_BASE_URGENCY = 0.4; // Minimum urgency when within warning distance
 
 export class AINavigation {
   private readonly aiDroneState: AIDroneState;
@@ -51,14 +60,13 @@ export class AINavigation {
 
   public update(deltaTime: number) {
     this.desiredDirection = this.getDesiredDirection(deltaTime);
-    let movementDirection: Vector2 = { ...this.desiredDirection };
 
-    movementDirection = this.steerMovement(movementDirection, deltaTime);
+    let movementDirection = this.steerMovement(this.desiredDirection, deltaTime);
     // console.log(
     //   `Desired Direction: (${this.desiredDirection.x.toFixed(2)}, ${this.desiredDirection.y.toFixed(2)}) | Movement Direction: (${movementDirection.x.toFixed(2)}, ${movementDirection.y.toFixed(2)})`
     // );
 
-    this.aiDroneState.setRequestedMovement(movementDirection);
+    this.aiDroneState.enqueueMovement(movementDirection); // Enqueue movement command with artificial latency
     this.movementDirection = movementDirection;
   }
 
@@ -87,6 +95,11 @@ export class AINavigation {
     this.targetState = targetState;
   }
 
+  /**
+   * Get the desired movement direction based on the current navigation mode.
+   * @param deltaTime Time elapsed since last update
+   * @returns A normalized direction vector representing the desired movement direction.
+   */
   private getDesiredDirection(deltaTime: number): Vector2 {
     switch (this.navigationMode) {
       case "Wander":
@@ -159,7 +172,21 @@ export class AINavigation {
     return VectorUtils.normalize(weightedRandomDirection);
   }
 
+  /**
+   * Steer the movement direction to avoid obstacles and threats.
+   * @param desiredDirection The desired movement direction (must be normalized).
+   * @param deltaTime Time elapsed since last update.
+   * @returns The adjusted movement direction.
+   */
   private steerMovement(desiredDirection: Vector2, deltaTime: number): Vector2 {
+    this.nextSteeringUpdateTimer -= deltaTime;
+    if (this.nextSteeringUpdateTimer > 0) {
+      return this.movementDirection; // Keep current movement direction
+    }
+
+    // Reset steering update timer
+    this.nextSteeringUpdateTimer = CommonUtils.randomRange(MIN_STEERING_UPDATE_INTERVAL, MAX_STEERING_UPDATE_INTERVAL);
+
     // Get current position and velocity
     const selfPosition: Vector2 = { x: this.aiDroneState.posX, y: this.aiDroneState.posY };
     const selfVelocity: Vector2 = { x: this.aiDroneState.velX, y: this.aiDroneState.velY };
@@ -223,6 +250,9 @@ export class AINavigation {
       });
     }
 
+    // Add virtual wall boundary threats to avoid running into map edges
+    this.addVirtualWallBoundaryThreats(selfPosition, desiredDirection, this.threats);
+
     // Sort threats by urgency
     this.threats.sort((a, b) => {
       const comparison = b.urgency - a.urgency;
@@ -238,11 +268,8 @@ export class AINavigation {
       rawAvoidanceVector = VectorUtils.add(rawAvoidanceVector, VectorUtils.scale(threat.awayFromThreat, weight));
     }
 
-    // Avoid map boundaries
-    // TODO: Implement map boundary avoidance
-
     const rawAvoidanceSqrMagnitude = VectorUtils.sqrMagnitude(rawAvoidanceVector);
-    if (rawAvoidanceSqrMagnitude === 0) return desiredDirection; // No adjustment needed
+    if (rawAvoidanceSqrMagnitude === 0) return { x: desiredDirection.x, y: desiredDirection.y }; // No adjustment needed, return copy of desired direction
     rawAvoidanceVector = VectorUtils.normalize(rawAvoidanceVector);
 
     // TODO: Smooth the avoidance vector
@@ -251,5 +278,56 @@ export class AINavigation {
     const avoidanceWeight = this.aiDroneState.calculateAvoidanceWeight();
     const steeredMovement = VectorUtils.normalize(VectorUtils.add(desiredDirection, VectorUtils.scale(rawAvoidanceVector, avoidanceWeight)));
     return steeredMovement;
+  }
+
+  /**
+   * Add virtual wall boundary threats to the threats array based on proximity to map edges.
+   * @param selfPosition The current position of the AI agent.
+   * @param desiredDirection The desired movement direction of the AI agent (must be normalized).
+   * @param threats The array of threats to populate.
+   */
+  private addVirtualWallBoundaryThreats(selfPosition: Vector2, desiredDirection: Vector2, threats: Threat[]): void {
+    const { x: selfX, y: selfY } = selfPosition;
+
+    // Wall sides
+    type WallSide = "Left" | "Right" | "Bottom" | "Top";
+    const walls: { side: WallSide; distance: number; normal: Vector2 }[] = [
+      { side: "Left", distance: selfX - -MAP_MAX_COORDINATE, normal: { x: 1, y: 0 } }, // push right
+      { side: "Right", distance: MAP_MAX_COORDINATE - selfX, normal: { x: -1, y: 0 } }, // push left
+      { side: "Bottom", distance: selfY - -MAP_MAX_COORDINATE, normal: { x: 0, y: 1 } }, // push up
+      { side: "Top", distance: MAP_MAX_COORDINATE - selfY, normal: { x: 0, y: -1 } }, // push down
+    ];
+
+    for (const wall of walls) {
+      const distance = wall.distance;
+
+      // Too far from this wall or outside map bounds (shouldn't happen), skip
+      if (distance > BOUNDARY_WARNING_DISTANCE || distance <= 0) continue;
+
+      // Proximity factor: 0 at warning distance, 1 at/inside hard push distance
+      const proximityFactor = CommonUtils.clamp01((BOUNDARY_WARNING_DISTANCE - distance) / BOUNDARY_WARNING_LENGTH);
+
+      // If we have a desired direction, down-weight walls that we are not moving towards.
+      let directionFactor = 1;
+      if (!VectorUtils.isNegligible(desiredDirection)) {
+        // For a wall with normal N, moving into the wall means dot (-N) > 0
+        const intoWallDirection = VectorUtils.scale(wall.normal, -1);
+        const dot = VectorUtils.dot(desiredDirection, intoWallDirection);
+        directionFactor = CommonUtils.clamp01((dot + 1) * 0.5); // Map [-1,1] -> [0,1], then clamp
+      }
+
+      // Final urgency:
+      // - at least BOUNDARY_BASE_URGENCY inside warning zone
+      // - scaled up by proximityFactor and directionFactor
+      const urgency = CommonUtils.clamp01(CommonUtils.lerp(BOUNDARY_BASE_URGENCY, 1, proximityFactor * directionFactor));
+      if (urgency <= 0) continue; // No urgency, skip
+
+      threats.push({
+        timeToClosestApproach: 0,
+        distanceAtClosestApproach: distance,
+        awayFromThreat: wall.normal, // Already normalized
+        urgency,
+      });
+    }
   }
 }

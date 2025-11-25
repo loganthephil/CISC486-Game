@@ -17,9 +17,18 @@ namespace DroneStrikers.Game.UI.UpgradeSelectionStates
             // Create a UI element for each available upgrade
             foreach (UpgradeSO upgrade in upgrades)
             {
+                // Instantiate UI element
                 GameObject selectableUIObj = Object.Instantiate(_upgradeSelector.UpgradeSelectionUIPrefab, _upgradeSelector.UpgradeSelectionUIParent);
                 SelectableItemUI itemUI = selectableUIObj.GetComponent<SelectableItemUI>();
-                if (itemUI == null) Debug.LogError("SelectableItemUI component missing on UpgradeSelectionUIPrefab.");
+
+                // Sanity check
+                if (itemUI == null)
+                {
+                    Debug.LogError("SelectableItemUI component missing on UpgradeSelectionUIPrefab.");
+                    continue;
+                }
+
+                // Setup UI element such that clicking it selects the upgrade and resets the selected tree
                 itemUI.Initialize(upgrade.UpgradeName, () =>
                 {
                     _upgradeSelector.SelectedTree = null;

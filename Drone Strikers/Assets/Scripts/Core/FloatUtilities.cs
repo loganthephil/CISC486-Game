@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Globalization;
+using UnityEngine;
 
 namespace DroneStrikers.Core
 {
@@ -37,6 +38,42 @@ namespace DroneStrikers.Core
         {
             if (!value.IsNegligible()) return value;
             return 0.0001f * Mathf.Sign(value); // Return a small value with the same sign as the original
+        }
+
+        /// <summary>
+        ///     Returns an abbreviated string representation of the float (e.g., 1.5K, 2.3M).
+        /// </summary>
+        /// <param name="value"> The float value. </param>
+        /// <param name="decimalPlaces"> The number of decimal places to include (i.e. "1.5K"). Default is 1. </param>
+        /// <returns> The abbreviated string representation. </returns>
+        public static string ToAbbreviatedString(this float value, int decimalPlaces = 1)
+        {
+            char abbreviation = 'Q'; // Default to 'Q' for quadrillion (highest defined)
+
+            switch (value)
+            {
+                case >= 1_000_000_000_000f:
+                    value /= 1_000_000_000_000f;
+                    abbreviation = 'T';
+                    break;
+                case >= 1_000_000_000f:
+                    value /= 1_000_000_000f;
+                    abbreviation = 'B';
+                    break;
+                case >= 1_000_000f:
+                    value /= 1_000_000f;
+                    abbreviation = 'M';
+                    break;
+                case >= 1_000f:
+                    value /= 1_000f;
+                    abbreviation = 'K';
+                    break;
+                default:
+                    abbreviation = '\0'; // No abbreviation
+                    break;
+            }
+
+            return value.ToString("F" + decimalPlaces, CultureInfo.InvariantCulture).TrimEnd('0').TrimEnd('.') + abbreviation;
         }
     }
 }

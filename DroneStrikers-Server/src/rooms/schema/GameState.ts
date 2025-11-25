@@ -6,7 +6,7 @@ import { DroneType, Vector2 } from "src/types/commonTypes";
 import { ClientMessage, ClientMessageType } from "src/types/clientMessage";
 import { DroneTeam, Team } from "src/types/team";
 import { Player } from "src/types/player";
-import { Constants } from "src/utils";
+import { Constants, VectorUtils } from "src/utils";
 import { BehaviorState } from "@rooms/schema/BehaviourState";
 import { Room } from "colyseus";
 import { ArenaObjectSpawner } from "@rooms/systems/arenaObjectSpawner";
@@ -306,7 +306,9 @@ export class GameState extends BehaviorState {
   public droneExists(id: string): boolean {
     return this.drones.has(id);
   }
+  //#endregion
 
+  //#region Drone Shooting
   public requestDroneShoot(droneId: string): boolean {
     const projectile = this.droneTryShoot(droneId);
     if (!projectile) return false; // Shooting failed
@@ -333,6 +335,12 @@ export class GameState extends BehaviorState {
       return null; // Cannot fire yet
     }
 
+    // Get current aim direction
+    const currentAim = drone.getAimVector();
+
+    const recoilStat = drone.getStatValue("recoilForce");
+    drone.rigidbody.applyImpulse(VectorUtils.scale(currentAim, -recoilStat)); // Multiply by -recoil force to apply backward impulse
+
     const projectileSpeedStat = drone.getStatValue("projectileSpeed");
     const attackSpeedStat = drone.getStatValue("attackSpeed");
     const attackDamageStat = drone.getStatValue("attackDamage");
@@ -342,7 +350,6 @@ export class GameState extends BehaviorState {
     drone.nextShotAvailableTime = this.gameTimeSeconds + attackCooldown; // Update next shot available time
 
     // Create projectile
-    const currentAim = drone.getAimVector();
     const velocity: Vector2 = {
       x: currentAim.x * projectileSpeedStat,
       y: currentAim.y * projectileSpeedStat,
@@ -355,7 +362,6 @@ export class GameState extends BehaviorState {
     };
     return new ProjectileState(drone, attackDamageStat, attackPierceStat, drone.team, spawnPosition, velocity);
   }
-
   //#endregion
 
   //#region Collision System

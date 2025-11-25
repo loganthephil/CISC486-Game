@@ -13,7 +13,7 @@ namespace DroneStrikers.Game.UI.UpgradeSelectionStates
         {
             foreach (Transform child in _upgradeSelector.UpgradeSelectionUIParent)
             {
-                Debug.Log($"Destroying child UI element: {child.gameObject.name}");
+                // Debug.Log($"Destroying child UI element: {child.gameObject.name}");
                 Object.Destroy(child.gameObject);
             }
         }

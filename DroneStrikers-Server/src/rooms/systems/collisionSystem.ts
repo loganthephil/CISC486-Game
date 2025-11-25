@@ -218,6 +218,8 @@ export class CollisionSystem {
     const mapHalfSize = Constants.MAP_MAX_COORDINATE;
 
     for (const collider of this.colliders.values()) {
+      if (collider.isTrigger) continue; // No bounds enforcement for triggers
+
       const r = collider.radius;
       const minX = -mapHalfSize + r;
       const maxX = mapHalfSize - r;

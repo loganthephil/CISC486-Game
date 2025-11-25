@@ -1,6 +1,7 @@
-﻿using DroneStrikers.Core.Editor;
+﻿using System.Globalization;
+using DroneStrikers.Core.Editor;
 using DroneStrikers.Events;
-using DroneStrikers.Game.Player;
+using DroneStrikers.Game.Drone;
 using TMPro;
 using UnityEngine;
 
@@ -21,17 +22,17 @@ namespace DroneStrikers.Game.UI
 
         private void OnEnable()
         {
-            _localEvents.Subscribe(PlayerEvents.ExperienceGained, OnPlayerExperienceGained);
-            _localEvents.Subscribe(PlayerEvents.LevelUp, OnPlayerLevelUp);
+            _localEvents.Subscribe(DroneEvents.ExperienceGained, OnPlayerExperienceGained);
+            _localEvents.Subscribe(DroneEvents.LevelUp, OnPlayerLevelUp);
         }
 
         private void OnDisable()
         {
-            _localEvents.Unsubscribe(PlayerEvents.ExperienceGained, OnPlayerExperienceGained);
-            _localEvents.Unsubscribe(PlayerEvents.LevelUp, OnPlayerLevelUp);
+            _localEvents.Unsubscribe(DroneEvents.ExperienceGained, OnPlayerExperienceGained);
+            _localEvents.Unsubscribe(DroneEvents.LevelUp, OnPlayerLevelUp);
         }
 
-        private void OnPlayerExperienceGained(float totalExperience) => _experienceText.text = ((int)totalExperience).ToString();
+        private void OnPlayerExperienceGained(float totalExperience) => _experienceText.text = ((int)totalExperience).ToString("N0", CultureInfo.InvariantCulture);
         private void OnPlayerLevelUp(int newLevel) => _levelText.text = "Level: " + newLevel;
     }
 }

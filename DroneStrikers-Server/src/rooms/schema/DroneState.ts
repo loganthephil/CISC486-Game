@@ -10,6 +10,8 @@ import { StatType } from "src/types/stats";
 import { DroneTeam } from "src/types/team";
 import { CommonUtils, Constants, VectorUtils } from "src/utils";
 
+const REGEN_DELAY = 5; // Seconds after taking damage before regeneration starts
+
 export class DroneState extends TransformState implements IDamageable {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("string") id: string;
@@ -46,6 +48,9 @@ export class DroneState extends TransformState implements IDamageable {
 
   private requestedAim: number = 0; // Radian angle to aim towards
 
+  // Regeneration state
+  private regenerationTimer: number = 0;
+
   constructor(id: string, name: string, team: DroneTeam, position: Vector2) {
     super("Drone", 0.5, position);
     this.id = id;
@@ -67,6 +72,9 @@ export class DroneState extends TransformState implements IDamageable {
 
     // Update physics
     this.rigidbody.updatePhysics(deltaTime);
+
+    // Handle health regeneration
+    this.regenerationTick(deltaTime);
   }
 
   /**
@@ -93,6 +101,10 @@ export class DroneState extends TransformState implements IDamageable {
     if (this.health <= 0) {
       this.toDespawn = true;
     }
+
+    // Reset regeneration timer
+    this.regenerationTimer = REGEN_DELAY;
+
     return this.toDespawn;
   }
 
@@ -145,5 +157,19 @@ export class DroneState extends TransformState implements IDamageable {
   private updateAimRotation(deltaTime: number = Constants.FIXED_TIME_STEP_S) {
     // Smoothly interpolate upper rotation towards requested aim
     this.upperRotation = CommonUtils.radianSmoothStep(this.upperRotation, this.requestedAim, this.getStatValue("aimSpeed") * deltaTime);
+  }
+
+  private regenerationTick(deltaTime: number) {
+    if (this.health >= this.maxHealth) return; // Already at max health
+
+    // Wait for regeneration timer
+    if (this.regenerationTimer > 0) {
+      this.regenerationTimer -= deltaTime;
+      return;
+    }
+
+    // Regenerate health
+    const regenRate = this.getStatValue("healthRegen");
+    this.health = Math.min(this.maxHealth, this.health + regenRate * deltaTime);
   }
 }

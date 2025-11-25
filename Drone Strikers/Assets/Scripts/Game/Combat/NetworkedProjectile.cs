@@ -5,28 +5,42 @@ using UnityEngine;
 
 namespace DroneStrikers.Game.Combat
 {
-    public class NetworkedProjectile : MonoBehaviour
+    public class NetworkedProjectile : NetworkedEntityBase<ProjectileState>
     {
         [SerializeField] [RequiredField] private TeamMember _teamMember;
 
-        [SerializeField] private float _spawnYLevel = 1.1f;
+        private Vector3 _serverVelocity = Vector3.zero;
 
-        private Vector3 _velocity = Vector3.zero;
+        protected override bool UsesInterpolation => true;
+        protected override bool UsesExtrapolation => true;
 
         public void Initialize(ProjectileState projectileState)
         {
-            // Initialize projectile based on its state
-            transform.position = new Vector3(projectileState.posX, _spawnYLevel, projectileState.posY);
-            _velocity = new Vector3(projectileState.velX, 0, projectileState.velY);
             _teamMember.Team = (Team)projectileState.team;
+            InitializeFromState(projectileState);
+
+            NetworkManager.Instance.GameStateCallbacks.OnChange(projectileState, () =>
+            {
+                OnNetworkStateUpdated(projectileState);
+            });
         }
 
-        // TODO: Take into account network updates for more accurate movement
-        // We are already getting the position any way so we might as well use it, plus it'll fix de-sync issues
-        
-        private void FixedUpdate()
+        protected override void ApplyAdditionalStateImmediately(ProjectileState state)
         {
-            transform.position += _velocity * Time.fixedDeltaTime;
+            _serverVelocity = new Vector3(state.velX, 0f, state.velY);
+        }
+
+        protected override void OnStateSideEffects(ProjectileState state)
+        {
+            _serverVelocity = new Vector3(state.velX, 0f, state.velY);
+        }
+
+        protected override void ApplySettingOverrides()
+        {
+            _transformYLevel = 1.1f; // Projectiles fly above ground level
+
+            _interpolationBackTime = 0f;
+            _extrapolationLimit = 1f; // Projectiles have a consistent velocity, so we can extrapolate further
         }
     }
 }
