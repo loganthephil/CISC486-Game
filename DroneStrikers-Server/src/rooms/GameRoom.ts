@@ -28,6 +28,8 @@ export class GameRoom extends Room<GameState> {
     //   client.leave();
     //   return;
     // }
+    // For now set name to generic
+    options.name = "Player" + this.state.humanPlayerCount;
 
     this.state.onPlayerJoin(client.sessionId, createPlayer(options.name));
   }

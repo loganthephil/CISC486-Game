@@ -385,7 +385,6 @@ const droneBehaviourTree: BehaviourTreeDefinition<AIDroneBlackboard> = {
 
       // Flee if the highest level drone is significantly higher level
       const fleeLevel = context.blackboard.get("fleeLevel");
-      console.log(`AI Drone Brain: Checking flee condition. Highest Level Drone: ${highestLevelDrone.level}, Flee Level: ${fleeLevel}`);
       if (highestLevelDrone.level > fleeLevel) return true;
 
       // Or if current health is below threshold

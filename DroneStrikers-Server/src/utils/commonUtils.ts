@@ -22,8 +22,27 @@ export function clamp01(value: number): number {
   return clamp(value, 0, 1);
 }
 
+/**
+ * Returns a random number in the range [min, max)
+ * @param min The minimum value (inclusive)
+ * @param max The maximum value (exclusive)
+ * @returns A random number between min (inclusive) and max (exclusive)
+ */
 export function randomRange(min: number, max: number): number {
   return Math.random() * (max - min) + min;
+}
+
+/**
+ * Returns a random number in the range [min, max) with a bias towards lower or higher values.
+ * @param min The minimum value (inclusive)
+ * @param max The maximum value (exclusive)
+ * @param bias The bias factor. >1 biases towards lower values, <1 biases towards higher values, 1 is uniform.
+ * @returns A random number between min (inclusive) and max (exclusive) with the specified bias
+ */
+export function randomRangeBiased(min: number, max: number, bias: number): number {
+  const rnd = Math.random();
+  const biased = Math.pow(rnd, bias);
+  return biased * (max - min) + min;
 }
 
 /**

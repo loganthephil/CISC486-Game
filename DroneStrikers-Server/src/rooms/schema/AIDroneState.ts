@@ -57,7 +57,7 @@ export class AIDroneState extends DroneState {
     this.detectionSystem = detectionSystem;
 
     // Initialize random traits
-    this.skill = Math.random();
+    this.skill = CommonUtils.randomRangeBiased(0, 1, 1.5); // Bias towards lower skill
     this.aggression = CommonUtils.clamp01(this.skill + (Math.random() - 0.5));
 
     this.aiNavigation = new AINavigation(this, this.detectionSystem);

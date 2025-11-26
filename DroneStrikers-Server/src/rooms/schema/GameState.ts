@@ -1,11 +1,11 @@
-import { MapSchema, type } from "@colyseus/schema";
+import { ArraySchema, MapSchema, type } from "@colyseus/schema";
 import { ArenaObjectState } from "@rooms/schema/ArenaObjectState";
 import { DroneState } from "@rooms/schema/DroneState";
 import { ProjectileState } from "@rooms/schema/ProjectileState";
 import { DroneType, Vector2 } from "src/types/commonTypes";
 import { ClientMessage, ClientMessageType } from "src/types/clientMessage";
 import { DroneTeam, Team } from "src/types/team";
-import { Player } from "src/types/player";
+import { AIPlayer, Player } from "src/types/player";
 import { Constants, VectorUtils } from "src/utils";
 import { BehaviorState } from "@rooms/schema/BehaviourState";
 import { Room } from "colyseus";
@@ -15,6 +15,9 @@ import { CollisionSystem } from "@rooms/systems/collisionSystem";
 import { DroneSpawner } from "@rooms/systems/droneSpawner";
 import { DetectionSystem } from "@rooms/systems/detectionSystem";
 import { AIPlayerManager } from "@rooms/systems/aiPlayerManager";
+import { LeaderboardEntry } from "@rooms/schema/LeaderboardEntry";
+
+const LEADERBOARD_UPDATE_INTERVAL = 1; // seconds
 
 export class GameState extends BehaviorState {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
@@ -26,11 +29,13 @@ export class GameState extends BehaviorState {
   @type({ map: DroneState }) drones = new MapSchema<DroneState>();
   @type({ map: ArenaObjectState }) arenaObjects = new MapSchema<ArenaObjectState>();
   @type({ map: ProjectileState }) projectiles = new MapSchema<ProjectileState>();
+
+  @type([LeaderboardEntry]) leaderboard = new ArraySchema<LeaderboardEntry>();
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
 
   // Keep track of players that have joined the session (independent of drones)
   private _humanPlayers: Map<string, Player> = new Map<string, Player>();
-  private _aiPlayers: Map<string, Player> = new Map<string, Player>();
+  private _aiPlayers: Map<string, AIPlayer> = new Map<string, AIPlayer>();
 
   private room: Room;
 
@@ -41,6 +46,9 @@ export class GameState extends BehaviorState {
   private droneSpawner: DroneSpawner = new DroneSpawner();
   private arenaObjectSpawner: ArenaObjectSpawner = new ArenaObjectSpawner(this);
   private aiPlayerManager: AIPlayerManager = new AIPlayerManager(this);
+
+  // Leaderboard
+  private nextLeaderboardUpdateTime: number = 0;
 
   constructor(room: Room) {
     super();
@@ -101,6 +109,9 @@ export class GameState extends BehaviorState {
       this.arenaObjects.delete(id);
       this.unregisterCollider(id);
     });
+
+    // Update leaderboard
+    this.updateLeaderboard();
   }
 
   //#region Client Message Processing
@@ -168,10 +179,10 @@ export class GameState extends BehaviorState {
   /**
    * Add an AI player to the game state.
    * @param id The ID of the AI player.
-   * @param player The Player object representing the AI player.
+   * @param aiPlayer The AIPlayer object representing the AI player.
    */
-  public AIPlayerJoin(id: string, player: Player) {
-    this._aiPlayers.set(id, player);
+  public AIPlayerJoin(id: string, aiPlayer: AIPlayer) {
+    this._aiPlayers.set(id, aiPlayer);
   }
 
   /**
@@ -192,7 +203,7 @@ export class GameState extends BehaviorState {
     return this._humanPlayers.size;
   }
 
-  public get aiPlayers(): Map<string, Player> {
+  public get aiPlayers(): Map<string, AIPlayer> {
     return new Map(this._aiPlayers);
   }
 
@@ -413,5 +424,42 @@ export class GameState extends BehaviorState {
     this.collisionSystem.unregister(id);
     // this.collidersById.delete(id);
   }
+  //#endregion
+
+  //#region Leaderboard Management
+  private updateLeaderboard() {
+    if (this.gameTimeSeconds < this.nextLeaderboardUpdateTime) return; // Not time to update yet
+
+    // Get top 5 drones by experience
+    const topDrones = Array.from(this.drones.values())
+      .sort((a, b) => b.experience - a.experience)
+      .slice(0, 5);
+
+    // Reuse the same ArraySchema instance, mutate in-place
+    const newSize = topDrones.length;
+
+    // Ensure current array has the same size (remove extra entries if less than before)
+    if (this.leaderboard.length > newSize) this.leaderboard.splice(newSize, this.leaderboard.length - newSize);
+
+    // Update / insert entries
+    for (let i = 0; i < newSize; i++) {
+      const drone = topDrones[i];
+      const existing = this.leaderboard[i];
+
+      if (existing) {
+        // Mutate existing entry so it keeps the same reference
+        existing.name = drone.name;
+        existing.experience = drone.experience;
+        existing.team = drone.team;
+      } else {
+        // Add new entry
+        this.leaderboard.push(new LeaderboardEntry(drone.name, drone.experience, drone.team));
+      }
+    }
+
+    // Set next update time
+    this.nextLeaderboardUpdateTime = this.gameTimeSeconds + LEADERBOARD_UPDATE_INTERVAL;
+  }
+
   //#endregion
 }

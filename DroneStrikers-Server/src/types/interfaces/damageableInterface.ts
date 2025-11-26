@@ -1,9 +1,13 @@
+import { Rigidbody } from "@rooms/systems/rigidbody";
+
 /**
  * Defines an interface for damageable objects.
  * An object implementing this interface can take damage and report if it has been destroyed.
  * Additionally, it can provide the amount of experience to drop upon destruction.
  */
 export interface IDamageable {
+  rigidbody: Rigidbody;
+
   /**
    * Applies damage to the object.
    * @param amount The amount of damage to apply.
@@ -24,5 +28,5 @@ export interface IDamageable {
  * @returns True if the object is damageable, false otherwise.
  */
 export function isDamageable(obj: any): obj is IDamageable {
-  return typeof obj.takeDamage === "function" && typeof obj.getExperienceDrop === "function";
+  return obj.rigidbody instanceof Rigidbody && typeof obj.takeDamage === "function" && typeof obj.getExperienceDrop === "function";
 }

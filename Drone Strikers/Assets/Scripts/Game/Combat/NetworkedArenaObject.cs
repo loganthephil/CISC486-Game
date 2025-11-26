@@ -17,9 +17,6 @@ namespace DroneStrikers.Game.Combat
         [SerializeField] [RequiredField] private NetworkedObjectSO _mediumObjectSO;
         [SerializeField] [RequiredField] private NetworkedObjectSO _largeObjectSO;
 
-        protected override bool UsesInterpolation => false;
-        protected override bool UsesExtrapolation => false;
-
         public void Initialize(ArenaObjectState objectState)
         {
             // Apply initial state and push first snapshot
@@ -65,7 +62,8 @@ namespace DroneStrikers.Game.Combat
 
         protected override void ApplySettingOverrides()
         {
-            _maxRelevanceDistance = 500f;
+            _usesInterpolation = false;
+            _usesExtrapolation = false;
         }
     }
 }

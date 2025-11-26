@@ -1,4 +1,7 @@
 import { GameState } from "@rooms/schema/GameState";
+import { generateAIUsername } from "@rooms/systems/usernameGenerator";
+import { createAIPlayer } from "src/types/player";
+import { DroneTeam } from "src/types/team";
 import { CommonUtils, Constants } from "src/utils";
 
 // Time between which an AI player will join if there are not enough human players
@@ -31,9 +34,10 @@ export class AIPlayerManager {
 
     // Time to add an AI player
     const aiPlayerId = `AI_${Date.now()}`;
-    const aiPlayerName = `AI Drone ${aiPlayerCount + 1}`; // TODO: Replace with realistic usernames
+    const aiPlayerName = generateAIUsername();
 
-    this.gameState.AIPlayerJoin(aiPlayerId, { name: aiPlayerName });
+    const aiPlayer = createAIPlayer(aiPlayerName);
+    this.gameState.AIPlayerJoin(aiPlayerId, aiPlayer);
     console.log(`AI Player ${aiPlayerName} joined the game.`);
 
     // Schedule next AI player join time
@@ -58,8 +62,13 @@ export class AIPlayerManager {
       // Spawn or respawn the AI player's drone
       else {
         // Get a random team that is not full
-        const team = CommonUtils.randomChoice(teamsNotFull); // TODO: AI Drone should probably prefer the same team that it was on before
+        let team = aiPlayer.preferredTeam;
+        
+        // If preferred team is full or not set, pick a random available team
+        if (!team || !teamsNotFull.includes(team)) team = CommonUtils.randomChoice(teamsNotFull);
+
         this.gameState.attemptSpawnDroneForAIPlayer(aiPlayerId, team);
+        aiPlayer.preferredTeam = team; // Update preferred team
       }
     }
   }

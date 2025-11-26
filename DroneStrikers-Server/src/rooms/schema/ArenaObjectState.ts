@@ -1,15 +1,17 @@
 import { type } from "@colyseus/schema";
 import { TransformState } from "@rooms/schema/TransformState";
+import { Collider } from "@rooms/systems/collider";
 import { Rigidbody } from "@rooms/systems/rigidbody";
 import { Vector2 } from "src/types/commonTypes";
-import { IDamageable } from "src/types/interfaces/damageableInterface";
+import { IDamageable, isDamageable } from "src/types/interfaces/damageableInterface";
 import { ObjectTeam } from "src/types/team";
+import { Constants, VectorUtils } from "src/utils";
 
 export type ArenaObjectType = "small" | "medium" | "large";
-const ARENA_OBJECT_CONFIG: Record<ArenaObjectType, { health: number; expDrop: number; radius: number }> = {
-  small: { health: 5, expDrop: 5, radius: 0.4 },
-  medium: { health: 10, expDrop: 10, radius: 0.6 },
-  large: { health: 50, expDrop: 50, radius: 0.8 },
+const ARENA_OBJECT_CONFIG: Record<ArenaObjectType, { health: number; expDrop: number; radius: number; contactDamage: number }> = {
+  small: { health: 5, expDrop: 5, radius: 0.4, contactDamage: 1 },
+  medium: { health: 10, expDrop: 10, radius: 0.6, contactDamage: 5 },
+  large: { health: 50, expDrop: 50, radius: 0.8, contactDamage: 10 },
 };
 
 export class ArenaObjectState extends TransformState implements IDamageable {
@@ -22,6 +24,8 @@ export class ArenaObjectState extends TransformState implements IDamageable {
   @type("number") health: number = 50; // Might set on drone spawn
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
 
+  contactDamage: number = 0;
+
   public readonly rigidbody: Rigidbody = new Rigidbody(this, { mass: 10, drag: 10 });
   private onDestroyAction: () => void;
 
@@ -32,6 +36,8 @@ export class ArenaObjectState extends TransformState implements IDamageable {
     this.arenaObjectType = arenaObjectType;
     this.maxHealth = cfg.health;
     this.health = cfg.health;
+    this.contactDamage = cfg.contactDamage;
+
     this.onDestroyAction = onDestroy ?? (() => {});
   }
 
@@ -59,5 +65,21 @@ export class ArenaObjectState extends TransformState implements IDamageable {
 
   public getRigidbody(): Rigidbody {
     return this.rigidbody;
+  }
+
+  public override onCollisionEnter(self: Collider, other: Collider): void {
+    const otherTransform = other.transform;
+
+    if (!isDamageable(otherTransform)) return; // Not damageable
+
+    // Apply knockback to other object
+    const knockbackDirection = VectorUtils.normalize(VectorUtils.subtract(other.position, self.position));
+    const knockbackForce = VectorUtils.scale(knockbackDirection, Constants.BASE_KNOCKBACK_FORCE);
+    otherTransform.rigidbody.applyImpulse(knockbackForce);
+
+    if (other.team === this.team) return; // Ignore collisions with same team
+
+    // Apply damage to the other object
+    otherTransform.takeDamage(this.contactDamage);
   }
 }

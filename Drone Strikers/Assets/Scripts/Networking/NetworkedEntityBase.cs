@@ -30,15 +30,17 @@ namespace DroneStrikers.Networking
         // [SerializeField] protected int _maxBufferSize = 5;
 
         [Header("Relevance")]
-        [SerializeField] protected bool _enableVisibilityCulling = true;
-        [SerializeField] protected float _maxRelevanceDistance = 200f;
+        [SerializeField] protected bool _enableVisibilityCulling;
+        [SerializeField] protected float _maxRelevanceDistance = 20f;
 
         protected CircularBuffer<Snapshot> _snapshotBuffer;
         protected Transform _transform;
         protected Transform _cameraTransform;
 
-        protected virtual bool UsesInterpolation => true;
-        protected virtual bool UsesExtrapolation => true;
+        protected bool _usesInterpolation = true;
+        protected bool _usesExtrapolation = true;
+
+        private bool _isProjectile;
 
         protected virtual void Awake()
         {
@@ -69,10 +71,12 @@ namespace DroneStrikers.Networking
             ApplyAdditionalStateImmediately(state);
 
             PushSnapshot(state);
+
+            _isProjectile = state is ProjectileState;
         }
 
         /// <summary>
-        ///     Called by NetworkManager when a new state arrives from the server.
+        ///     Called by parent when a new state arrives from the server.
         /// </summary>
         protected void OnNetworkStateUpdated(TState state)
         {
@@ -82,6 +86,7 @@ namespace DroneStrikers.Networking
 
         private void PushSnapshot(TState state)
         {
+            if (_isProjectile) Debug.Log("Pushing projectile snapshot at time: " + Time.time + " | Position: " + ExtractPosition(state));
             Snapshot snapshot = new()
             {
                 Time = Time.time,
@@ -95,32 +100,24 @@ namespace DroneStrikers.Networking
 
         protected virtual void Update()
         {
-            if (!UsesInterpolation || _snapshotBuffer.Count == 0)
-            {
-                return;
-            }
-
-            if (_enableVisibilityCulling && !IsRelevant())
-            {
-                return;
-            }
+            if (_enableVisibilityCulling && !IsRelevant()) return;
 
             SynchronizeFromSnapshots();
         }
 
         private void SynchronizeFromSnapshots()
         {
-            if (_snapshotBuffer.IsEmpty)
-            {
-                return; // Nothing to synchronize from
-            }
+            if (_snapshotBuffer.IsEmpty) return; // Nothing to synchronize from
 
-            float renderTime = Time.time - _interpolationBackTime;
+            // Calculate the render time
+            // If using interpolation, rewind by interpolation back time
+            float renderTime = Time.time - (_usesInterpolation ? _interpolationBackTime : 0f);
 
             // Find the two snapshots surrounding the render time
             Snapshot newer = default;
             Snapshot older = default;
             bool foundPair = false;
+            bool fullyCaughtUp = false;
 
             for (int i = 0; i < _snapshotBuffer.Count; i++)
             {
@@ -141,58 +138,60 @@ namespace DroneStrikers.Networking
                     {
                         // Oldest is the newest snapshot we have
                         newer = older;
-                        foundPair = false;
+                        fullyCaughtUp = true;
                     }
 
                     break; // Exit loop after finding the pair
                 }
             }
 
-            Vector3 targetPos;
-            float targetYaw;
-
             // If we found a valid pair, interpolate between them
-            if (foundPair)
-            {
-                // TODO: Render time should change on a per-frame basis where then these Lerps are what actually get applied
-                float t = (renderTime - older.Time) / (newer.Time - older.Time);
-                targetPos = Vector3.Lerp(older.Position, newer.Position, t);
-                targetYaw = Mathf.LerpAngle(older.YawDeg, newer.YawDeg, t);
-            }
-            // Otherwise, handle extrapolation or hold the last known state
-            else
+            if (foundPair) DoInterpolation(renderTime, older, newer);
+
+            // Otherwise, if identified as fully caught up, either extrapolate or hold last known state
+            else if (fullyCaughtUp)
             {
                 // If no pair was found, then newer is the newest snapshot we have
-                if (UsesExtrapolation)
-                {
-                    float timeSinceNewest = renderTime - newer.Time;
-
-                    // Only extrapolate up to the limit
-                    if (timeSinceNewest <= _extrapolationLimit)
-                    {
-                        // Extrapolate forward using velocity
-                        targetPos = newer.Position + newer.Velocity * timeSinceNewest;
-                    }
-                    else
-                    {
-                        // Hit extrapolation limit, hold position
-                        targetPos = newer.Position + newer.Velocity * _extrapolationLimit;
-                    }
-
-                    targetYaw = newer.YawDeg;
-                }
-                // Don't use extrapolation, just hold the last known state
-                else
-                {
-                    targetPos = newer.Position;
-                    targetYaw = newer.YawDeg;
-                }
+                // If enabled, extrapolate from the newest snapshot
+                if (_usesExtrapolation) DoExtrapolation(renderTime, newer);
+                // Otherwise, don't use extrapolation and just hold the last known state
+                else ApplyTransform(newer.Position, newer.YawDeg);
             }
-
-            ApplyInterpolatedTransform(targetPos, targetYaw);
         }
 
-        protected virtual void ApplyInterpolatedTransform(Vector3 targetPos, float targetYawDeg)
+        private void DoInterpolation(float renderTime, Snapshot older, Snapshot newer)
+        {
+            float t = (renderTime - older.Time) / (newer.Time - older.Time);
+            Vector3 targetPos = Vector3.Lerp(older.Position, newer.Position, t);
+            float targetYaw = Mathf.LerpAngle(older.YawDeg, newer.YawDeg, t);
+
+            ApplyTransform(targetPos, targetYaw);
+        }
+
+        private void DoExtrapolation(float renderTime, Snapshot newest)
+        {
+            float timeSinceNewest = renderTime - newest.Time;
+
+            Vector3 targetPos;
+
+            // Only extrapolate up to the limit
+            if (timeSinceNewest <= _extrapolationLimit)
+            {
+                // Extrapolate forward using velocity
+                targetPos = newest.Position + newest.Velocity * timeSinceNewest;
+            }
+            else
+            {
+                // Hit extrapolation limit, hold position
+                targetPos = newest.Position + newest.Velocity * _extrapolationLimit;
+            }
+
+            // Debug.Log("Current pos: " + _transform.position + " | newest pos: " + newest.Position + " | Extrapolated pos: " + targetPos + " | Newest time: " + newest.Time + " | Time since newest: " + timeSinceNewest + " | Current time : " + Time.time);
+
+            ApplyTransform(targetPos, newest.YawDeg);
+        }
+
+        protected virtual void ApplyTransform(Vector3 targetPos, float targetYawDeg)
         {
             _transform.position = targetPos;
             _transform.rotation = Quaternion.Euler(0f, targetYawDeg, 0f);
@@ -203,12 +202,10 @@ namespace DroneStrikers.Networking
 
         protected virtual bool IsRelevant()
         {
-            if (!_enableVisibilityCulling)
-            {
-                return true;
-            }
+            if (!_enableVisibilityCulling) return true;
 
-            float dist = Vector3.Distance(_cameraTransform.position, _transform.position);
+            // Check distance from camera to the most recent snapshot position
+            float dist = Vector3.Distance(_cameraTransform.position, _snapshotBuffer.Front().Position);
             return dist <= _maxRelevanceDistance;
         }
 

@@ -53,6 +53,7 @@ export class Collider {
     this.layer = properties.layer;
     this.mask = properties.mask;
     this.isTrigger = properties.isTrigger ?? false;
+    this.team = properties.team;
     this.handler = properties.handler;
     this.rigidbody = properties.rigidbody;
   }

@@ -1,11 +1,12 @@
 import { type } from "@colyseus/schema";
 import { TransformState } from "@rooms/schema/TransformState";
+import { Collider } from "@rooms/systems/collider";
 import { DroneStats } from "@rooms/systems/droneStats";
 import { DroneUpgrader } from "@rooms/systems/droneUpgrader";
 import { MovementController } from "@rooms/systems/movementController";
 import { Rigidbody } from "@rooms/systems/rigidbody";
 import { Vector2 } from "src/types/commonTypes";
-import { IDamageable } from "src/types/interfaces/damageableInterface";
+import { IDamageable, isDamageable } from "src/types/interfaces/damageableInterface";
 import { StatType } from "src/types/stats";
 import { DroneTeam } from "src/types/team";
 import { CommonUtils, Constants, VectorUtils } from "src/utils";
@@ -152,6 +153,26 @@ export class DroneState extends TransformState implements IDamageable {
       x: Math.sin(this.upperRotation),
       y: Math.cos(this.upperRotation),
     };
+  }
+
+  public override onCollisionEnter(self: Collider, other: Collider): void {
+    const otherTransform = other.transform;
+
+    if (!isDamageable(otherTransform)) return; // Not damageable
+
+    // Apply knockback to other object
+    const knockbackDirection = VectorUtils.normalize(VectorUtils.subtract(other.position, self.position));
+    const knockbackForce = VectorUtils.scale(knockbackDirection, Constants.BASE_KNOCKBACK_FORCE);
+    otherTransform.rigidbody.applyImpulse(knockbackForce);
+
+    if (other.team === this.team) return; // Ignore collisions with same team
+
+    // Apply damage to the other object
+    if (otherTransform.takeDamage(this.getStatValue("attackDamage"))) {
+      // If the other object was destroyed, award experience to this drone
+      const expDrop = otherTransform.getExperienceDrop();
+      this.awardExperience(expDrop);
+    }
   }
 
   private updateAimRotation(deltaTime: number = Constants.FIXED_TIME_STEP_S) {

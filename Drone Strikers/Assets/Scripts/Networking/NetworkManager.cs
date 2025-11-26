@@ -24,6 +24,9 @@ namespace DroneStrikers.Networking
         private Action<string, ArenaObjectState> _onArenaObjectAdded;
         private Action<string> _onArenaObjectRemoved;
 
+        private Action<int, LeaderboardEntry> _onLeaderboardEntryAdded;
+        private Action<int, LeaderboardEntry> _onLeaderboardEntryRemoved;
+
         public float GameTimeSeconds
         {
             get
@@ -89,20 +92,30 @@ namespace DroneStrikers.Networking
         public void AddOnArenaObjectRemovedListener(Action<string> listener) => _onArenaObjectRemoved += listener;
         public void RemoveOnArenaObjectRemovedListener(Action<string> listener) => _onArenaObjectRemoved -= listener;
 
+        // -- Leaderboard --
+        public void AddOnLeaderboardEntryAddedListener(Action<int, LeaderboardEntry> listener) => _onLeaderboardEntryAdded += listener;
+        public void RemoveOnLeaderboardEntryAddedListener(Action<int, LeaderboardEntry> listener) => _onLeaderboardEntryAdded -= listener;
+
+        public void AddOnLeaderboardEntryRemovedListener(Action<int, LeaderboardEntry> listener) => _onLeaderboardEntryRemoved += listener;
+        public void RemoveOnLeaderboardEntryRemovedListener(Action<int, LeaderboardEntry> listener) => _onLeaderboardEntryRemoved -= listener;
+
+
         private void RegisterListeners()
         {
             Room.OnMessage<byte[]>("__playground_message_types", _ => { }); // Get rid of warning
 
+            // Drones
             GameStateCallbacks.OnAdd(addedState => addedState.drones, (droneId, drone) =>
             {
                 _onDroneAdded?.Invoke(droneId, drone);
             });
 
-            GameStateCallbacks.OnRemove(addedState => addedState.drones, (droneId, drone) =>
+            GameStateCallbacks.OnRemove(addedState => addedState.drones, (droneId, _) =>
             {
                 _onDroneRemoved?.Invoke(droneId);
             });
 
+            // Projectiles
             GameStateCallbacks.OnAdd(addedState => addedState.projectiles, (projectileId, projectile) =>
             {
                 _onDroneProjectileAdded?.Invoke(projectileId, projectile);
@@ -113,14 +126,26 @@ namespace DroneStrikers.Networking
                 _onDroneProjectileRemoved?.Invoke(projectileId, projectile);
             });
 
+            // Arena Objects
             GameStateCallbacks.OnAdd(addedState => addedState.arenaObjects, (objectId, arenaObject) =>
             {
                 _onArenaObjectAdded?.Invoke(objectId, arenaObject);
             });
 
-            GameStateCallbacks.OnRemove(addedState => addedState.arenaObjects, (objectId, arenaObject) =>
+            GameStateCallbacks.OnRemove(addedState => addedState.arenaObjects, (objectId, _) =>
             {
                 _onArenaObjectRemoved?.Invoke(objectId);
+            });
+
+            // Leaderboard
+            GameStateCallbacks.OnAdd(addedState => addedState.leaderboard, (index, entry) =>
+            {
+                _onLeaderboardEntryAdded?.Invoke(index, entry);
+            });
+
+            GameStateCallbacks.OnRemove(addedState => addedState.leaderboard, (index, entry) =>
+            {
+                _onLeaderboardEntryRemoved?.Invoke(index, entry);
             });
         }
 

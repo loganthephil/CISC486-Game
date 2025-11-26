@@ -2,7 +2,7 @@
 /**
  * Enable debug drone spawns for development purposes.
  */
-export const ENABLE_DEBUG_DRONE_SPAWNS = true;
+export const ENABLE_DEBUG_DRONE_SPAWNS = false;
 
 // -- TIMING CONSTANTS --
 /**
@@ -23,7 +23,7 @@ export const PATCH_RATE_MS = 50;
 // -- GAME CONSTANTS --
 export const MAX_HUMAN_PLAYERS = 10;
 
-export const MAX_AI_PLAYERS = 1; // Normally should be 9, but change for testing
+export const MAX_AI_PLAYERS = 0; // Normally should be 9, but change for testing
 
 export const MAX_DRONE_PER_TEAM = 5;
 
@@ -36,3 +36,8 @@ export const MAP_MAX_COORDINATE = 75;
  * Offset from drone center to projectile spawn point
  */
 export const DRONE_WEAPON_PROJECTILE_OFFSET = 0.8;
+
+/**
+ * Base knockback force applied when an object collides with another.
+ */
+export const BASE_KNOCKBACK_FORCE = 4;

@@ -39,9 +39,6 @@ namespace DroneStrikers.Game.Drone
 
         private bool _isLocalPlayer;
 
-        protected override bool UsesInterpolation => true;
-        protected override bool UsesExtrapolation => true;
-
         public void Initialize(DroneState droneState, string droneId, bool isLocalPlayer)
         {
             DroneId = droneId; // Set the DroneId
@@ -103,20 +100,12 @@ namespace DroneStrikers.Game.Drone
 
         protected override float ExtractYawDeg(DroneState state) => state.upperRotation * Mathf.Rad2Deg;
 
-        protected override void ApplyInterpolatedTransform(Vector3 targetPos, float targetYawDeg)
+        protected override void ApplyTransform(Vector3 targetPos, float targetYawDeg)
         {
-            // Position uses base interpolation
-            _transform.position = Vector3.Lerp(
-                _transform.position,
-                targetPos,
-                Time.deltaTime * _positionLerpSpeed);
+            _transform.position = targetPos;
 
             // Rotation only on body transform
-            Quaternion desiredRot = Quaternion.Euler(0f, targetYawDeg, 0f);
-            _bodyTransform.rotation = Quaternion.Slerp(
-                _bodyTransform.rotation,
-                desiredRot,
-                Time.deltaTime * _rotationLerpSpeed);
+            _bodyTransform.rotation = Quaternion.Euler(0f, targetYawDeg, 0f);
         }
 
         protected override void OnStateSideEffects(DroneState state)
@@ -130,8 +119,8 @@ namespace DroneStrikers.Game.Drone
             // TODO: Implement client-side prediction for local player drone
             if (_isLocalPlayer)
             {
-                _interpolationBackTime = 0f;
-                _extrapolationLimit = 0f;
+                _interpolationBackTime = 0.07f;
+                _usesExtrapolation = false;
             }
         }
 

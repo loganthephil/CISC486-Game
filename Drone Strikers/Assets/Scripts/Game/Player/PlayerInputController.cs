@@ -32,6 +32,12 @@ namespace DroneStrikers.Game.Player
             // Get input actions from the input handler singleton
             GameInputActions inputActions = GameInputHandler.InputActions;
 
+            if (inputActions.Drone.enabled)
+            {
+                Debug.LogWarning("PlayerInputController enabled while Drone action map is already enabled.");
+                return;
+            }
+
             inputActions.Drone.Enable(); // Enable the Drone action map
 
             // Cache needed input action references
@@ -98,6 +104,7 @@ namespace DroneStrikers.Game.Player
         private bool TryGetTargetPoint(out Vector3 targetPoint)
         {
             Vector2 mousePosition = _mousePositionAction.ReadValue<Vector2>();
+
             if (_raycastCamera == null)
             {
                 targetPoint = Vector3.zero;

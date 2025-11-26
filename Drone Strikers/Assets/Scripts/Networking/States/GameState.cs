@@ -33,5 +33,8 @@ public GameState() { }
 
 		[Type(5, "map", typeof(MapSchema<ProjectileState>))]
 		public MapSchema<ProjectileState> projectiles = null;
+
+		[Type(6, "array", typeof(ArraySchema<LeaderboardEntry>))]
+		public ArraySchema<LeaderboardEntry> leaderboard = null;
 	}
 }
