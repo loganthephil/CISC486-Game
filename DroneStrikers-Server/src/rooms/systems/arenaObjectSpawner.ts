@@ -37,6 +37,7 @@ export class ArenaObjectSpawner {
    */
   public doSpawnObjectsTick(): ArenaObjectState[] {
     const spawnedObjects: ArenaObjectState[] = [];
+    if (Constants.DEBUG_DISABLE_ARENA_OBJECTS) return spawnedObjects;
 
     this.objectSpawnZones.forEach((zone, index) => {
       // TODO: Create a method that checks if the zone is ready to spawn. Add condition that doesn't spawn if players are too close.

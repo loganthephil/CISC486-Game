@@ -16,46 +16,40 @@ namespace DroneStrikers.Networking {
 [Preserve]
 #endif
 public DroneState() { }
-		[Type(5, "string")]
-		public string id = default(string);
-
-		[Type(6, "string")]
+		[Type(4, "string")]
 		public string name = default(string);
 
-		[Type(7, "uint8")]
+		[Type(5, "uint8")]
 		public byte team = default(byte);
 
-		[Type(8, "number")]
+		[Type(6, "number")]
 		public float experience = default(float);
 
-		[Type(9, "uint8")]
+		[Type(7, "uint8")]
 		public byte level = default(byte);
 
-		[Type(10, "uint8")]
+		[Type(8, "uint8")]
 		public byte upgradePoints = default(byte);
 
-		[Type(11, "number")]
+		[Type(9, "number")]
 		public float progressToNextLevel = default(float);
 
-		[Type(12, "string")]
+		[Type(10, "string")]
 		public string lastTurretUpgradeId = default(string);
 
-		[Type(13, "string")]
+		[Type(11, "string")]
 		public string lastBodyUpgradeId = default(string);
 
-		[Type(14, "string")]
+		[Type(12, "string")]
 		public string lastMovementUpgradeId = default(string);
 
-		[Type(15, "number")]
+		[Type(13, "number")]
 		public float maxHealth = default(float);
 
-		[Type(16, "number")]
+		[Type(14, "number")]
 		public float health = default(float);
 
-		[Type(17, "number")]
-		public float lowerRotation = default(float);
-
-		[Type(18, "number")]
+		[Type(15, "number")]
 		public float upperRotation = default(float);
 	}
 }

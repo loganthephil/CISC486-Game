@@ -9,6 +9,13 @@ namespace DroneStrikers.Game.Combat
     {
         [SerializeField] [RequiredField] private TeamMember _teamMember;
 
+        // protected override void Update()
+        // {
+        //     base.Update();
+        //
+        //     Debug.Log("Position: " + transform.position + " | ~Server Time: " + NetworkManager.EstimatedServerTime);
+        // }
+
         public void Initialize(ProjectileState projectileState)
         {
             _teamMember.Team = (Team)projectileState.team;

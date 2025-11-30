@@ -230,14 +230,15 @@ export class GameState extends BehaviorState {
       return false; // Cannot change team once drone is spawned
     }
 
-    switch (team) {
-      case Team.Red:
-        if (this.redTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Red team is full
-        break;
-      case Team.Blue:
-        if (this.blueTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Blue team is full
-        break;
-    }
+    // Perhaps don't care about team limits for human players?
+    // switch (team) {
+    //   case Team.Red:
+    //     if (this.redTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Red team is full
+    //     break;
+    //   case Team.Blue:
+    //     if (this.blueTeamDroneCount >= Constants.MAX_DRONE_PER_TEAM) return false; // Blue team is full
+    //     break;
+    // }
 
     const player = this._humanPlayers.get(playerId);
     if (!player) {

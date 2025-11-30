@@ -11,8 +11,8 @@ export abstract class TransformState extends BehaviorState {
   @type("number") velX: number;
   @type("number") velY: number;
 
-  @type("number") collisionRadius: number; // Radius in units for collision
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
+  public collisionRadius: number; // Radius in units for collision
 
   public readonly objectType: ObjectType;
 

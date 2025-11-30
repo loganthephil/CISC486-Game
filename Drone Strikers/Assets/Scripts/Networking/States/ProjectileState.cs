@@ -16,7 +16,7 @@ namespace DroneStrikers.Networking {
 [Preserve]
 #endif
 public ProjectileState() { }
-		[Type(5, "uint8")]
+		[Type(4, "uint8")]
 		public byte team = default(byte);
 	}
 }

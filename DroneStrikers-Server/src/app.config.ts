@@ -1,11 +1,13 @@
 import config from "@colyseus/tools";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
+import { uWebSocketsTransport } from "@colyseus/uwebsockets-transport";
 
 /**
  * Import your Room files
  */
 import { GameRoom } from "./rooms/GameRoom";
+import { Constants } from "src/utils";
 
 export default config({
   initializeGameServer: (gameServer) => {
@@ -13,6 +15,11 @@ export default config({
      * Define your room handlers:
      */
     gameServer.define("game_room", GameRoom);
+    if (Constants.ENABLE_DEBUG_LATENCY_SIMULATION) gameServer.simulateLatency(Constants.DEBUG_LATENCY_MS);
+  },
+
+  initializeTransport: (transport) => {
+    return new uWebSocketsTransport({}, {});
   },
 
   initializeExpress: (app) => {

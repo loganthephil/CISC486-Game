@@ -1,3 +1,3 @@
 export interface PlayerOptions {
-  name: string;
+  username: string;
 }

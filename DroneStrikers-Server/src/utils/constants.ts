@@ -4,6 +4,15 @@
  */
 export const ENABLE_DEBUG_DRONE_SPAWNS = false;
 
+export const DEBUG_DISABLE_ARENA_OBJECTS = false;
+
+/**
+ * Enable debug latency simulation for development purposes. MAKE SURE TO DISABLE FOR PRODUCTION.
+ */
+export const ENABLE_DEBUG_LATENCY_SIMULATION = false;
+
+export const DEBUG_LATENCY_MS = 50;
+
 // -- TIMING CONSTANTS --
 /**
  * Fixed time step for the game simulation in milliseconds.
@@ -26,6 +35,8 @@ export const MAX_HUMAN_PLAYERS = 10;
 export const MAX_AI_PLAYERS = 0; // Normally should be 9, but change for testing
 
 export const MAX_DRONE_PER_TEAM = 5;
+
+export const MAX_USERNAME_LENGTH = 20;
 
 /**
  * Maximum coordinate value for the game map (both X and Y axes).

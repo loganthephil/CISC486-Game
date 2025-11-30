@@ -30,9 +30,14 @@ namespace DroneStrikers.Game.NetworkSpawners
 
         private void SpawnDrone(string droneId, DroneState droneState)
         {
-            Debug.Log($"Drone added with ID: {droneId}");
+            if (_spawnedDrones.ContainsKey(droneId))
+            {
+                Debug.LogWarning($"Attempted to spawn drone {droneId} but it already exists!");
+                return; // Drone already spawned (likely a duplicate message)
+            }
 
             ColyseusRoom<GameState> room = NetworkManager.Instance.Room;
+
             if (room == null)
             {
                 Debug.LogError("Cannot spawn drone: Not connected to a room.");
@@ -58,6 +63,7 @@ namespace DroneStrikers.Game.NetworkSpawners
             if (_spawnedDrones.TryGetValue(droneId, out GameObject droneObject))
             {
                 Destroy(droneObject);
+                Debug.Log("Removing drone with id: " + droneId);
                 _spawnedDrones.Remove(droneId);
             }
         }

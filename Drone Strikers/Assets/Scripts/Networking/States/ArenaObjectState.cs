@@ -16,16 +16,13 @@ namespace DroneStrikers.Networking {
 [Preserve]
 #endif
 public ArenaObjectState() { }
-		[Type(5, "string")]
+		[Type(4, "string")]
 		public string arenaObjectType = default(string);
 
-		[Type(6, "uint8")]
-		public byte team = default(byte);
-
-		[Type(7, "number")]
+		[Type(5, "number")]
 		public float maxHealth = default(float);
 
-		[Type(8, "number")]
+		[Type(6, "number")]
 		public float health = default(float);
 	}
 }

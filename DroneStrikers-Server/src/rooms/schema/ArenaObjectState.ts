@@ -18,11 +18,10 @@ export class ArenaObjectState extends TransformState implements IDamageable {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
   @type("string") arenaObjectType: ArenaObjectType;
 
-  @type("uint8") team: ObjectTeam = 0; // Arena objects are neutral
-
   @type("number") maxHealth: number = 50; // Might set on drone spawn
   @type("number") health: number = 50; // Might set on drone spawn
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
+  public team: ObjectTeam = 0; // Arena objects are neutral
 
   contactDamage: number = 0;
 

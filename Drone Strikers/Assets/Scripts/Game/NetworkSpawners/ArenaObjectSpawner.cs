@@ -27,7 +27,10 @@ namespace DroneStrikers.Game.NetworkSpawners
 
         private void SpawnArenaObject(string arenaObjectId, ArenaObjectState arenaObjectState)
         {
+            if (_spawnedArenaObjects.ContainsKey(arenaObjectId)) return; // Arena object already spawned (likely a duplicate message)
+
             ColyseusRoom<GameState> room = NetworkManager.Instance.Room;
+
             if (room == null)
             {
                 Debug.LogError("Cannot spawn arena object: Not connected to a room.");

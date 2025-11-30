@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "my-app",
+  "name": "dronestrikers-server",
   "version": "1.0.0",
-  "description": "npm init template for bootstrapping an empty Colyseus project",
+  "description": "DroneStrikers game server.",
   "main": "build/index.js",
   "engines": {
     "node": ">= 20.9.0"
@@ -36,6 +36,7 @@
     "@colyseus/playground": "^0.16.4",
     "@colyseus/schema": "^3.0.67",
     "@colyseus/tools": "^0.16.14",
+    "@colyseus/uwebsockets-transport": "^0.16.10",
     "colyseus": "^0.16.5",
     "express": "^4.18.2"
   }

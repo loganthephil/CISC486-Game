@@ -13,6 +13,8 @@ export class GameRoom extends Room<GameState> {
   state: GameState = new GameState(this);
 
   onCreate(options: any) {
+    console.log("GameRoom created!", this.roomId, " | Options: ", options);
+
     this.patchRate = Constants.PATCH_RATE_MS;
     this.setSimulationInterval((dt) => this.handleTick(dt / 1000), Constants.FIXED_TIME_STEP_MS);
 
@@ -20,18 +22,26 @@ export class GameRoom extends Room<GameState> {
   }
 
   onJoin(client: Client, options: PlayerOptions) {
-    console.log(client.sessionId, "joined!");
+    console.log(client.sessionId, "joined!", "options:", options);
 
-    // TODO: Enforce name validity
-    // if (droneName.length < 1) {
-    //   // Invalid name, disconnect the client
-    //   client.leave();
-    //   return;
-    // }
-    // For now set name to generic
-    options.name = "Player" + this.state.humanPlayerCount;
+    if (!options.username || typeof options.username !== "string") {
+      // Invalid name, disconnect the client
+      client.leave(4001, "Invalid player name: missing or not a string");
+      return;
+    }
 
-    this.state.onPlayerJoin(client.sessionId, createPlayer(options.name));
+    if (options.username.length < 1) {
+      // Invalid name, disconnect the client
+      client.leave(4002, "Invalid player name: name too short");
+      return;
+    }
+
+    // Cap the username length
+    if (options.username.length > Constants.MAX_USERNAME_LENGTH) {
+      options.username = options.username.substring(0, Constants.MAX_USERNAME_LENGTH);
+    }
+
+    this.state.onPlayerJoin(client.sessionId, createPlayer(options.username));
   }
 
   onLeave(client: Client, consented: boolean) {
@@ -41,8 +51,6 @@ export class GameRoom extends Room<GameState> {
     this.state.removeDrone(client.sessionId);
 
     this.state.onPlayerLeave(client.sessionId);
-
-    client.leave(); // Ensure the client is fully disconnected
   }
 
   onDispose() {

@@ -15,13 +15,13 @@ const REGEN_DELAY = 5; // Seconds after taking damage before regeneration starts
 
 export class DroneState extends TransformState implements IDamageable {
   // -- BELOW ARE SYNCED TO ALL PLAYERS --
-  @type("string") id: string;
   @type("string") name: string;
   @type("uint8") team: DroneTeam;
 
   @type("number") experience: number = 0;
   @type("uint8") level: number = 1;
-  @type("uint8") upgradePoints: number = 0;
+
+  @type("uint8") upgradePoints: number = 0; // This and progressToNextLevel do not need to be synced to everyone (only the owner)
   @type("number") progressToNextLevel: number = 0;
 
   @type("string") lastTurretUpgradeId: string = "";
@@ -31,9 +31,10 @@ export class DroneState extends TransformState implements IDamageable {
   @type("number") maxHealth: number;
   @type("number") health: number;
 
-  @type("number") lowerRotation: number = 0; // Movement rotation in radians (consider handling only on client side)
   @type("number") upperRotation: number = 0; // Body rotation in radians
+  // @type("number") lowerRotation: number = 0; // Movement rotation in radians (consider handling only on client side)
   // -- ABOVE ARE SYNCED TO ALL PLAYERS --
+  public id: string;
 
   public nextShotAvailableTime: number = 0; // Time in seconds when the drone can next shoot
 

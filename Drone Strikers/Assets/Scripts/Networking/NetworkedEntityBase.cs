@@ -40,7 +40,7 @@ namespace DroneStrikers.Networking
         protected bool _usesInterpolation = true;
         protected bool _usesExtrapolation = true;
 
-        private bool _isProjectile;
+        // private bool _isProjectile;
 
         protected virtual void Awake()
         {
@@ -72,7 +72,7 @@ namespace DroneStrikers.Networking
 
             PushSnapshot(state);
 
-            _isProjectile = state is ProjectileState;
+            // _isProjectile = state is ProjectileState;
         }
 
         /// <summary>
@@ -86,10 +86,11 @@ namespace DroneStrikers.Networking
 
         private void PushSnapshot(TState state)
         {
-            if (_isProjectile) Debug.Log("Pushing projectile snapshot at time: " + Time.time + " | Position: " + ExtractPosition(state));
+            float serverTime = NetworkManager.ReportedServerTime; // Use actual server time (hopefully would be time that this state was sent at)
+            // if (_isProjectile) Debug.Log("Pushing projectile snapshot at reported time: " + serverTime + " | Position: " + ExtractPosition(state));
             Snapshot snapshot = new()
             {
-                Time = Time.time,
+                Time = serverTime,
                 Position = ExtractPosition(state),
                 YawDeg = ExtractYawDeg(state),
                 Velocity = ExtractVelocity(state)
@@ -111,7 +112,7 @@ namespace DroneStrikers.Networking
 
             // Calculate the render time
             // If using interpolation, rewind by interpolation back time
-            float renderTime = Time.time - (_usesInterpolation ? _interpolationBackTime : 0f);
+            float renderTime = NetworkManager.EstimatedServerTime - (_usesInterpolation ? _interpolationBackTime : 0f);
 
             // Find the two snapshots surrounding the render time
             Snapshot newer = default;

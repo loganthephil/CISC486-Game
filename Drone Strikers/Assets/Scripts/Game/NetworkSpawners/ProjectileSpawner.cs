@@ -27,7 +27,10 @@ namespace DroneStrikers.Game.NetworkSpawners
 
         private void SpawnProjectile(string projectileId, ProjectileState projectileState)
         {
+            if (_projectiles.ContainsKey(projectileId)) return; // Projectile already spawned (likely a duplicate message)
+
             ColyseusRoom<GameState> room = NetworkManager.Instance.Room;
+
             if (room == null)
             {
                 Debug.LogError("Cannot spawn projectile: Not connected to a room.");

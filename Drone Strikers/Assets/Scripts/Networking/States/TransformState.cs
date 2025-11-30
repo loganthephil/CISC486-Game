@@ -27,8 +27,5 @@ public TransformState() { }
 
 		[Type(3, "number")]
 		public float velY = default(float);
-
-		[Type(4, "number")]
-		public float collisionRadius = default(float);
 	}
 }
