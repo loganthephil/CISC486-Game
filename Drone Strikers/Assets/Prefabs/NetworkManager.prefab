@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4679046872572254191}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.84752, y: 62.28631, z: -68.98264}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddcc551eef0680344998f4647e5df933, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Networking::DroneStrikers.Networking.NetworkManager
-  _colyseusSettings: {fileID: 11400000, guid: 122de3cd4aa43244288fcb0dbce0f21a, type: 2}
+  _colyseusSettings: {fileID: 11400000, guid: 4f20b9b10be174d459fd407398292fc1, type: 2}
   _mainMenuSceneName: Main Menu
   _gameSceneName: 'Networked Arena [2 Teams - 15x15]'
   _serverTimeCorrectionRate: 1

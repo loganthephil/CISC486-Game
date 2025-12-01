@@ -17,17 +17,6 @@ namespace DroneStrikers.Networking
         [Tooltip("Determines the fixed Y level for the entity's transform position.")]
         [SerializeField] protected float _transformYLevel;
 
-        [Header("Network Interpolation")]
-        [Tooltip("How far (seconds) to rewind when choosing interpolation window.")]
-        [SerializeField] protected float _interpolationBackTime = 0.1f;
-        [Tooltip("Max extrapolation time (seconds) if we are ahead of newest snapshot.")]
-        [SerializeField] protected float _extrapolationLimit = 0.25f;
-        [Tooltip("Smoothing factor for applying interpolated position.")]
-        [SerializeField] protected float _positionLerpSpeed = 15f;
-        [Tooltip("Smoothing factor for applying interpolated rotation.")]
-        [SerializeField] protected float _rotationLerpSpeed = 15f;
-        // [Tooltip("Max snapshots to keep in buffer. Should roughly correspond to network update rate and interpolation time. (")]
-        // [SerializeField] protected int _maxBufferSize = 5;
 
         [Header("Relevance")]
         [SerializeField] protected bool _enableVisibilityCulling;
@@ -37,6 +26,9 @@ namespace DroneStrikers.Networking
         ///     The current velocity of the entity as determined by the latest snapshots.
         /// </summary>
         public Vector3 Velocity { get; protected set; }
+
+        protected float _interpolationBackTime = 0.2f; // How far (seconds) to rewind when choosing interpolation window
+        protected float _extrapolationLimit = 0.25f; // Max extrapolation time (seconds) if we are ahead of newest snapshot
 
         protected CircularBuffer<Snapshot> _snapshotBuffer;
         protected Transform _transform;

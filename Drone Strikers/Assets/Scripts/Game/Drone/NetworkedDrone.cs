@@ -127,7 +127,7 @@ namespace DroneStrikers.Game.Drone
             // TODO: Implement client-side prediction for local player drone
             if (_isLocalPlayer)
             {
-                _interpolationBackTime = 0.07f;
+                // _interpolationBackTime = 0.07f; // Pretty much not interpolating
                 _usesExtrapolation = false;
             }
         }

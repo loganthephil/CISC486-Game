@@ -142,13 +142,13 @@ function makeAestheticName(): string {
     // w1_w2
     return `${w1}_${w2}`;
   } else {
-    // doubled letter inside w1: e.g. moonn
+    // Doubled letter inside w1: e.g. moonn
     const doubledIndex = randInt(1, Math.max(1, w1.length - 1));
     const chars = w1.split("");
     chars.splice(doubledIndex, 0, chars[doubledIndex]);
     const result = chars.join("");
 
-    // occasionally add a small number
+    // Occasionally add a small number
     return Math.random() < 0.3 ? result + randInt(1, 99) : result;
   }
 }
@@ -170,7 +170,7 @@ function makeTryhardName(): string {
       return noun + maybeNumber(1.0);
     }
   } else {
-    // lowercase with underscore: noscope_shadow, sweaty_pilot
+    // Lowercase with underscore: noscope_shadow, sweaty_pilot
     const lowerBase = base.toLowerCase();
     const lowerNoun = noun.toLowerCase();
     return `${lowerBase}_${lowerNoun}`;

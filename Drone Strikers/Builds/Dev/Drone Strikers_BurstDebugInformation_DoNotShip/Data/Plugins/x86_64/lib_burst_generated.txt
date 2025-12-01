@@ -13,7 +13,6 @@ Library: E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plu
 --linker-options=PdbAltPath="Drone Strikers_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\Burst
---debug=Full
 --key-folder=E:/Unity/Unity Editors/6000.2.6f2/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Library\Burst
 --output=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
@@ -35,7 +34,6 @@ Library: E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plu
 --linker-options=PdbAltPath="Drone Strikers_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\Burst
---debug=Full
 --key-folder=E:/Unity/Unity Editors/6000.2.6f2/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Library\Burst
 --output=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
@@ -55,7 +53,6 @@ Library: E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plu
 --linker-options=PdbAltPath="Drone Strikers_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\Burst
---debug=Full
 --key-folder=E:/Unity/Unity Editors/6000.2.6f2/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Library\Burst
 --output=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
@@ -168,7 +165,6 @@ Library: E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plu
 --linker-options=PdbAltPath="Drone Strikers_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\Burst
---debug=Full
 --key-folder=E:/Unity/Unity Editors/6000.2.6f2/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=E:\Unity\Projects\CISC486-Game\Drone Strikers\Library\Burst
 --output=E:\Unity\Projects\CISC486-Game\Drone Strikers\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
