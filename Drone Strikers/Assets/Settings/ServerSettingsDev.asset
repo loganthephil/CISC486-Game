@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6ed729989615d4b4db072e1e8c41076c, type: 3}
-  m_Name: ServerSettings
+  m_Name: ServerSettingsDev
   m_EditorClassIdentifier: ColyseusSDK::Colyseus.ColyseusSettings
-  colyseusServerAddress: drone-strikers-server.onrender.com
-  colyseusServerPort: 443
-  useSecureProtocol: 1
+  colyseusServerAddress: 192.168.2.58
+  colyseusServerPort: 2567
+  useSecureProtocol: 0
   _requestHeaders: []

@@ -73,6 +73,7 @@ MonoBehaviour:
   _onPlayerDeath: {fileID: 11400000, guid: fac67669d03021b4cadcdc1535ff6d7b, type: 2}
   _onPlayerUpgradePointGained: {fileID: 11400000, guid: 18c6ac7cf34ae7249a10ae719ec2698d, type: 2}
   _onPlayerUpgradeApplied: {fileID: 11400000, guid: fc17a4072224e0d489a8e4b8530980ca, type: 2}
+  _movementRotationSpeed: 40
 --- !u!114 &6587718172633206434
 MonoBehaviour:
   m_ObjectHideFlags: 0

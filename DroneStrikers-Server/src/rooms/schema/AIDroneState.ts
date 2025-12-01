@@ -147,7 +147,7 @@ export class AIDroneState extends DroneState {
     }
 
     // Apply movement and aim from the command
-    if (commandToApply.movement) this.setRequestedMovement(commandToApply.movement);
+    this.setRequestedMovement(commandToApply.movement ?? { x: 0, y: 0 }); // Default to no movement if none specified
     if (commandToApply.aim) this.setRequestedAim(commandToApply.aim);
   }
 

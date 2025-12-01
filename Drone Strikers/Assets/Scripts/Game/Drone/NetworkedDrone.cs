@@ -1,4 +1,5 @@
 ﻿using System;
+using DroneStrikers.Core;
 using DroneStrikers.Core.Editor;
 using DroneStrikers.Core.Types;
 using DroneStrikers.Events;
@@ -34,10 +35,18 @@ namespace DroneStrikers.Game.Drone
         [SerializeField] [RequiredField] private IntEventSO _onPlayerUpgradePointGained;
         [SerializeField] [RequiredField] private StringEventSO _onPlayerUpgradeApplied;
 
+        [Header("Movement Rotation")]
+        [Tooltip("Rotation speed of the movement transform in degrees per second.")]
+        [SerializeField] private float _movementRotationSpeed = 40f;
+
         public string DroneId { get; private set; }
         public DroneState CurrentState { get; private set; }
 
         private bool _isLocalPlayer;
+
+        private Quaternion _targetRotation = Quaternion.identity; // The desired rotation of the
+
+        private void LateUpdate() => DoTransformRotation();
 
         public void Initialize(DroneState droneState, string droneId, bool isLocalPlayer)
         {
@@ -100,12 +109,11 @@ namespace DroneStrikers.Game.Drone
 
         protected override float ExtractYawDeg(DroneState state) => state.upperRotation * Mathf.Rad2Deg;
 
-        protected override void ApplyTransform(Vector3 targetPos, float targetYawDeg)
+        protected override void ApplyTransform(Vector3 targetPos, float targetYawDeg, Vector3 targetVelocity)
         {
             _transform.position = targetPos;
-
-            // Rotation only on body transform
-            _bodyTransform.rotation = Quaternion.Euler(0f, targetYawDeg, 0f);
+            _bodyTransform.rotation = Quaternion.Euler(0f, targetYawDeg, 0f); // Rotation only on body transform
+            Velocity = targetVelocity;
         }
 
         protected override void OnStateSideEffects(DroneState state)
@@ -149,6 +157,35 @@ namespace DroneStrikers.Game.Drone
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void DoTransformRotation()
+        {
+            if (Velocity.IsNegligible()) return; // Don't rotate if not moving at all
+
+            // Always smoothly rotate towards the target rotation even when not moving
+            float degreesDelta = Velocity.magnitude * _movementRotationSpeed * Time.fixedDeltaTime;
+
+            Vector3 desiredRotationDirection = Velocity.normalized;
+
+            // Compare the current forward direction to the desired direction and flip if the opposite is closer
+            Vector3 currentForward = _movementTransform.forward.Flatten().normalized;
+
+            float dot = Vector3.Dot(currentForward, desiredRotationDirection);
+
+            // If the new direction is the same or exactly opposite, set rotation directly
+            // This also stops the transform from doing a full smooth 180 spin since its unnecessary
+            if (Mathf.Approximately(dot.Abs(), 1f))
+            {
+                _targetRotation = Quaternion.LookRotation(desiredRotationDirection);
+                _movementTransform.rotation = _targetRotation;
+                return;
+            }
+
+            // if (dot < 0f) desiredRotationDirection = -desiredRotationDirection; // Use shorter rotation path
+            _targetRotation = Quaternion.LookRotation(desiredRotationDirection);
+
+            _movementTransform.rotation = Quaternion.RotateTowards(_movementTransform.rotation, _targetRotation, degreesDelta);
         }
 
         private void OnDestroy()

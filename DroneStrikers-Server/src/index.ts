@@ -14,4 +14,5 @@ import { listen } from "@colyseus/tools";
 import app from "./app.config";
 
 // Create and listen on 2567 (or PORT environment variable.)
-listen(app, 2567);
+const port: number = Number(process.env.PORT) || 2567;
+listen(app, port);

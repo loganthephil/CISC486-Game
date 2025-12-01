@@ -29,7 +29,18 @@ namespace DroneStrikers.Core
         /// <param name="other"> The second vector.</param>
         /// <param name="tolerance"> The tolerance within which the vectors are considered approximately equal. Default is 0.01f.</param>
         /// <returns> True if the vectors are approximately equal, false otherwise.</returns>
+        public static bool Approximately(this Vector2 v, Vector2 other, float tolerance = 0.01f) => (v - other).sqrMagnitude < tolerance * tolerance;
+
+        /// <summary>
+        ///     Returns true if the two vectors are approximately equal within a given tolerance.
+        /// </summary>
+        /// <param name="v"> The first vector.</param>
+        /// <param name="other"> The second vector.</param>
+        /// <param name="tolerance"> The tolerance within which the vectors are considered approximately equal. Default is 0.01f.</param>
+        /// <returns> True if the vectors are approximately equal, false otherwise.</returns>
         public static bool Approximately(this Vector3 v, Vector3 other, float tolerance = 0.01f) => (v - other).sqrMagnitude < tolerance * tolerance;
+
+        public static bool IsNegligible(this Vector2 v) => v.sqrMagnitude < 0.0001f;
 
         public static bool IsNegligible(this Vector3 v) => v.sqrMagnitude < 0.0001f;
 

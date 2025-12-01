@@ -33,6 +33,11 @@ namespace DroneStrikers.Networking
         [SerializeField] protected bool _enableVisibilityCulling;
         [SerializeField] protected float _maxRelevanceDistance = 20f;
 
+        /// <summary>
+        ///     The current velocity of the entity as determined by the latest snapshots.
+        /// </summary>
+        public Vector3 Velocity { get; protected set; }
+
         protected CircularBuffer<Snapshot> _snapshotBuffer;
         protected Transform _transform;
         protected Transform _cameraTransform;
@@ -156,7 +161,7 @@ namespace DroneStrikers.Networking
                 // If enabled, extrapolate from the newest snapshot
                 if (_usesExtrapolation) DoExtrapolation(renderTime, newer);
                 // Otherwise, don't use extrapolation and just hold the last known state
-                else ApplyTransform(newer.Position, newer.YawDeg);
+                else ApplyTransform(newer.Position, newer.YawDeg, newer.Velocity);
             }
         }
 
@@ -165,8 +170,9 @@ namespace DroneStrikers.Networking
             float t = (renderTime - older.Time) / (newer.Time - older.Time);
             Vector3 targetPos = Vector3.Lerp(older.Position, newer.Position, t);
             float targetYaw = Mathf.LerpAngle(older.YawDeg, newer.YawDeg, t);
+            Vector3 targetVelocity = Vector3.Lerp(older.Velocity, newer.Velocity, t);
 
-            ApplyTransform(targetPos, targetYaw);
+            ApplyTransform(targetPos, targetYaw, targetVelocity);
         }
 
         private void DoExtrapolation(float renderTime, Snapshot newest)
@@ -189,13 +195,14 @@ namespace DroneStrikers.Networking
 
             // Debug.Log("Current pos: " + _transform.position + " | newest pos: " + newest.Position + " | Extrapolated pos: " + targetPos + " | Newest time: " + newest.Time + " | Time since newest: " + timeSinceNewest + " | Current time : " + Time.time);
 
-            ApplyTransform(targetPos, newest.YawDeg);
+            ApplyTransform(targetPos, newest.YawDeg, newest.Velocity);
         }
 
-        protected virtual void ApplyTransform(Vector3 targetPos, float targetYawDeg)
+        protected virtual void ApplyTransform(Vector3 targetPos, float targetYawDeg, Vector3 targetVelocity)
         {
             _transform.position = targetPos;
             _transform.rotation = Quaternion.Euler(0f, targetYawDeg, 0f);
+            Velocity = targetVelocity;
         }
 
         private Vector3 ExtractPosition(TState state) => new(state.posX, _transformYLevel, state.posY);

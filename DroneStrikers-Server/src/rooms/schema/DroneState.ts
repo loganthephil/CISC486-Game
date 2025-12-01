@@ -67,7 +67,6 @@ export class DroneState extends TransformState implements IDamageable {
   public override update(deltaTime: number) {
     // Apply movement based on requested movement vector and speed stat
     this.movementController.move(this.requestedMovement);
-    this.requestedMovement = { x: 0, y: 0 }; // Reset requested movement
 
     // Update aim rotation
     this.updateAimRotation(deltaTime);
@@ -129,7 +128,6 @@ export class DroneState extends TransformState implements IDamageable {
 
   /**
    * Sets the requested movement vector for this drone.
-   * Must be called every frame to maintain movement.
    * @param movement The movement vector requested by the controlling force.
    */
   public setRequestedMovement(movement: Vector2) {

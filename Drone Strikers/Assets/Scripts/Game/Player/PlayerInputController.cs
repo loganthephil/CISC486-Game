@@ -8,6 +8,8 @@ namespace DroneStrikers.Game.Player
 {
     public class PlayerInputController : MonoBehaviour
     {
+        private const float MOVEMENT_DEADZONE = 0.01f;
+
         [Tooltip("The transform to use for the Y level targeted by mouse raycasts.")]
         [SerializeField] [RequiredField] private Transform _mouseRayYLevelTransform;
 
@@ -20,6 +22,8 @@ namespace DroneStrikers.Game.Player
         private Vector2 _movementInput = Vector2.zero;
         private bool _fireHeld;
         private bool _autoFireEnabled;
+
+        private Vector2 _lastSentMovement = Vector2.zero;
 
         // Cache the main camera on awake as the camera used for ray casting
         private void Awake() => _raycastCamera = Camera.main;
@@ -72,10 +76,8 @@ namespace DroneStrikers.Game.Player
 
         private void FixedUpdate()
         {
-            // if (_autoFireEnabled || _fireHeld) _turret.RequestFire();
-
             // Send movement input to the server
-            if (_movementInput != Vector2.zero) NetworkManager.Send(ClientMessages.PlayerMove, new PlayerMoveMessage(_movementInput));
+            TrySendMovement();
 
             // Send aiming direction to the server
             if (TryGetTargetPoint(out Vector3 targetPoint))
@@ -127,6 +129,22 @@ namespace DroneStrikers.Game.Player
             // If no intersection, return zero vector (this shouldn't happen)
             targetPoint = Vector3.zero;
             return false;
+        }
+
+        private void TrySendMovement()
+        {
+            // Normalized-ish comparison with dead zone
+            Vector2 current = _movementInput;
+
+            // If input is tiny, treat as zero
+            if (current.IsNegligible()) current = Vector2.zero;
+
+            // If same as last sent (within dead zone), don't send again
+            if (_lastSentMovement.Approximately(current)) return;
+
+            // Movement changed: send to server and cache
+            NetworkManager.Send(ClientMessages.PlayerMove, new PlayerMoveMessage(current));
+            _lastSentMovement = current;
         }
     }
 }
